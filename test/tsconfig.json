@@ -19,7 +19,6 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "./**/*.ts",
-    "../src/**/*.ts"
+    "./**/*.ts"
   ]
 }

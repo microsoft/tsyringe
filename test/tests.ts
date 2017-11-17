@@ -13,8 +13,8 @@ interface IBar {
 function testWithContainer(
   name: string,
   run: (container: DependencyContainer, decorators: { inject: (token: InjectionToken<any>) => any, injectable: () => any, registry: (...args: any[]) => any }) => GenericTest<Context<any>>) {
-  const container = requireUncached("../src/DependencyContainer").default;
-  const {injectable, inject, registry} = proxyquire("../src/decorators", {
+  const container = requireUncached("../../dist/DependencyContainer").default;
+  const {injectable, inject, registry} = proxyquire("../../dist/decorators", {
     "./DependencyContainer": {default: container}
   })
   test(name, run(container, {injectable, inject, registry}));
