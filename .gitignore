@@ -60,4 +60,4 @@ typings/
 # Compiled output
 dist/
 types/
-test-out/
+test/out/

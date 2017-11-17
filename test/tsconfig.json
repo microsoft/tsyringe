@@ -2,9 +2,8 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "declaration": true,
-    "declarationDir": "./types",
-    "outDir": "./dist",
+    "declaration": false,
+    "outDir": "./out",
     "lib": ["es6"],
     "removeComments": true,
     "strict": true,
@@ -20,6 +19,7 @@
     "emitDecoratorMetadata": true
   },
   "include": [
-    "./src/**/*.ts"
+    "./**/*.ts",
+    "../src/**/*.ts"
   ]
 }
