@@ -3,7 +3,7 @@
     "target": "es5",
     "module": "commonjs",
     "declaration": false,
-    "outDir": "./out",
+    "outDir": "../test-out",
     "lib": ["es6"],
     "removeComments": true,
     "strict": true,

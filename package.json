@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p ./src",
-    "test": "rimraf ./test/out && tsc -p ./test && ava ./test/out/test/tests.js"
+    "test": "rimraf ./test-out && tsc -p ./test && ava ./test-out/test/tests.js"
   },
   "repository": {
     "type": "git",
