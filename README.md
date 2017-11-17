@@ -1,8 +1,8 @@
 [![Travis](https://img.shields.io/travis/Microsoft/inject-js.svg)](https://travis-ci.org/Microsoft/inject-js/)
 
-# inject-js
+# inject-ts
 
-A lightweight dependency injection container for JavaScript
+A lightweight dependency injection container for TypeScript
 
 ## Contributing
 
