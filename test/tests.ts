@@ -12,12 +12,17 @@ interface IBar {
 
 function testWithContainer(
   name: string,
-  run: (container: DependencyContainer, decorators: { inject: (token: InjectionToken<any>) => any, injectable: () => any, registry: (...args: any[]) => any }) => GenericTest<Context<any>>) {
+  run: (container: DependencyContainer, decorators: { inject: (token: InjectionToken<any>) => any, injectable: () => any, registry: (...args: any[]) => any }) => GenericTest<Context<any>>,
+  only: boolean = false) {
   const container = requireUncached("../../dist/DependencyContainer").default;
   const {injectable, inject, registry} = proxyquire("../../dist/decorators", {
     "./DependencyContainer": {default: container}
   })
-  test(name, run(container, {injectable, inject, registry}));
+  if(!only) {
+    test(name, run(container, {injectable, inject, registry}));
+  } else {
+    test.only(name, run(container, {injectable, inject, registry}));
+  }
 }
 
 // --- resolve() ---
@@ -219,7 +224,7 @@ testWithContainer("returns true for a registered token provider", (container, {i
 
 // --- @injectable ---
 
-testWithContainer("resolves when not using DI", (_container, {injectable}) => t => {
+testWithContainer("@injectable resolves when not using DI", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -238,7 +243,7 @@ testWithContainer("resolves when not using DI", (_container, {injectable}) => t 
   t.is(myFoo.myBar.value, myValue);
 });
 
-testWithContainer("resolves when using DI", (container, {injectable}) => t => {
+testWithContainer("@injectable resolves when using DI", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -253,7 +258,7 @@ testWithContainer("resolves when using DI", (container, {injectable}) => t => {
   t.is(myFoo.myBar.value, "");
 });
 
-testWithContainer("resolves nested depenencies when using DI", (container, {injectable}) => t => {
+testWithContainer("@injectable resolves nested depenencies when using DI", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -271,7 +276,7 @@ testWithContainer("resolves nested depenencies when using DI", (container, {inje
   t.is(myFooBar.myFoo.myBar.value, "");
 });
 
-testWithContainer("preserves static members", (_container, {injectable}) => t => {
+testWithContainer("@injectable preserves static members", (_container, {injectable}) => t => {
   const value = "foobar";
 
   @injectable()
@@ -287,7 +292,7 @@ testWithContainer("preserves static members", (_container, {injectable}) => t =>
   t.is(MyStatic.testVal, value);
 });
 
-testWithContainer("works when the @injectable is a polymorphic ancestor (root node)", (container, {injectable}) => t => {
+testWithContainer("@injectable works when the @injectable is a polymorphic ancestor (root node)", (container, {injectable}) => t => {
   const a = 5;
   const b = 10;
 
@@ -304,7 +309,7 @@ testWithContainer("works when the @injectable is a polymorphic ancestor (root no
   class Ancestor {
     public a: number;
 
-    constructor(public foo: Foo | null = null) {
+    constructor(public foo?: Foo) {
       this.a = a;
     }
   }
@@ -321,12 +326,12 @@ testWithContainer("works when the @injectable is a polymorphic ancestor (root no
 
   const instance = container.resolve(Child);
 
-  t.true(instance.foo != undefined);
+  t.true(instance.foo instanceof Foo);
   t.is(instance.a, a);
   t.is(instance.b, b);
 });
 
-testWithContainer("works when the @injectable is a polymorphic ancestor (middle node)", (container, {injectable}) => t => {
+testWithContainer("@injectable works when the @injectable is a polymorphic ancestor (middle node)", (container, {injectable}) => t => {
   const a = 5;
   const b = 10;
   const c = 15;
@@ -377,7 +382,7 @@ testWithContainer("works when the @injectable is a polymorphic ancestor (middle 
   t.is(instance.c, c);
 });
 
-testWithContainer("handles optional params", (container, {injectable}) => t => {
+testWithContainer("@injectable handles optional params", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -411,7 +416,7 @@ testWithContainer("passes through the given params", (_container, {injectable}) 
   t.is(instance.c, c);
 });
 
-testWithContainer("resolves the not given params using DI", (_container, {injectable}) => t => {
+testWithContainer("@injectable resolves the not given params using DI", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -437,7 +442,7 @@ testWithContainer("resolves the not given params using DI", (_container, {inject
   t.true(instance.e instanceof Foo);
 });
 
-testWithContainer("works twice in a row", (_container, {injectable}) => t => {
+testWithContainer("@injectable works twice in a row", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";

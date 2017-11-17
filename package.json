@@ -5,7 +5,10 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf ./dist ./types && tsc -p ./src",
-    "test": "npm run -s build && rimraf ./test-out && tsc -p ./test && ava ./test-out/test/tests.js"
+    "test": "npm run -s test:build && npm run test:run",
+    "test:build": "npm run -s build && rimraf ./test-out && tsc -p ./test",
+    "test:run": "ava ./test-out/test/tests.js",
+    "test:debug": "npm run -s test:build && node --inspect-brk ./node_modules/ava/profile.js ./test-out/test/tests.js"
   },
   "repository": {
     "type": "git",
