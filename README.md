@@ -1,9 +1,14 @@
+[![Travis](https://img.shields.io/travis/Microsoft/inject-js.svg)](https://travis-ci.org/Microsoft/inject-js/)
 
-# Contributing
+# inject-js
+
+A lightweight dependency injection container for JavaScript
+
+## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit https://cla.microsoft.com.
+the rights to use your contribution. For details, visit [https://cla.microsoft.com](https://cla.microsoft.com).
 
 When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
 a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
