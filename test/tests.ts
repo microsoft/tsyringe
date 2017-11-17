@@ -1,7 +1,7 @@
-import * as Types from "../src/types";
-import test from "ava";
+import test, {GenericTest, Context} from "ava";
 import { instanceCachingFactory, predicateAwareClassFactory } from "../src/factories";
-import { Provider } from "../src/Providers";
+import { Provider, InjectionToken } from "../src/Providers";
+import { DependencyContainer } from "../src/types";
 
 const proxyquire = require("proxyquire").noCallThru();
 const requireUncached = require("require-uncached");
@@ -10,25 +10,25 @@ interface IBar {
   value: string;
 }
 
-function createContainer(): Types.DependencyContainer {
-  return requireUncached("../src/DependencyContainer").default;
+function testWithContainer(
+  name: string,
+  run: (container: DependencyContainer, decorators: { inject: (token: InjectionToken<any>) => any, injectable: () => any, registry: (...args: any[]) => any }) => GenericTest<Context<any>>) {
+  const container = requireUncached("../src/DependencyContainer").default;
+  const {injectable, inject, registry} = proxyquire("../src/decorators", {
+    "./DependencyContainer": {default: container}
+  })
+  test(name, run(container, {injectable, inject, registry}));
 }
 
 // --- resolve() ---
 
-test("fails to resolve unregistered dependency by name", t => {
-  const container = createContainer();
-
+testWithContainer("fails to resolve unregistered dependency by name", (container) => t => {
   t.throws(() => {
     container.resolve("NotRegistered");
   });
 });
 
-test("resolves transient instances when dependencies aren't registered", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves transient instances when dependencies aren't registered", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -41,11 +41,7 @@ test("resolves transient instances when dependencies aren't registered", t => {
   t.not(myBar.value, myBar2.value);
 });
 
-test("resolves a singleton for registered dependencies by class", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves a singleton for registered dependencies by class", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -59,11 +55,7 @@ test("resolves a singleton for registered dependencies by class", t => {
   t.is(myBar.value, myBar2.value);
 });
 
-test("resolves a singleton for registered dependencies by name", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves a singleton for registered dependencies by name", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -81,11 +73,7 @@ test("resolves a singleton for registered dependencies by name", t => {
   t.is(myBar.value, myBar2.value);
 });
 
-test("resolves registered dependencies by token", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves registered dependencies by token", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -100,8 +88,7 @@ test("resolves registered dependencies by token", t => {
   t.true(myBar instanceof Bar);
 });
 
-test("executes a registered factory each time resolve is called", t => {
-  const container = createContainer();
+testWithContainer("executes a registered factory each time resolve is called", (container) => t => {
   let value = true;
 
   const provider: Provider<boolean> = {
@@ -115,8 +102,7 @@ test("executes a registered factory each time resolve is called", t => {
   t.false(container.resolve(provider.token));
 });
 
-test("allows for factories that have instance caching", t => {
-  const container = createContainer();
+testWithContainer("allows for factories that have instance caching", (container) => t => {
   let value = true;
 
   const provider: Provider<boolean> = {
@@ -140,8 +126,7 @@ test("allows for factories that have instance caching", t => {
   t.true(container.resolve(provider.token));
 });
 
-test("resolves two functionally equivalent constructors as separate singletons", t => {
-  const container = createContainer();
+testWithContainer("resolves two functionally equivalent constructors as separate singletons", (container) => t => {
   const ctor1 = class { };
   const ctor2 = class { };
 
@@ -163,11 +148,7 @@ test("resolves two functionally equivalent constructors as separate singletons",
 
 // --- isRegistered() ---
 
-test("returns true for a registered type provider", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("returns true for a registered type provider", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -182,11 +163,7 @@ test("returns true for a registered type provider", t => {
   t.true(container.isRegistered(Foo));
 });
 
-test("returns true for a registered class provider", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("returns true for a registered class provider", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -204,11 +181,7 @@ test("returns true for a registered class provider", t => {
   t.true(container.isRegistered(Foo));
 });
 
-test("returns true for a registered value provider", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("returns true for a registered value provider", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -226,11 +199,7 @@ test("returns true for a registered value provider", t => {
   t.true(container.isRegistered(Foo));
 });
 
-test("returns true for a registered token provider", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("returns true for a registered token provider", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -250,10 +219,7 @@ test("returns true for a registered token provider", t => {
 
 // --- @injectable ---
 
-test("resolves when not using DI", t => {
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
+testWithContainer("resolves when not using DI", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -272,11 +238,7 @@ test("resolves when not using DI", t => {
   t.is(myFoo.myBar.value, myValue);
 });
 
-test("resolves when using DI", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves when using DI", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -291,11 +253,7 @@ test("resolves when using DI", t => {
   t.is(myFoo.myBar.value, "");
 });
 
-test("resolves nested depenencies when using DI", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("resolves nested depenencies when using DI", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -313,11 +271,8 @@ test("resolves nested depenencies when using DI", t => {
   t.is(myFooBar.myFoo.myBar.value, "");
 });
 
-test("preserves static members", t => {
+testWithContainer("preserves static members", (_container, {injectable}) => t => {
   const value = "foobar";
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
 
   @injectable()
   class MyStatic {
@@ -332,13 +287,10 @@ test("preserves static members", t => {
   t.is(MyStatic.testVal, value);
 });
 
-test("works when the @injectable is a polymorphic ancestor (root node)", t => {
-  const container = createContainer();
+testWithContainer("works when the @injectable is a polymorphic ancestor (root node)", (container, {injectable}) => t => {
   const a = 5;
   const b = 10;
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -374,14 +326,10 @@ test("works when the @injectable is a polymorphic ancestor (root node)", t => {
   t.is(instance.b, b);
 });
 
-test("works when the @injectable is a polymorphic ancestor (middle node)", t => {
-  const container = createContainer();
+testWithContainer("works when the @injectable is a polymorphic ancestor (middle node)", (container, {injectable}) => t => {
   const a = 5;
   const b = 10;
   const c = 15;
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
 
   @injectable()
   class Bar implements IBar {
@@ -429,11 +377,7 @@ test("works when the @injectable is a polymorphic ancestor (middle node)", t => 
   t.is(instance.c, c);
 });
 
-test("handles optional params", t => {
-  const container = createContainer();
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("handles optional params", (container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -451,10 +395,7 @@ test("handles optional params", t => {
   t.true(myOptional.myFoo instanceof Foo);
 });
 
-test("passes through the given params", t => {
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
+testWithContainer("passes through the given params", (_container, {injectable}) => t => {
   @injectable()
   class MyViewModel {
     constructor(public a: any, public b: any, public c: any) { }
@@ -470,10 +411,7 @@ test("passes through the given params", t => {
   t.is(instance.c, c);
 });
 
-test("resolves the not given params using DI", t => {
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
+testWithContainer("resolves the not given params using DI", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -499,10 +437,7 @@ test("resolves the not given params using DI", t => {
   t.true(instance.e instanceof Foo);
 });
 
-test("works twice in a row", t => {
-  const {injectable} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
+testWithContainer("works twice in a row", (_container, {injectable}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -527,21 +462,14 @@ test("works twice in a row", t => {
 
 // --- @registry ---
 
-test("doesn't blow up with empty args", t => {
-  const {registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: createContainer()}
-  })
+testWithContainer("doesn't blow up with empty args", (_container, {registry}) => t => {
   @registry()
   class RegisteringFoo { }
 
   t.notThrows(() => new RegisteringFoo());
 });
 
-test("registers by type provider", t => {
-  const container = createContainer();
-  const {injectable, registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("registers by type provider", (container, {injectable, registry}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -554,11 +482,7 @@ test("registers by type provider", t => {
   t.true(container.isRegistered(Bar));
 });
 
-test("registers by class provider", t => {
-  const container = createContainer();
-  const {injectable, registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("registers by class provider", (container, {injectable, registry}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -576,15 +500,11 @@ test("registers by class provider", t => {
   t.true(container.isRegistered(provider.token));
 });
 
-test("registers by value provider", t => {
-  const container = createContainer();
+testWithContainer("registers by value provider", (container, {registry}) => t => {
   const provider: Provider<any> = {
     token: "IBar",
     useValue: {}
   };
-  const {registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
 
   @registry([provider])
   class RegisteringFoo { }
@@ -594,15 +514,11 @@ test("registers by value provider", t => {
   t.true(container.isRegistered(provider.token));
 });
 
-test("registers by token provider", t => {
-  const container = createContainer();
+testWithContainer("registers by token provider", (container, {registry}) => t => {
   const provider: Provider<any> = {
     token: "IBar",
     useToken: "IFoo"
   };
-  const {registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
 
   @registry([provider])
   class RegisteringFoo { }
@@ -612,15 +528,12 @@ test("registers by token provider", t => {
   t.true(container.isRegistered(provider.token));
 });
 
-test("registers by factory provider", t => {
-  const container = createContainer();
+testWithContainer("registers by factory provider", (container, {injectable, registry}) => t => {
   const provider: Provider<any> = {
     token: "IBar",
     useFactory: (container) => container.resolve(Bar)
   };
-  const {injectable, registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -634,11 +547,7 @@ test("registers by factory provider", t => {
   t.true(container.isRegistered(provider.token));
 });
 
-test("registers mixed types", t => {
-  const container = createContainer();
-  const {injectable, registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("registers mixed types", (container, {injectable, registry}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -663,12 +572,7 @@ test("registers mixed types", t => {
 
 // --- @inject ---
 
-test("allows interfaces to be resolved from the constructor with injection token", t => {
-  const container = createContainer();
-  const { injectable, inject, registry } = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
-
+testWithContainer("allows interfaces to be resolved from the constructor with injection token", (container, {inject, injectable, registry}) => t => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -687,11 +591,7 @@ test("allows interfaces to be resolved from the constructor with injection token
   t.is(myFoo.myBar.value, myBar.value);
 });
 
-test("allows interfaces to be resolved from the constructor with just a name", t => {
-  const container = createContainer();
-  const {injectable, inject, registry} = proxyquire("../src/decorators", {
-    "./DependencyContainer": {default: container}
-  })
+testWithContainer("allows interfaces to be resolved from the constructor with just a name", (container, {inject, injectable, registry}) => t => {
 
   @injectable()
   class Bar implements IBar {
@@ -716,15 +616,13 @@ test("allows interfaces to be resolved from the constructor with just a name", t
 
 // --- factories ---
 
-test("instanceCachingFactory caches the returned instance", t => {
-  const container = createContainer();
+testWithContainer("instanceCachingFactory caches the returned instance", (container) => t => {
   const factory = instanceCachingFactory(() => { });
 
   t.is(factory(container), factory(container));
 });
 
-test("instanceCachingFactory caches the returned instance even when there is branching logic in the factory", t => {
-  const container = createContainer();
+testWithContainer("instanceCachingFactory caches the returned instance even when there is branching logic in the factory", (container) => t => {
   const instanceA = {};
   const instanceB = {};
   let useA = true;
@@ -736,8 +634,7 @@ test("instanceCachingFactory caches the returned instance even when there is bra
   t.is(factory(container), instanceA);
 });
 
-test("predicateAwareClassFactory correctly switches the returned instance with caching on", t => {
-  const container = createContainer();
+testWithContainer("predicateAwareClassFactory correctly switches the returned instance with caching on", (container) => t => {
   class A { }
   class B { }
   let useA = true;
@@ -748,8 +645,7 @@ test("predicateAwareClassFactory correctly switches the returned instance with c
   t.true(factory(container) instanceof B);
 });
 
-test("predicateAwareClassFactory returns the same instance each call with caching on", t => {
-  const container = createContainer();
+testWithContainer("predicateAwareClassFactory returns the same instance each call with caching on", (container) => t => {
   class A { }
   class B { }
   const factory = predicateAwareClassFactory(() => true, A, B);
@@ -757,8 +653,7 @@ test("predicateAwareClassFactory returns the same instance each call with cachin
   t.is(factory(container), factory(container));
 });
 
-test("predicateAwareClassFactory correctly switches the returned instance with caching off", t => {
-  const container = createContainer();
+testWithContainer("predicateAwareClassFactory correctly switches the returned instance with caching off", (container) => t => {
   class A { }
   class B { }
   let useA = true;
@@ -769,8 +664,7 @@ test("predicateAwareClassFactory correctly switches the returned instance with c
   t.true(factory(container) instanceof B);
 });
 
-test("predicateAwareClassFactory returns new instances each call with caching off", t => {
-  const container = createContainer();
+testWithContainer("predicateAwareClassFactory returns new instances each call with caching off", (container) => t => {
   class A { }
   class B { }
   const factory = predicateAwareClassFactory(() => true, A, B, false);
