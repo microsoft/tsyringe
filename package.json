@@ -1,0 +1,39 @@
+{
+  "name": "inject-js",
+  "version": "1.0.0",
+  "description": "Lightweight dependency injection container for JavaScript",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p ./src",
+    "test": "rimraf ./test/out && tsc -p ./test && ava ./test/out/test/tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Microsoft/inject-js.git"
+  },
+  "keywords": [
+    "javascript",
+    "typescript",
+    "dependency",
+    "injection",
+    "ioc",
+    "container"
+  ],
+  "author": "Steven Hobson-Campbell",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Microsoft/inject-js/issues"
+  },
+  "homepage": "https://github.com/Microsoft/inject-js#readme",
+  "dependencies": {
+    "reflect-metadata": "^0.1.10"
+  },
+  "devDependencies": {
+    "@types/node": "^8.0.53",
+    "ava": "^0.23.0",
+    "proxyquire": "^1.8.0",
+    "require-uncached": "^1.0.3",
+    "rimraf": "^2.6.2",
+    "typescript": "^2.6.1"
+  }
+}
