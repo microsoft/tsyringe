@@ -4,8 +4,8 @@
   "description": "Lightweight dependency injection container for JavaScript",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -p ./src",
-    "test": "rimraf ./test-out && tsc -p ./test && ava ./test-out/test/tests.js"
+    "build": "rimraf ./dist ./types && tsc -p ./src",
+    "test": "npm run -s build && rimraf ./test-out && tsc -p ./test && ava ./test-out/test/tests.js"
   },
   "repository": {
     "type": "git",
