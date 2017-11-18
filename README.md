@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/Microsoft/inject-js.svg)](https://travis-ci.org/Microsoft/inject-js/)
+[![Travis](https://img.shields.io/travis/Microsoft/inject-ts.svg)](https://travis-ci.org/Microsoft/inject-ts/)
 
 # inject-ts
 
