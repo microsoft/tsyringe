@@ -1,8 +1,8 @@
 import "reflect-metadata";
 
-import DependencyContainer from "./DependencyContainer";
+import DependencyContainer from "./dependency-container";
 
-import { InjectionToken, Provider } from "./Providers";
+import { InjectionToken, Provider } from "./providers";
 import { constructor, Dictionary } from "./types";
 
 const injectionTokenMetadataKey = "injectionTokens";

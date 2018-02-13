@@ -35,7 +35,6 @@
     ],
     "coveragePathIgnorePatterns": [
       "/node_modules/",
-      "dependency-container.ts",
       "types.ts"
     ],
     "globals": {

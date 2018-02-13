@@ -1,4 +1,4 @@
-import { Provider, InjectionToken } from "./Providers";
+import { Provider, InjectionToken } from "./providers";
 
 /** Constructor type */
 export type constructor<T> = { new(...args: any[]): T };

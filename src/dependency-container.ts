@@ -6,7 +6,7 @@ import {
     isFactoryProvider,
     isTokenProvider,
     isValueProvider
-} from "./Providers";
+} from "./providers";
 import { constructor } from "./types";
 
 /** Dependency Container */

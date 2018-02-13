@@ -1,7 +1,7 @@
 import { instanceCachingFactory, predicateAwareClassFactory } from "../src/factories";
-import { Provider } from "../src/Providers";
+import { Provider } from "../src/providers";
 import { inject, injectable, registry } from "../src/decorators";
-import container from "../src/DependencyContainer";
+import container from "../src/dependency-container";
 
 interface IBar {
   value: string;
