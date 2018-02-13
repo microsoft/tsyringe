@@ -10,8 +10,10 @@ import {
 import { constructor } from "./types";
 
 /** Dependency Container */
-class DependencyContainer implements Types.DependencyContainer {
+export class DependencyContainer implements Types.DependencyContainer {
     private _registry = new Map<InjectionToken<any>, [Provider<any>, any]>();
+
+    public constructor(private parent?: DependencyContainer) {}
 
     /**
      * Register a dependency provider.
@@ -38,10 +40,12 @@ class DependencyContainer implements Types.DependencyContainer {
      * @return {T} An instance of the dependency
      */
     public resolve<T>(token: InjectionToken<T>): T {
-        const registration = this.isRegistered(token) && this._registry.get(token);
+        const registration = this.getRegistration(token);
 
-        if (!registration && typeof(token) === "string") {
-            throw `Attempted to resolve unregistered dependency token: ${token}`;
+        if (!registration) {
+            if (typeof(token) === "string") {
+              throw `Attempted to resolve unregistered dependency token: ${token}`;
+            }
         }
 
         if (registration) {
@@ -57,16 +61,16 @@ class DependencyContainer implements Types.DependencyContainer {
             } else if (isTokenProvider(provider)) {
                 return registration[1] = this.resolve(provider.useToken);
             } else if (isClassProvider(provider)) {
-                return registration[1] = this._construct(provider.useClass);
+                return registration[1] = this.construct(provider.useClass);
             } else if (isFactoryProvider(provider)) {
                 return provider.useFactory(this);
             } else {
-                return registration[1] = this._construct(provider);
+                return registration[1] = this.construct(provider);
             }
         }
 
         // No registration for this token, but since it's a constructor, return an instance
-        return this._construct(<constructor<T>>token);
+        return this.construct(<constructor<T>>token);
     }
 
     /**
@@ -85,11 +89,25 @@ class DependencyContainer implements Types.DependencyContainer {
       this._registry.clear();
     }
 
-    private _construct<T>(ctor: constructor<T>): T {
-        return new ctor();
+    public createChildContainer(): Types.DependencyContainer {
+      return new DependencyContainer(this);
+    }
+
+    protected getRegistration<T>(token: InjectionToken<T>): [Provider<any>, any] | null {
+      if (this.isRegistered(token)) {
+        return this._registry.get(token)!;
+      }
+
+      if (this.parent) {
+        return this.parent.getRegistration(token);
+      }
+
+      return null;
+    }
+
+    private construct<T>(ctor: constructor<T>): T {
+        return this.parent ? new ctor(this) : new ctor();
     }
 }
 
-const instance: Types.DependencyContainer = new DependencyContainer();
-
-export default instance;
+export const instance: Types.DependencyContainer = new DependencyContainer();
