@@ -78,6 +78,13 @@ class DependencyContainer implements Types.DependencyContainer {
         return this._registry.has(token);
     }
 
+    /**
+     * Clears all registered tokens
+     */
+    public reset(): void {
+      this._registry.clear();
+    }
+
     private _construct<T>(ctor: constructor<T>): T {
         return new ctor();
     }

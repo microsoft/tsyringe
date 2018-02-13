@@ -1,22 +1,8 @@
 {
+  "extends": "../tsconfig-base.json",
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
     "declaration": true,
     "declarationDir": "../types",
-    "outDir": "../dist",
-    "lib": ["es6"],
-    "removeComments": true,
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "alwaysStrict": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "outDir": "../dist"
   }
 }
