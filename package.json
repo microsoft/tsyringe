@@ -21,6 +21,7 @@
     "ioc",
     "container"
   ],
+  "types": "./types/index.d.ts",
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
   "bugs": {

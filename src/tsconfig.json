@@ -3,6 +3,7 @@
   "compilerOptions": {
     "declaration": true,
     "declarationDir": "../types",
-    "outDir": "../dist"
+    "outDir": "../dist",
+    "stripInternal": true
   }
 }
