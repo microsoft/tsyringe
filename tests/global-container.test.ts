@@ -1,21 +1,21 @@
 import { instanceCachingFactory, predicateAwareClassFactory } from "../src/factories";
 import { Provider } from "../src/providers";
 import { inject, injectable, registry } from "../src/decorators";
-import container from "../src/dependency-container";
+import {instance as globalContainer} from "../src/dependency-container";
 
 interface IBar {
   value: string;
 }
 
 afterEach(() => {
-  container.reset();
+  globalContainer.reset();
 });
 
 // --- resolve() ---
 
 test("fails to resolve unregistered dependency by name", () => {
   expect(() => {
-    container.resolve("NotRegistered");
+    globalContainer.resolve("NotRegistered");
   }).toThrow();
 });
 
@@ -25,9 +25,9 @@ test("resolves transient instances when dependencies aren't registered", () => {
     public value: string = "";
   }
 
-  const myBar = container.resolve(Bar);
+  const myBar = globalContainer.resolve(Bar);
   myBar.value = "test";
-  const myBar2 = container.resolve(Bar);
+  const myBar2 = globalContainer.resolve(Bar);
 
   expect(myBar.value).not.toBe(myBar2.value);
 });
@@ -37,11 +37,11 @@ test("resolves a singleton for registered dependencies by class", () => {
   class Bar implements IBar {
     public value: string = "";
   }
-  container.register(Bar);
+  globalContainer.register(Bar);
 
-  const myBar = container.resolve(Bar);
+  const myBar = globalContainer.resolve(Bar);
   myBar.value = "test";
-  const myBar2 = container.resolve(Bar);
+  const myBar2 = globalContainer.resolve(Bar);
 
   expect(myBar.value).toBe(myBar2.value);
 });
@@ -51,15 +51,15 @@ test("resolves a singleton for registered dependencies by name", () => {
   class Bar implements IBar {
     public value: string = "";
   }
-  container.register({
+  globalContainer.register({
     token: "Bar",
     useClass: Bar
   });
 
-  const myBar = container.resolve<Bar>("Bar");
+  const myBar = globalContainer.resolve<Bar>("Bar");
   myBar.value = "test";
 
-  const myBar2 = container.resolve<Bar>("Bar");
+  const myBar2 = globalContainer.resolve<Bar>("Bar");
 
   expect(myBar.value).toBe(myBar2.value);
 });
@@ -73,9 +73,9 @@ test("resolves registered dependencies by token", () => {
     token: Bar,
     useClass: Bar
   };
-  container.register(provider);
+  globalContainer.register(provider);
 
-  const myBar = container.resolve(Bar);
+  const myBar = globalContainer.resolve(Bar);
   expect(myBar instanceof Bar).toBeTruthy();
 });
 
@@ -86,11 +86,11 @@ test("executes a registered factory each time resolve is called", () => {
     token: "Test",
     useFactory: () => value
   };
-  container.register(provider);
+  globalContainer.register(provider);
 
-  expect(container.resolve(provider.token)).toBeTruthy();
+  expect(globalContainer.resolve(provider.token)).toBeTruthy();
   value = false;
-  expect(container.resolve(provider.token)).toBeFalsy();
+  expect(globalContainer.resolve(provider.token)).toBeFalsy();
 });
 
 test("allows for factories that have instance caching", () => {
@@ -110,24 +110,24 @@ test("allows for factories that have instance caching", () => {
       };
     })()
   };
-  container.register(provider);
+  globalContainer.register(provider);
 
-  expect(container.resolve(provider.token)).toBeTruthy();
+  expect(globalContainer.resolve(provider.token)).toBeTruthy();
   value = false;
-  expect(container.resolve(provider.token)).toBeTruthy();
+  expect(globalContainer.resolve(provider.token)).toBeTruthy();
 });
 
 test("resolves two functionally equivalent constructors as separate singletons", () => {
   const ctor1 = class { };
   const ctor2 = class { };
 
-  container.register(ctor1);
-  container.register(ctor2);
+  globalContainer.register(ctor1);
+  globalContainer.register(ctor2);
 
-  const instance1a = container.resolve(ctor1);
-  const instance1b = container.resolve(ctor1);
-  const instance2a = container.resolve(ctor2);
-  const instance2b = container.resolve(ctor2);
+  const instance1a = globalContainer.resolve(ctor1);
+  const instance1b = globalContainer.resolve(ctor1);
+  const instance2a = globalContainer.resolve(ctor2);
+  const instance2b = globalContainer.resolve(ctor2);
 
   expect(instance1a instanceof ctor1).toBeTruthy();
   expect(instance1b instanceof ctor1).toBeTruthy();
@@ -149,9 +149,9 @@ test("returns true for a registered type provider", () => {
   class Foo {
     constructor(public myBar: Bar) { }
   }
-  container.register(Foo);
+  globalContainer.register(Foo);
 
-  expect(container.isRegistered(Foo)).toBeTruthy();
+  expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
 test("returns true for a registered class provider", () => {
@@ -164,12 +164,12 @@ test("returns true for a registered class provider", () => {
   class Foo {
     constructor(public myBar: Bar) { }
   }
-  container.register({
+  globalContainer.register({
     token: Foo,
     useClass: Foo
   });
 
-  expect(container.isRegistered(Foo)).toBeTruthy();
+  expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
 test("returns true for a registered value provider", () => {
@@ -182,12 +182,12 @@ test("returns true for a registered value provider", () => {
   class Foo {
     constructor(public myBar: Bar) { }
   }
-  container.register({
+  globalContainer.register({
     token: Foo,
     useValue: {}
   });
 
-  expect(container.isRegistered(Foo)).toBeTruthy();
+  expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
 test("returns true for a registered token provider", () => {
@@ -200,12 +200,12 @@ test("returns true for a registered token provider", () => {
   class Foo {
     constructor(public myBar: Bar) { }
   }
-  container.register({
+  globalContainer.register({
     token: Foo,
     useToken: "Bar"
   });
 
-  expect(container.isRegistered(Foo)).toBeTruthy();
+  expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
 // --- @injectable ---
@@ -239,7 +239,7 @@ test("@injectable resolves when using DI", () => {
   class Foo {
     constructor(public myBar: Bar) { }
   }
-  const myFoo = container.resolve(Foo);
+  const myFoo = globalContainer.resolve(Foo);
 
   expect(myFoo.myBar.value).toBe("");
 });
@@ -257,7 +257,7 @@ test("@injectable resolves nested depenencies when using DI", () => {
   class FooBar {
     constructor(public myFoo: Foo) { }
   }
-  const myFooBar = container.resolve(FooBar);
+  const myFooBar = globalContainer.resolve(FooBar);
 
   expect(myFooBar.myFoo.myBar.value).toBe("");
 });
@@ -310,7 +310,7 @@ test("@injectable works when the @injectable is a polymorphic ancestor (root nod
     }
   }
 
-  const instance = container.resolve(Child);
+  const instance = globalContainer.resolve(Child);
 
   expect(instance.foo instanceof Foo).toBeTruthy();
   expect(instance.a).toBe(a);
@@ -360,7 +360,7 @@ test("@injectable works when the @injectable is a polymorphic ancestor (middle n
     }
   }
 
-  const instance = container.resolve(Child);
+  const instance = globalContainer.resolve(Child);
 
   expect(instance.foo != undefined).toBeTruthy();
   expect(instance.a).toBe(a);
@@ -382,7 +382,7 @@ test("@injectable handles optional params", () => {
     constructor(public myFoo?: Foo) { }
   }
 
-  const myOptional = container.resolve(MyOptional);
+  const myOptional = globalContainer.resolve(MyOptional);
   expect(myOptional.myFoo instanceof Foo).toBeTruthy();
 });
 
@@ -470,7 +470,7 @@ test("registers by type provider", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(Bar)).toBeTruthy();
+  expect(globalContainer.isRegistered(Bar)).toBeTruthy();
 });
 
 test("registers by class provider", () => {
@@ -488,7 +488,7 @@ test("registers by class provider", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(provider.token)).toBeTruthy();
+  expect(globalContainer.isRegistered(provider.token)).toBeTruthy();
 });
 
 test("registers by value provider", () => {
@@ -502,7 +502,7 @@ test("registers by value provider", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(provider.token)).toBeTruthy();
+  expect(globalContainer.isRegistered(provider.token)).toBeTruthy();
 });
 
 test("registers by token provider", () => {
@@ -516,13 +516,13 @@ test("registers by token provider", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(provider.token)).toBeTruthy();
+  expect(globalContainer.isRegistered(provider.token)).toBeTruthy();
 });
 
 test("registers by factory provider", () => {
   const provider: Provider<any> = {
     token: "IBar",
-    useFactory: (container) => container.resolve(Bar)
+    useFactory: (globalContainer) => globalContainer.resolve(Bar)
   };
 
   @injectable()
@@ -535,7 +535,7 @@ test("registers by factory provider", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(provider.token)).toBeTruthy();
+  expect(globalContainer.isRegistered(provider.token)).toBeTruthy();
 });
 
 test("registers mixed types", () => {
@@ -557,8 +557,8 @@ test("registers mixed types", () => {
 
   new RegisteringFoo();
 
-  expect(container.isRegistered(provider.token)).toBeTruthy();
-  expect(container.isRegistered(Foo)).toBeTruthy();
+  expect(globalContainer.isRegistered(provider.token)).toBeTruthy();
+  expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
 // --- @inject ---
@@ -575,8 +575,8 @@ test("allows interfaces to be resolved from the constructor with injection token
     constructor( @inject(Bar) public myBar: IBar) { }
   }
 
-  const myFoo = container.resolve(FooWithInterface);
-  const myBar = container.resolve(Bar);
+  const myFoo = globalContainer.resolve(FooWithInterface);
+  const myBar = globalContainer.resolve(Bar);
   myBar.value = "test";
 
   expect(myFoo.myBar.value).toBe(myBar.value);
@@ -598,8 +598,8 @@ test("allows interfaces to be resolved from the constructor with just a name", (
     constructor( @inject("IBar") public myBar: IBar) { }
   }
 
-  const myFoo = container.resolve(FooWithInterface);
-  const myBar = container.resolve<Bar>("IBar");
+  const myFoo = globalContainer.resolve(FooWithInterface);
+  const myBar = globalContainer.resolve<Bar>("IBar");
   myBar.value = "test";
 
   expect(myFoo.myBar.value).toBe(myBar.value);
@@ -610,7 +610,7 @@ test("allows interfaces to be resolved from the constructor with just a name", (
 test("instanceCachingFactory caches the returned instance", () => {
   const factory = instanceCachingFactory(() => { });
 
-  expect(factory(container)).toBe(factory(container));
+  expect(factory(globalContainer)).toBe(factory(globalContainer));
 });
 
 test("instanceCachingFactory caches the returned instance even when there is branching logic in the factory", () => {
@@ -620,9 +620,9 @@ test("instanceCachingFactory caches the returned instance even when there is bra
 
   const factory = instanceCachingFactory(() => useA ? instanceA : instanceB);
 
-  expect(factory(container)).toBe(instanceA);
+  expect(factory(globalContainer)).toBe(instanceA);
   useA = false;
-  expect(factory(container)).toBe(instanceA);
+  expect(factory(globalContainer)).toBe(instanceA);
 });
 
 test("predicateAwareClassFactory correctly switches the returned instance with caching on", () => {
@@ -631,9 +631,9 @@ test("predicateAwareClassFactory correctly switches the returned instance with c
   let useA = true;
   const factory = predicateAwareClassFactory(() => useA, A, B);
 
-  expect(factory(container) instanceof A).toBeTruthy();
+  expect(factory(globalContainer) instanceof A).toBeTruthy();
   useA = false;
-  expect(factory(container) instanceof B).toBeTruthy();
+  expect(factory(globalContainer) instanceof B).toBeTruthy();
 });
 
 test("predicateAwareClassFactory returns the same instance each call with caching on", () => {
@@ -641,7 +641,7 @@ test("predicateAwareClassFactory returns the same instance each call with cachin
   class B { }
   const factory = predicateAwareClassFactory(() => true, A, B);
 
-  expect(factory(container)).toBe(factory(container));
+  expect(factory(globalContainer)).toBe(factory(globalContainer));
 });
 
 test("predicateAwareClassFactory correctly switches the returned instance with caching off", () => {
@@ -650,9 +650,9 @@ test("predicateAwareClassFactory correctly switches the returned instance with c
   let useA = true;
   const factory = predicateAwareClassFactory(() => useA, A, B, false);
 
-  expect(factory(container) instanceof A).toBeTruthy();
+  expect(factory(globalContainer) instanceof A).toBeTruthy();
   useA = false;
-  expect(factory(container) instanceof B).toBeTruthy();
+  expect(factory(globalContainer) instanceof B).toBeTruthy();
 });
 
 test("predicateAwareClassFactory returns new instances each call with caching off", () => {
@@ -660,5 +660,5 @@ test("predicateAwareClassFactory returns new instances each call with caching of
   class B { }
   const factory = predicateAwareClassFactory(() => true, A, B, false);
 
-  expect(factory(container)).not.toBe(factory(container));
+  expect(factory(globalContainer)).not.toBe(factory(globalContainer));
 });

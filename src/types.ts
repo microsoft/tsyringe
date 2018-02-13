@@ -10,4 +10,5 @@ export interface DependencyContainer {
     resolve<T>(token: InjectionToken<T>): T;
     isRegistered<T>(token: InjectionToken<T>): boolean;
     reset(): void;
+    createChildContainer(): DependencyContainer;
 }
