@@ -1,0 +1,4 @@
+coverage/
+src/
+.travis.yml
+tsconfig-base.json

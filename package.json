@@ -1,5 +1,5 @@
 {
-  "name": "inject-js",
+  "name": "inject-ts",
   "version": "1.0.0",
   "description": "Lightweight dependency injection container for JavaScript",
   "main": "dist/index.js",
@@ -21,7 +21,7 @@
     "ioc",
     "container"
   ],
-  "types": "./types/index.d.ts",
+  "types": "types/index.d.ts",
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
   "bugs": {
