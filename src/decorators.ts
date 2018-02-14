@@ -1,7 +1,7 @@
 import "reflect-metadata";
 
 import * as Types from "./types";
-import {DependencyContainer, instance as globalContainer} from "./dependency-container";
+import {instance as globalContainer, typeInfo} from "./dependency-container";
 import { InjectionToken, Provider } from "./providers";
 import { constructor, Dictionary } from "./types";
 
@@ -13,30 +13,15 @@ const injectionTokenMetadataKey = "injectionTokens";
  *
  * @return {Function} The class decorator
  */
-export function injectable(): (target: constructor<any>) => any {
-    return function(target: constructor<any>): constructor<any> {
+export function injectable<T>(): (target: constructor<T>) => void {
+    return function(target: constructor<T>): void {
         const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
         const injectionTokens: Dictionary<InjectionToken<any>> = Reflect.getOwnMetadata(injectionTokenMetadataKey, target) || {};
         Object.keys(injectionTokens).forEach(key => {
             params[+key] = injectionTokens[key];
         });
 
-        return class extends target {
-          constructor(...args: any[]) {
-            let container = globalContainer;
-
-            if (args[0] instanceof DependencyContainer) {
-              container = args.shift();
-            }
-
-            const resolvedArgs = args.slice();
-            params.slice(args.length).forEach(param => {
-                resolvedArgs.push(container.resolve(param));
-            });
-
-            super(...resolvedArgs);
-          }
-        }
+        typeInfo.set(target, params);
     };
 }
 

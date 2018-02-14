@@ -106,8 +106,22 @@ export class DependencyContainer implements Types.DependencyContainer {
     }
 
     private construct<T>(ctor: constructor<T>): T {
-        return this.parent ? new ctor(this) : new ctor();
+        if(ctor.length === 0) {
+          return new ctor();
+        }
+
+        const paramInfo = typeInfo.get(ctor);
+
+        if (!paramInfo) {
+          throw `TypeInfo not known for ${ctor}`
+        }
+
+        const params = paramInfo.map(param => this.resolve(param));
+
+        return new ctor(...params);
     }
 }
+
+export const typeInfo = new Map<constructor<any>, any[]>();
 
 export const instance: Types.DependencyContainer = new DependencyContainer();
