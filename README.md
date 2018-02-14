@@ -1,8 +1,8 @@
-[![Travis](https://img.shields.io/travis/Microsoft/inject-ts.svg)](https://travis-ci.org/Microsoft/inject-ts/)
+[![Travis](https://img.shields.io/travis/Microsoft/tsyringe.svg)](https://travis-ci.org/Microsoft/inject-ts/)
 
-# inject-ts
+# TSyringe
 
-A lightweight dependency injection container for TypeScript
+A lightweight dependency injection container for TypeScript/TypeScript
 
 ## Contributing
 

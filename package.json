@@ -1,7 +1,7 @@
 {
-  "name": "inject-ts",
+  "name": "tsyringe",
   "version": "1.0.0",
-  "description": "Lightweight dependency injection container for JavaScript",
+  "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf ./dist ./types && tsc -p ./src",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/inject-js.git"
+    "url": "git+https://github.com/Microsoft/tsyringe.git"
   },
   "keywords": [
     "javascript",
@@ -25,9 +25,9 @@
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Microsoft/inject-js/issues"
+    "url": "https://github.com/Microsoft/tsyringe/issues"
   },
-  "homepage": "https://github.com/Microsoft/inject-js#readme",
+  "homepage": "https://github.com/Microsoft/tsyringe#readme",
   "jest": {
     "mapCoverage": true,
     "collectCoverageFrom": [
