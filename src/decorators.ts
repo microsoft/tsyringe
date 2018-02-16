@@ -26,6 +26,26 @@ export function injectable<T>(): (target: constructor<T>) => void {
 }
 
 /**
+ * Class decorator factory that replaces the decorated class' constructor with
+ * a parameterless constructor that has dependencies auto-resolved
+ *
+ * Note: Resolution is performed using the global container
+ *
+ * @return {Function} The class decorator
+ */
+export function autoInject(): (target: constructor<any>) => any {
+    return function(target: constructor<any>): constructor<any> {
+        injectable()(target);
+
+        return class extends target {
+          constructor(...args: any[]) {
+              super(...args.concat(typeInfo.get(target)!.slice(args.length).map(type => globalContainer.resolve(type))));
+          }
+        }
+    }
+}
+
+/**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata
  *
  * @return {Function} The parameter decorator
