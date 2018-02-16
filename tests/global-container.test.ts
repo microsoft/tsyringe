@@ -32,7 +32,7 @@ test("resolves transient instances when dependencies aren't registered", () => {
   expect(myBar.value).not.toBe(myBar2.value);
 });
 
-test("resolves a singleton for registered dependencies by class", () => {
+test("resolves a transient instance for registered dependencies by class", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -43,10 +43,10 @@ test("resolves a singleton for registered dependencies by class", () => {
   myBar.value = "test";
   const myBar2 = globalContainer.resolve(Bar);
 
-  expect(myBar.value).toBe(myBar2.value);
+  expect(myBar.value).not.toBe(myBar2.value);
 });
 
-test("resolves a singleton for registered dependencies by name", () => {
+test("resolves a transient instance for registered dependencies by name", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -61,7 +61,7 @@ test("resolves a singleton for registered dependencies by name", () => {
 
   const myBar2 = globalContainer.resolve<Bar>("Bar");
 
-  expect(myBar.value).toBe(myBar2.value);
+  expect(myBar.value).not.toBe(myBar2.value);
 });
 
 test("resolves registered dependencies by token", () => {
@@ -117,24 +117,15 @@ test("allows for factories that have instance caching", () => {
   expect(globalContainer.resolve(provider.token)).toBeTruthy();
 });
 
-test("resolves two functionally equivalent constructors as separate singletons", () => {
+test("resolves anonymous classes as separately", () => {
   const ctor1 = class { };
   const ctor2 = class { };
 
-  globalContainer.register(ctor1);
-  globalContainer.register(ctor2);
+  globalContainer.registerInstance(ctor1, new ctor1());
+  globalContainer.registerInstance(ctor2, new ctor2());
 
-  const instance1a = globalContainer.resolve(ctor1);
-  const instance1b = globalContainer.resolve(ctor1);
-  const instance2a = globalContainer.resolve(ctor2);
-  const instance2b = globalContainer.resolve(ctor2);
-
-  expect(instance1a instanceof ctor1).toBeTruthy();
-  expect(instance1b instanceof ctor1).toBeTruthy();
-  expect(instance2a instanceof ctor2).toBeTruthy();
-  expect(instance2b instanceof ctor2).toBeTruthy();
-  expect(instance1a).toBe(instance1b);
-  expect(instance2a).toBe(instance2b);
+  expect(globalContainer.resolve(ctor1) instanceof ctor1).toBeTruthy();
+  expect(globalContainer.resolve(ctor2) instanceof ctor2).toBeTruthy();
 });
 
 // --- isRegistered() ---
@@ -437,14 +428,11 @@ test("allows interfaces to be resolved from the constructor with injection token
   }
 
   const myFoo = globalContainer.resolve(FooWithInterface);
-  const myBar = globalContainer.resolve(Bar);
-  myBar.value = "test";
 
-  expect(myFoo.myBar.value).toBe(myBar.value);
+  expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
 test("allows interfaces to be resolved from the constructor with just a name", () => {
-
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -460,10 +448,8 @@ test("allows interfaces to be resolved from the constructor with just a name", (
   }
 
   const myFoo = globalContainer.resolve(FooWithInterface);
-  const myBar = globalContainer.resolve<Bar>("IBar");
-  myBar.value = "test";
 
-  expect(myFoo.myBar.value).toBe(myBar.value);
+  expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
 // --- factories ---

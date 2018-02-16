@@ -11,7 +11,7 @@ import { constructor } from "./types";
 
 /** Dependency Container */
 export class DependencyContainer implements Types.DependencyContainer {
-    private _registry = new Map<InjectionToken<any>, [Provider<any>, any]>();
+    private _registry = new Map<InjectionToken<any>, Provider<any>>();
 
     public constructor(private parent?: DependencyContainer) {}
 
@@ -20,17 +20,29 @@ export class DependencyContainer implements Types.DependencyContainer {
      *
      * @param provider {Provider} The dependency provider
      */
-    public register<T>(provider: Provider<T>): void {
+    public register<T>(provider: Provider<T>): DependencyContainer {
         // If constructor
         if (!isClassProvider(provider) && !isTokenProvider(provider) && !isValueProvider(provider) && !isFactoryProvider(provider)) {
-            if (!this.isRegistered(provider)) {
-                this._registry.set(provider, [provider, undefined]);
-            }
+            this._registry.set(provider, provider);
         } else {
-            if (!this.isRegistered(provider.token)) {
-                this._registry.set(provider.token, [provider, undefined]);
-            }
+            this._registry.set(provider.token, provider);
         }
+
+        return this;
+    }
+
+    public registerType<T>(token: InjectionToken<T>, type: constructor<T>): DependencyContainer {
+      return this.register({
+        token,
+        useClass: type
+      })
+    }
+
+    public registerInstance<T>(token: InjectionToken<T>, instance: T): DependencyContainer {
+      return this.register({
+        token,
+        useValue: instance
+      });
     }
 
     /**
@@ -49,23 +61,16 @@ export class DependencyContainer implements Types.DependencyContainer {
         }
 
         if (registration) {
-            const provider: Provider<T> = registration[0];
-            const cachedInstance: T = registration[1];
-
-            if (cachedInstance != undefined) {
-                return cachedInstance;
-            }
-
-            if (isValueProvider(provider)) {
-                return registration[1] = provider.useValue;
-            } else if (isTokenProvider(provider)) {
-                return registration[1] = this.resolve(provider.useToken);
-            } else if (isClassProvider(provider)) {
-                return registration[1] = this.construct(provider.useClass);
-            } else if (isFactoryProvider(provider)) {
-                return provider.useFactory(this);
+            if (isValueProvider(registration)) {
+                return registration.useValue;
+            } else if (isTokenProvider(registration)) {
+                return this.resolve(registration.useToken);
+            } else if (isClassProvider(registration)) {
+                return this.construct(registration.useClass);
+            } else if (isFactoryProvider(registration)) {
+                return registration.useFactory(this);
             } else {
-                return registration[1] = this.construct(provider);
+                return this.construct(registration);
             }
         }
 
@@ -93,7 +98,7 @@ export class DependencyContainer implements Types.DependencyContainer {
       return new DependencyContainer(this);
     }
 
-    protected getRegistration<T>(token: InjectionToken<T>): [Provider<any>, any] | null {
+    protected getRegistration<T>(token: InjectionToken<T>): Provider<any> | null {
       if (this.isRegistered(token)) {
         return this._registry.get(token)!;
       }
