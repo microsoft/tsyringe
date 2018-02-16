@@ -1,13 +1,19 @@
 import * as Types from "./types";
+import {instanceCachingFactory} from "./factories";
 import {
+    ClassProvider,
+    FactoryProvider,
     InjectionToken,
     Provider,
+    TokenProvider,
+    ValueProvider,
     isClassProvider,
     isFactoryProvider,
     isTokenProvider,
-    isValueProvider
+    isValueProvider,
+    isConstructor
 } from "./providers";
-import { constructor } from "./types";
+import { RegistrationOptions, constructor } from "./types";
 
 /** Dependency Container */
 export class DependencyContainer implements Types.DependencyContainer {
@@ -20,12 +26,33 @@ export class DependencyContainer implements Types.DependencyContainer {
      *
      * @param provider {Provider} The dependency provider
      */
-    public register<T>(provider: Provider<T>): DependencyContainer {
-        // If constructor
-        if (!isClassProvider(provider) && !isTokenProvider(provider) && !isValueProvider(provider) && !isFactoryProvider(provider)) {
-            this._registry.set(provider, provider);
+    public register<T>(provider: ValueProvider<T>): DependencyContainer;
+    public register<T>(provider: FactoryProvider<T>): DependencyContainer;
+    public register<T>(provider: TokenProvider<T>, options?: RegistrationOptions): DependencyContainer;
+    public register<T>(provider: ClassProvider<T>, options?: RegistrationOptions): DependencyContainer;
+    public register<T>(provider: constructor<T>, options?: RegistrationOptions): DependencyContainer;
+    public register<T>(provider: Provider<T>, options: RegistrationOptions = {singleton: false}): DependencyContainer {
+        if (options.singleton) {
+            if (isTokenProvider(provider)) {
+                this._registry.set(provider.token, {
+                  token: provider.token,
+                  useFactory: instanceCachingFactory(() => this.resolve(provider.useToken))
+                });
+            } else if (isClassProvider(provider)) {
+              this._registry.set(provider.token, {
+                token: provider.token,
+                useFactory: instanceCachingFactory(() => this.resolve(provider.useClass))
+              });
+            } else if (isConstructor(provider)) {
+              this._registry.set(provider, {
+                token: provider,
+                useFactory: instanceCachingFactory(() => this.construct(provider))
+              });
+            } else {
+              throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders"
+            }
         } else {
-            this._registry.set(provider.token, provider);
+            this._registry.set(isConstructor(provider) ? provider : provider.token, provider);
         }
 
         return this;

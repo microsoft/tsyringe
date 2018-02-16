@@ -45,3 +45,7 @@ export function isTokenProvider<T>(provider: Provider<T>): provider is TokenProv
 export function isFactoryProvider<T>(provider: Provider<T>): provider is FactoryProvider<any> {
     return !!(<FactoryProvider<T>>provider).useFactory;
 }
+
+export function isConstructor<T>(provider: Provider<T>): provider is constructor<T> {
+  return !isClassProvider(provider) && !isValueProvider(provider) && !isTokenProvider(provider) && !isFactoryProvider(provider);
+}

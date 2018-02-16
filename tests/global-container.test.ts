@@ -19,7 +19,7 @@ test("fails to resolve unregistered dependency by name", () => {
   }).toThrow();
 });
 
-test("resolves transient instances when dependencies aren't registered", () => {
+test("resolves transient instances when not registered", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -32,7 +32,7 @@ test("resolves transient instances when dependencies aren't registered", () => {
   expect(myBar.value).not.toBe(myBar2.value);
 });
 
-test("resolves a transient instance for registered dependencies by class", () => {
+test("resolves a transient instance when registered by class", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -40,13 +40,25 @@ test("resolves a transient instance for registered dependencies by class", () =>
   globalContainer.register(Bar);
 
   const myBar = globalContainer.resolve(Bar);
-  myBar.value = "test";
   const myBar2 = globalContainer.resolve(Bar);
 
-  expect(myBar.value).not.toBe(myBar2.value);
+  expect(myBar).not.toBe(myBar2);
 });
 
-test("resolves a transient instance for registered dependencies by name", () => {
+test("resolves a singleton instance when class registered as singleton", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value: string = "";
+  }
+  globalContainer.register(Bar, {singleton: true});
+
+  const myBar = globalContainer.resolve(Bar);
+  const myBar2 = globalContainer.resolve(Bar);
+
+  expect(myBar).toBe(myBar2);
+});
+
+test("resolves a transient instance when registered by name", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -57,26 +69,96 @@ test("resolves a transient instance for registered dependencies by name", () => 
   });
 
   const myBar = globalContainer.resolve<Bar>("Bar");
-  myBar.value = "test";
-
   const myBar2 = globalContainer.resolve<Bar>("Bar");
 
-  expect(myBar.value).not.toBe(myBar2.value);
+  expect(myBar).not.toBe(myBar2);
 });
 
-test("resolves registered dependencies by token", () => {
+test("resolves a singleton instance when name registered as singleton", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
   }
-  const provider: Provider<Bar> = {
-    token: Bar,
+  globalContainer.register({
+    token: "Bar",
     useClass: Bar
-  };
-  globalContainer.register(provider);
+  }, {singleton: true});
 
-  const myBar = globalContainer.resolve(Bar);
-  expect(myBar instanceof Bar).toBeTruthy();
+  const myBar = globalContainer.resolve<Bar>("Bar");
+  const myBar2 = globalContainer.resolve<Bar>("Bar");
+
+  expect(myBar).toBe(myBar2);
+});
+
+test("resolves a transient instance when using token alias", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value: string = "";
+  }
+  globalContainer.register({
+    token: "Bar",
+    useClass: Bar
+  });
+  globalContainer.register({
+    token: "SingletonBar",
+    useToken: "Bar"
+  });
+
+  const myBar = globalContainer.resolve<Bar>("SingletonBar");
+  const myBar2 = globalContainer.resolve<Bar>("SingletonBar");
+
+  expect(myBar).not.toBe(myBar2);
+});
+
+test("resolves a singleton instance when token alias registered as singleton", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value: string = "";
+  }
+  globalContainer.register({
+    token: "Bar",
+    useClass: Bar
+  });
+  globalContainer.register({
+    token: "SingletonBar",
+    useToken: "Bar"
+  }, {singleton: true});
+
+  const myBar = globalContainer.resolve<Bar>("SingletonBar");
+  const myBar2 = globalContainer.resolve<Bar>("SingletonBar");
+
+  expect(myBar).toBe(myBar2);
+});
+
+test("resolves same instance when registerInstance() is used with a class", () => {
+  class Bar {}
+  const instance = new Bar();
+  globalContainer.registerInstance(Bar, instance);
+
+  expect(globalContainer.resolve(Bar)).toBe(instance);
+})
+
+test("resolves same instance when registerInstance() is used with a name", () => {
+  class Bar {}
+  const instance = new Bar();
+  globalContainer.registerInstance("Test", instance);
+
+  expect(globalContainer.resolve("Test")).toBe(instance);
+})
+
+test("registerType() allows for classes to be swapped", () => {
+  class Bar {}
+  class Foo {}
+  globalContainer.registerType(Bar, Foo);
+
+  expect(globalContainer.resolve(Bar) instanceof Foo).toBeTruthy();
+});
+
+test("registerType() allows for names to be registered for a given type", () => {
+  class Bar {}
+  globalContainer.registerType("CoolName", Bar);
+
+  expect(globalContainer.resolve("CoolName") instanceof Bar).toBeTruthy();
 });
 
 test("executes a registered factory each time resolve is called", () => {
@@ -117,7 +199,7 @@ test("allows for factories that have instance caching", () => {
   expect(globalContainer.resolve(provider.token)).toBeTruthy();
 });
 
-test("resolves anonymous classes as separately", () => {
+test("resolves anonymous classes separately", () => {
   const ctor1 = class { };
   const ctor2 = class { };
 
