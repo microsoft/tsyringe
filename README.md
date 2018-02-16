@@ -5,6 +5,14 @@
 A lightweight dependency injection container for TypeScript/TypeScript for
 constructor injection.
 
+* [Installation](#installation)
+* [API](#api)
+  * [injectable()](#injectable-)
+  * [autoInject()](#injectable-)
+  * [inject()](#injectable-)
+* [Full Examples](#full-examples)
+* [Contributing](#contributing)
+
 ## Installation
 
 ```sh
@@ -21,7 +29,73 @@ Modify your `tsconfig.json` to include the following settings
 }
 ```
 
-## Usage
+## API
+### injectable()
+Class decorator factory that allows the class' dependencies to be injected at
+runtime.
+
+#### Usage
+```TypeScript
+import {decorators} from "tsyringe";
+const {injectable} = decorators;
+
+@injectable()
+class Foo {
+  constructor(private database: Database) {}
+}
+
+// some other file
+import {container} from "tsyringe";
+import {Foo} from "./foo";
+
+const instance = container.resolve(Foo);
+```
+
+### autoInject()
+Class decorator factory that replaces the decorated class' constructor with
+a parameterless constructor that has dependencies auto-resolved.
+
+**Note** Resolution is performed using the global container
+
+#### Usage
+```TypeScript
+import {decorators} from "tsyringe";
+const {autoInject} = decorators;
+
+@autoInject()
+class Foo {
+  constructor(private database?: Database) {}
+}
+
+// some other file
+import {Foo} from "./foo";
+
+const instance = new Foo();
+```
+
+Notice how in order to allow the use of the empty constructor `new Foo()`, we
+need to make the parameters optional, e.g. `database?: Database`
+
+### inject()
+Parameter decorator factory that allows for interface and other non-class
+information to be stored in the constructor's metadata
+
+#### Usage
+```TypeScript
+import {decorators} from "tsyringe";
+const {injectable, inject} = decorators;
+
+interface Database {
+  // ...
+}
+
+@injectable()
+class Foo {
+  constructor(@inject("Database") private database?: Database) {}
+}
+```
+
+## Full examples
 ### Example without interfaces
 Since classes have type information at runtime, we can resolve them without any
 extra information. If a particular class isn't registered with the container then

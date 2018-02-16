@@ -8,8 +8,8 @@ import { constructor, Dictionary } from "./types";
 const injectionTokenMetadataKey = "injectionTokens";
 
 /**
- * Class decorator factory that allows the class' dependencies to be
- * automatically injected at runtime.
+ * Class decorator factory that allows the class' dependencies to be injected
+ * at runtime.
  *
  * @return {Function} The class decorator
  */
