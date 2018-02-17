@@ -1,9 +1,8 @@
 import "reflect-metadata";
 
-import * as Types from "./types";
 import {instance as globalContainer, typeInfo} from "./dependency-container";
 import { InjectionToken, Provider } from "./providers";
-import { constructor, Dictionary } from "./types";
+import { constructor, Dictionary, RegistrationOptions } from "./types";
 
 const injectionTokenMetadataKey = "injectionTokens";
 
@@ -63,9 +62,9 @@ export function inject(token: InjectionToken<any>): (target: any, propertyKey: s
  *
  * @return {Function} The class decorator
  */
-export function registry(providers: Provider<any>[] = [], container?: Types.DependencyContainer): (target: any) => any {
+export function registry(registrations: ({token: InjectionToken, options?: RegistrationOptions} & Provider<any>)[] = []): (target: any) => any {
     return function(target: any): any {
-        providers.forEach(provider => (container || globalContainer).register(provider));
+        registrations.forEach(({token, options, ...provider}) => globalContainer.register(token, <any>provider, options));
 
         return target;
     };

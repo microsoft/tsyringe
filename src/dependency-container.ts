@@ -1,5 +1,4 @@
 import * as Types from "./types";
-import {instanceCachingFactory} from "./factories";
 import {
     ClassProvider,
     FactoryProvider,
@@ -10,66 +9,81 @@ import {
     isClassProvider,
     isFactoryProvider,
     isTokenProvider,
-    isValueProvider,
-    isConstructor
+    isValueProvider
 } from "./providers";
 import { RegistrationOptions, constructor } from "./types";
 
+type Registration<T = any> = {
+    provider: Provider<T>;
+    options: RegistrationOptions;
+    instance?: T;
+};
+
 /** Dependency Container */
 export class DependencyContainer implements Types.DependencyContainer {
-    private _registry = new Map<InjectionToken<any>, Provider<any>>();
+    private _registry = new Map<InjectionToken<any>, Registration>();
 
-    public constructor(private parent?: DependencyContainer) {}
+    public constructor(private parent?: DependencyContainer) { }
 
     /**
      * Register a dependency provider.
      *
      * @param provider {Provider} The dependency provider
      */
-    public register<T>(provider: ValueProvider<T>): DependencyContainer;
-    public register<T>(provider: FactoryProvider<T>): DependencyContainer;
-    public register<T>(provider: TokenProvider<T>, options?: RegistrationOptions): DependencyContainer;
-    public register<T>(provider: ClassProvider<T>, options?: RegistrationOptions): DependencyContainer;
-    public register<T>(provider: constructor<T>, options?: RegistrationOptions): DependencyContainer;
-    public register<T>(provider: Provider<T>, options: RegistrationOptions = {singleton: false}): DependencyContainer {
+    public register<T>(token: InjectionToken<T>, provider: ValueProvider<T>): DependencyContainer;
+    public register<T>(token: InjectionToken<T>, provider: FactoryProvider<T>): DependencyContainer;
+    public register<T>(token: InjectionToken<T>, provider: TokenProvider<T>, options?: RegistrationOptions): DependencyContainer;
+    public register<T>(token: InjectionToken<T>, provider: ClassProvider<T>, options?: RegistrationOptions): DependencyContainer;
+    public register<T>(token: InjectionToken<T>, provider: Provider<T>, options: RegistrationOptions = { singleton: false }): DependencyContainer {
         if (options.singleton) {
-            if (isTokenProvider(provider)) {
-                this._registry.set(provider.token, {
-                  token: provider.token,
-                  useFactory: instanceCachingFactory(() => this.resolve(provider.useToken))
-                });
-            } else if (isClassProvider(provider)) {
-              this._registry.set(provider.token, {
-                token: provider.token,
-                useFactory: instanceCachingFactory(() => this.resolve(provider.useClass))
-              });
-            } else if (isConstructor(provider)) {
-              this._registry.set(provider, {
-                token: provider,
-                useFactory: instanceCachingFactory(() => this.construct(provider))
-              });
-            } else {
-              throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders"
+            if (isValueProvider(provider) || isFactoryProvider(provider)) {
+                throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders"
             }
-        } else {
-            this._registry.set(isConstructor(provider) ? provider : provider.token, provider);
         }
+
+        this._registry.set(token, { provider, options });
 
         return this;
     }
 
-    public registerType<T>(token: InjectionToken<T>, type: constructor<T>): DependencyContainer {
-      return this.register({
-        token,
-        useClass: type
-      })
+    public registerType<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer {
+        if (typeof (to) === "string") {
+            return this.register(from, {
+                useToken: to
+            });
+        }
+
+        return this.register(from, {
+            useClass: to
+        });
     }
 
     public registerInstance<T>(token: InjectionToken<T>, instance: T): DependencyContainer {
-      return this.register({
-        token,
-        useValue: instance
-      });
+        return this.register(token, {
+            useValue: instance
+        });
+    }
+
+    public registerSingleton<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer;
+    public registerSingleton<T>(token: constructor<T>): DependencyContainer;
+    public registerSingleton<T>(from: InjectionToken<T>, to?: InjectionToken<T>): DependencyContainer {
+        if (typeof (from) === "string") {
+            if (typeof (to) === "string") {
+                return this.register(from, {
+                    useToken: to
+                }, { singleton: true });
+            } else if (to) {
+                return this.register(from, {
+                    useClass: to
+                }, { singleton: true });
+            }
+
+            throw "Cannot register a type name as a singleton without a \"to\" token";
+        }
+
+        return this.register(from, {
+            useClass: from
+        }, { singleton: true });
     }
 
     /**
@@ -82,22 +96,26 @@ export class DependencyContainer implements Types.DependencyContainer {
         const registration = this.getRegistration(token);
 
         if (!registration) {
-            if (typeof(token) === "string") {
-              throw `Attempted to resolve unregistered dependency token: ${token}`;
+            if (typeof (token) === "string") {
+                throw `Attempted to resolve unregistered dependency token: ${token}`;
             }
         }
 
         if (registration) {
-            if (isValueProvider(registration)) {
-                return registration.useValue;
-            } else if (isTokenProvider(registration)) {
-                return this.resolve(registration.useToken);
-            } else if (isClassProvider(registration)) {
-                return this.construct(registration.useClass);
-            } else if (isFactoryProvider(registration)) {
-                return registration.useFactory(this);
+            if (isValueProvider(registration.provider)) {
+                return registration.provider.useValue;
+            } else if (isTokenProvider(registration.provider)) {
+                return registration.options.singleton ?
+                    (registration.instance || (registration.instance = this.resolve(registration.provider.useToken))) :
+                    this.resolve(registration.provider.useToken);
+            } else if (isClassProvider(registration.provider)) {
+                return registration.options.singleton ?
+                    (registration.instance || (registration.instance = this.construct(registration.provider.useClass))) :
+                    this.construct(registration.provider.useClass);
+            } else if (isFactoryProvider(registration.provider)) {
+                return registration.provider.useFactory(this);
             } else {
-                return this.construct(registration);
+                return this.construct(registration.provider);
             }
         }
 
@@ -118,34 +136,34 @@ export class DependencyContainer implements Types.DependencyContainer {
      * Clears all registered tokens
      */
     public reset(): void {
-      this._registry.clear();
+        this._registry.clear();
     }
 
     public createChildContainer(): Types.DependencyContainer {
-      return new DependencyContainer(this);
+        return new DependencyContainer(this);
     }
 
-    protected getRegistration<T>(token: InjectionToken<T>): Provider<any> | null {
-      if (this.isRegistered(token)) {
-        return this._registry.get(token)!;
-      }
+    private getRegistration<T>(token: InjectionToken<T>): Registration | null {
+        if (this.isRegistered(token)) {
+            return this._registry.get(token)!;
+        }
 
-      if (this.parent) {
-        return this.parent.getRegistration(token);
-      }
+        if (this.parent) {
+            return this.parent.getRegistration(token);
+        }
 
-      return null;
+        return null;
     }
 
     private construct<T>(ctor: constructor<T>): T {
-        if(ctor.length === 0) {
-          return new ctor();
+        if (ctor.length === 0) {
+            return new ctor();
         }
 
         const paramInfo = typeInfo.get(ctor);
 
         if (!paramInfo) {
-          throw `TypeInfo not known for ${ctor}`
+            throw `TypeInfo not known for ${ctor}`
         }
 
         const params = paramInfo.map(param => this.resolve(param));
