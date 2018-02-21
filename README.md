@@ -2,13 +2,13 @@
 
 # TSyringe
 
-A lightweight dependency injection container for TypeScript/TypeScript for
+A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
 * [Installation](#installation)
 * [API](#api)
   * [injectable()](#injectable)
-  * [autoInject()](#autoinject)
+  * [autoInjectable()](#autoInjectable)
   * [inject()](#inject)
 * [Full Examples](#full-examples)
 * [Contributing](#contributing)
@@ -51,7 +51,7 @@ import {Foo} from "./foo";
 const instance = container.resolve(Foo);
 ```
 
-### autoInject()
+### autoInjectable()
 Class decorator factory that replaces the decorated class' constructor with
 a parameterless constructor that has dependencies auto-resolved.
 
@@ -60,9 +60,9 @@ a parameterless constructor that has dependencies auto-resolved.
 #### Usage
 ```TypeScript
 import {decorators} from "tsyringe";
-const {autoInject} = decorators;
+const {autoInjectable} = decorators;
 
-@autoInject()
+@autoInjectable()
 class Foo {
   constructor(private database?: Database) {}
 }
@@ -98,8 +98,7 @@ class Foo {
 ## Full examples
 ### Example without interfaces
 Since classes have type information at runtime, we can resolve them without any
-extra information. If a particular class isn't registered with the container then
-a new instance will be resolved each time.
+extra information.
 
 ```TypeScript
 // Foo.ts
