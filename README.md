@@ -8,7 +8,7 @@ constructor injection.
 * [Installation](#installation)
 * [API](#api)
   * [injectable()](#injectable)
-  * [autoInjectable()](#autoInjectable)
+  * [autoInjectable()](#autoinjectable)
   * [inject()](#inject)
 * [Full Examples](#full-examples)
 * [Contributing](#contributing)
