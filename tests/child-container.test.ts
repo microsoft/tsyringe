@@ -1,8 +1,8 @@
 import {instance as globalContainer} from "../src/dependency-container";
 
 test("child container resolves even when parent doesn't have registration", () => {
-  interface IFoo {}
-  class Foo implements IFoo {}
+  interface IFoo { } // tslint:disable-line no-empty-interface
+  class Foo implements IFoo { }
 
   const container = globalContainer.createChildContainer();
   container.register("IFoo", {useClass: Foo});
@@ -13,8 +13,8 @@ test("child container resolves even when parent doesn't have registration", () =
 });
 
 test("child container resolves using parents' registration when child container doesn't have registration", () => {
-  interface IFoo {}
-  class Foo implements IFoo {}
+  interface IFoo { } // tslint:disable-line no-empty-interface
+  class Foo implements IFoo { }
 
   globalContainer.register("IFoo", {useClass: Foo});
   const container = globalContainer.createChildContainer();

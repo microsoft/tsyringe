@@ -5,8 +5,9 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "rimraf ./dist ./types && tsc -p ./src",
-    "test": "jest",
+    "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
+    "lint": "tslint -p src && tslint -p tests",
     "prepush": "npm test"
   },
   "repository": {
@@ -67,6 +68,8 @@
     "jest": "^22.2.2",
     "rimraf": "^2.6.2",
     "ts-jest": "^22.0.4",
+    "tslint": "^5.9.1",
+    "tslint-eslint-rules": "^5.0.0",
     "typescript": "^2.6.1"
   }
 }

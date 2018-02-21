@@ -1,38 +1,38 @@
-import { constructor, DependencyContainer } from "./types";
+import {DependencyContainer, constructor} from "./types";
 
 export type FactoryFunction<T> = (dependencyContainer: DependencyContainer) => T;
 
-export function instanceCachingFactory<T>(factoryFunc: FactoryFunction<T>) : FactoryFunction<T> {
-    let instance: T;
+export function instanceCachingFactory<T>(factoryFunc: FactoryFunction<T>): FactoryFunction<T> {
+  let instance: T;
 
-    return (dependencyContainer: DependencyContainer) => {
-        if (instance == undefined) {
-            instance = factoryFunc(dependencyContainer);
-        }
+  return (dependencyContainer: DependencyContainer) => {
+    if (instance == undefined) {
+      instance = factoryFunc(dependencyContainer);
+    }
 
-        return instance;
-    };
+    return instance;
+  };
 }
 
 export function predicateAwareClassFactory<T>(
-    predicate: (dependencyContainer: DependencyContainer) => boolean,
-    trueConstructor: constructor<T>,
-    falseConstructor: constructor<T>,
-    useCaching = true): FactoryFunction<T> {
+  predicate: (dependencyContainer: DependencyContainer) => boolean,
+  trueConstructor: constructor<T>,
+  falseConstructor: constructor<T>,
+  useCaching = true): FactoryFunction<T> {
 
-    let instance: T;
-    let previousPredicate: boolean;
+  let instance: T;
+  let previousPredicate: boolean;
 
-    return (dependencyContainer: DependencyContainer) => {
-        const currentPredicate = predicate(dependencyContainer);
-        if (!useCaching || previousPredicate !== currentPredicate) {
-            if (previousPredicate = currentPredicate) {
-                instance = dependencyContainer.resolve(trueConstructor);
-            } else {
-                instance = dependencyContainer.resolve(falseConstructor);
-            }
-        }
+  return (dependencyContainer: DependencyContainer) => {
+    const currentPredicate = predicate(dependencyContainer);
+    if (!useCaching || previousPredicate !== currentPredicate) {
+      if (previousPredicate = currentPredicate) {
+        instance = dependencyContainer.resolve(trueConstructor);
+      } else {
+        instance = dependencyContainer.resolve(falseConstructor);
+      }
+    }
 
-        return instance;
-    };
+    return instance;
+  };
 }

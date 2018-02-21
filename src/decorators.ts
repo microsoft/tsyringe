@@ -1,9 +1,9 @@
 import "reflect-metadata";
 
-import {instance as globalContainer, typeInfo} from "./dependency-container";
-import { InjectionToken, Provider } from "./providers";
-import { constructor, RegistrationOptions } from "./types";
 import {INJECTION_TOKEN_METADATA_KEY, getParamInfo} from "./reflection-helpers";
+import {InjectionToken, Provider} from "./providers";
+import {RegistrationOptions, constructor} from "./types";
+import {instance as globalContainer, typeInfo} from "./dependency-container";
 
 /**
  * Class decorator factory that allows the class' dependencies to be injected
@@ -12,9 +12,9 @@ import {INJECTION_TOKEN_METADATA_KEY, getParamInfo} from "./reflection-helpers";
  * @return {Function} The class decorator
  */
 export function injectable<T>(): (target: constructor<T>) => void {
-    return function(target: constructor<T>): void {
-        typeInfo.set(target, getParamInfo(target));
-    };
+  return function(target: constructor<T>): void {
+    typeInfo.set(target, getParamInfo(target));
+  };
 }
 
 /**
@@ -26,15 +26,15 @@ export function injectable<T>(): (target: constructor<T>) => void {
  * @return {Function} The class decorator
  */
 export function autoInjectable(): (target: constructor<any>) => any {
-    return function(target: constructor<any>): constructor<any> {
-        const paramInfo = getParamInfo(target);
+  return function(target: constructor<any>): constructor<any> {
+    const paramInfo = getParamInfo(target);
 
-        return class extends target {
-          constructor(...args: any[]) {
-              super(...args.concat(paramInfo.slice(args.length).map(type => globalContainer.resolve(type))));
-          }
-        }
-    }
+    return class extends target {
+      constructor(...args: any[]) {
+        super(...args.concat(paramInfo.slice(args.length).map(type => globalContainer.resolve(type))));
+      }
+    };
+  };
 }
 
 /**
@@ -43,11 +43,11 @@ export function autoInjectable(): (target: constructor<any>) => any {
  * @return {Function} The parameter decorator
  */
 export function inject(token: InjectionToken<any>): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
-    return function(target: any, _propertyKey: string | symbol, parameterIndex: number): any {
-        const injectionTokens = Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-        injectionTokens[parameterIndex] = token;
-        Reflect.defineMetadata(INJECTION_TOKEN_METADATA_KEY, injectionTokens, target);
-    };
+  return function(target: any, _propertyKey: string | symbol, parameterIndex: number): any {
+    const injectionTokens = Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
+    injectionTokens[parameterIndex] = token;
+    Reflect.defineMetadata(INJECTION_TOKEN_METADATA_KEY, injectionTokens, target);
+  };
 }
 
 /**
@@ -55,10 +55,10 @@ export function inject(token: InjectionToken<any>): (target: any, propertyKey: s
  *
  * @return {Function} The class decorator
  */
-export function registry(registrations: ({token: InjectionToken, options?: RegistrationOptions} & Provider<any>)[] = []): (target: any) => any {
-    return function(target: any): any {
-        registrations.forEach(({token, options, ...provider}) => globalContainer.register(token, <any>provider, options));
+export function registry(registrations: ({ token: InjectionToken, options?: RegistrationOptions } & Provider<any>)[] = []): (target: any) => any {
+  return function(target: any): any {
+    registrations.forEach(({token, options, ...provider}) => globalContainer.register(token, <any>provider, options));
 
-        return target;
-    };
+    return target;
+  };
 }

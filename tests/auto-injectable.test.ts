@@ -6,10 +6,10 @@ afterEach(() => {
 });
 
 test("@autoInjectable allows for injection to be performed without using .resolve()", () => {
-  class Bar {}
+  class Bar { }
   @autoInjectable()
   class Foo {
-    constructor(public myBar?: Bar) {}
+    constructor(public myBar?: Bar) { }
   }
 
   const myFoo = new Foo();
@@ -18,10 +18,10 @@ test("@autoInjectable allows for injection to be performed without using .resolv
 });
 
 test("@autoInjectable allows for parameters to be specified manually", () => {
-  class Bar {}
+  class Bar { }
   @autoInjectable()
   class Foo {
-    constructor(public myBar?: Bar) {}
+    constructor(public myBar?: Bar) { }
   }
 
   const myBar = new Bar();
@@ -31,11 +31,11 @@ test("@autoInjectable allows for parameters to be specified manually", () => {
 });
 
 test("@autoInjectable injects parameters beyond those specified manually", () => {
-  class Bar {}
-  class FooBar {}
+  class Bar { }
+  class FooBar { }
   @autoInjectable()
   class Foo {
-    constructor(public myFooBar: FooBar, public myBar?: Bar) {}
+    constructor(public myFooBar: FooBar, public myBar?: Bar) { }
   }
 
   const myFooBar = new FooBar();
@@ -52,7 +52,7 @@ test("@autoInjectable works when the @autoInjectable is a polymorphic ancestor",
 
   @autoInjectable()
   class Ancestor {
-    constructor(public myFoo?: Foo) {}
+    constructor(public myFoo?: Foo) { }
   }
 
   class Child extends Ancestor {
@@ -97,14 +97,14 @@ test("@autoInjectable classes keep behavior from their ancestor's constructors",
 });
 
 test("@autoInjectable classes resolve their @injectable dependencies", () => {
-  class Foo {}
+  class Foo { }
   @injectable()
   class Bar {
-    constructor(public myFoo: Foo) {}
+    constructor(public myFoo: Foo) { }
   }
   @autoInjectable()
   class FooBar {
-    constructor(public myBar?: Bar) {}
+    constructor(public myBar?: Bar) { }
   }
 
   const myFooBar = new FooBar();
