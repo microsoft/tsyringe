@@ -2,9 +2,8 @@ import "reflect-metadata";
 
 import {instance as globalContainer, typeInfo} from "./dependency-container";
 import { InjectionToken, Provider } from "./providers";
-import { constructor, Dictionary, RegistrationOptions } from "./types";
-
-const injectionTokenMetadataKey = "injectionTokens";
+import { constructor, RegistrationOptions } from "./types";
+import {INJECTION_TOKEN_METADATA_KEY, getParamInfo} from "./reflection-helpers";
 
 /**
  * Class decorator factory that allows the class' dependencies to be injected
@@ -14,13 +13,7 @@ const injectionTokenMetadataKey = "injectionTokens";
  */
 export function injectable<T>(): (target: constructor<T>) => void {
     return function(target: constructor<T>): void {
-        const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
-        const injectionTokens: Dictionary<InjectionToken<any>> = Reflect.getOwnMetadata(injectionTokenMetadataKey, target) || {};
-        Object.keys(injectionTokens).forEach(key => {
-            params[+key] = injectionTokens[key];
-        });
-
-        typeInfo.set(target, params);
+        typeInfo.set(target, getParamInfo(target));
     };
 }
 
@@ -32,13 +25,13 @@ export function injectable<T>(): (target: constructor<T>) => void {
  *
  * @return {Function} The class decorator
  */
-export function autoInject(): (target: constructor<any>) => any {
+export function autoInjectable(): (target: constructor<any>) => any {
     return function(target: constructor<any>): constructor<any> {
-        injectable()(target);
+        const paramInfo = getParamInfo(target);
 
         return class extends target {
           constructor(...args: any[]) {
-              super(...args.concat(typeInfo.get(target)!.slice(args.length).map(type => globalContainer.resolve(type))));
+              super(...args.concat(paramInfo.slice(args.length).map(type => globalContainer.resolve(type))));
           }
         }
     }
@@ -51,9 +44,9 @@ export function autoInject(): (target: constructor<any>) => any {
  */
 export function inject(token: InjectionToken<any>): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
     return function(target: any, _propertyKey: string | symbol, parameterIndex: number): any {
-        const injectionTokens = Reflect.getOwnMetadata(injectionTokenMetadataKey, target) || {};
+        const injectionTokens = Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
         injectionTokens[parameterIndex] = token;
-        Reflect.defineMetadata(injectionTokenMetadataKey, injectionTokens, target);
+        Reflect.defineMetadata(INJECTION_TOKEN_METADATA_KEY, injectionTokens, target);
     };
 }
 

@@ -162,7 +162,7 @@ export class DependencyContainer implements Types.DependencyContainer {
 
         const paramInfo = typeInfo.get(ctor);
 
-        if (!paramInfo) {
+        if (!paramInfo || paramInfo.length === 0) {
             throw `TypeInfo not known for ${ctor}`
         }
 

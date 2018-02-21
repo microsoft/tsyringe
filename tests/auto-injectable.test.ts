@@ -1,13 +1,13 @@
-import { autoInject, injectable } from "../src/decorators";
+import {autoInjectable, injectable} from "../src/decorators";
 import {instance as globalContainer} from "../src/dependency-container";
 
 afterEach(() => {
   globalContainer.reset();
 });
 
-test("@autoInject allows for injection to be performed without using .resolve()", () => {
+test("@autoInjectable allows for injection to be performed without using .resolve()", () => {
   class Bar {}
-  @autoInject()
+  @autoInjectable()
   class Foo {
     constructor(public myBar?: Bar) {}
   }
@@ -17,9 +17,9 @@ test("@autoInject allows for injection to be performed without using .resolve()"
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
-test("@autoInject allows for parameters to be specified manually", () => {
+test("@autoInjectable allows for parameters to be specified manually", () => {
   class Bar {}
-  @autoInject()
+  @autoInjectable()
   class Foo {
     constructor(public myBar?: Bar) {}
   }
@@ -30,10 +30,10 @@ test("@autoInject allows for parameters to be specified manually", () => {
   expect(myFoo.myBar).toBe(myBar);
 });
 
-test("@autoInject injects parameters beyond those specified manually", () => {
+test("@autoInjectable injects parameters beyond those specified manually", () => {
   class Bar {}
   class FooBar {}
-  @autoInject()
+  @autoInjectable()
   class Foo {
     constructor(public myFooBar: FooBar, public myBar?: Bar) {}
   }
@@ -45,12 +45,12 @@ test("@autoInject injects parameters beyond those specified manually", () => {
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
-test("@autoInject works when the @autoInject is a polymorphic ancestor", () => {
+test("@autoInjectable works when the @autoInjectable is a polymorphic ancestor", () => {
   class Foo {
     constructor() { }
   }
 
-  @autoInject()
+  @autoInjectable()
   class Ancestor {
     constructor(public myFoo?: Foo) {}
   }
@@ -66,14 +66,14 @@ test("@autoInject works when the @autoInject is a polymorphic ancestor", () => {
   expect(instance.myFoo instanceof Foo).toBeTruthy();
 });
 
-test("@autoInject classes keep behavior from their ancestor's constructors", () => {
+test("@autoInjectable classes keep behavior from their ancestor's constructors", () => {
   const a = 5;
   const b = 4;
   class Foo {
     constructor() { }
   }
 
-  @autoInject()
+  @autoInjectable()
   class Ancestor {
     public a: number;
     constructor(public myFoo?: Foo) {
@@ -96,13 +96,13 @@ test("@autoInject classes keep behavior from their ancestor's constructors", () 
   expect(instance.b).toBe(b);
 });
 
-test("@autoInject classes resolve their @injectable dependencies", () => {
+test("@autoInjectable classes resolve their @injectable dependencies", () => {
   class Foo {}
   @injectable()
   class Bar {
     constructor(public myFoo: Foo) {}
   }
-  @autoInject()
+  @autoInjectable()
   class FooBar {
     constructor(public myBar?: Bar) {}
   }
