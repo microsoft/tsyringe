@@ -157,8 +157,8 @@ import {Client} from "./Client";
 import {TestService} from "./TestService";
 import {container} from "tsyringe";
 
-container.register({
-  token: "SuperService",
+container.register(
+  "SuperService", {
   useClass: TestService
 });
 
