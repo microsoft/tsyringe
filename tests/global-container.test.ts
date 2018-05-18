@@ -305,6 +305,19 @@ test("@singleton registers class as singleton with the global container", () => 
   expect(myBar).toBe(myBar2);
 });
 
+test("dependencies of an @singleton can be resolved", () => {
+  class Foo {}
+
+  @singleton()
+  class Bar {
+    constructor(public foo: Foo) {}
+  }
+
+  const myBar = globalContainer.resolve(Bar);
+
+  expect(myBar.foo instanceof Foo).toBeTruthy();
+});
+
 test("passes through the given params", () => {
   @injectable()
   class MyViewModel {

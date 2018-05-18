@@ -25,6 +25,7 @@ export function injectable<T>(): (target: constructor<T>) => void {
  */
 export function singleton<T>(): (target: constructor<T>) => void {
   return function(target: constructor<T>): void {
+    injectable()(target);
     globalContainer.registerSingleton(target);
   };
 }
