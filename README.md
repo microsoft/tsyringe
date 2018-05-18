@@ -10,6 +10,7 @@ constructor injection.
 * [Installation](#installation)
 * [API](#api)
   * [injectable()](#injectable)
+  * [singleton()](@singleton)
   * [autoInjectable()](#autoinjectable)
   * [inject()](#inject)
 * [Full Examples](#full-examples)
@@ -44,6 +45,27 @@ const {injectable} = decorators;
 @injectable()
 class Foo {
   constructor(private database: Database) {}
+}
+
+// some other file
+import {container} from "tsyringe";
+import {Foo} from "./foo";
+
+const instance = container.resolve(Foo);
+```
+
+### singleton()
+Class decorator factory that registers the class as a singleton within the
+global container.
+
+#### Usage
+```TypeScript
+import {decorators} from "tsyringe";
+const {singleton} = decorators;
+
+@singleton()
+class Foo {
+  constructor() {}
 }
 
 // some other file
