@@ -10,7 +10,7 @@ constructor injection.
 * [Installation](#installation)
 * [API](#api)
   * [injectable()](#injectable)
-  * [singleton()](@singleton)
+  * [singleton()](#singleton)
   * [autoInjectable()](#autoinjectable)
   * [inject()](#inject)
 * [Full Examples](#full-examples)
