@@ -30,7 +30,6 @@
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
   "jest": {
-    "mapCoverage": true,
     "collectCoverageFrom": [
       "src/**/*.ts",
       "tests/**/*.ts"
