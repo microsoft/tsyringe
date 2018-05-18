@@ -1,4 +1,4 @@
-import {inject, injectable, registry} from "../src/decorators";
+import {inject, injectable, registry, singleton} from "../src/decorators";
 import {instanceCachingFactory, predicateAwareClassFactory} from "../src/factories";
 import {DependencyContainer} from "../src/types";
 import {instance as globalContainer} from "../src/dependency-container";
@@ -292,6 +292,17 @@ test("@injectable handles optional params", () => {
 
   const myOptional = globalContainer.resolve(MyOptional);
   expect(myOptional.myFoo instanceof Foo).toBeTruthy();
+});
+
+test("@singleton registers class as singleton with the global container", () => {
+  @singleton()
+  class Bar { }
+
+  const myBar = globalContainer.resolve(Bar);
+  const myBar2 = globalContainer.resolve(Bar);
+
+  expect(myBar instanceof Bar).toBeTruthy();
+  expect(myBar).toBe(myBar2);
 });
 
 test("passes through the given params", () => {
