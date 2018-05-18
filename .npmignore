@@ -1,5 +1,6 @@
 coverage/
 src/
+tests/
 .travis.yml
 tsconfig-base.json
 tslint.json
