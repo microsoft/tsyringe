@@ -59,4 +59,4 @@ typings/
 
 # Compiled output
 dist/
-types/
+*.d.ts
