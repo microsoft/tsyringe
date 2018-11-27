@@ -22,6 +22,9 @@
     "ioc",
     "container"
   ],
+  "engines": {
+    "node": ">= 8.0.0"
+  },
   "types": "types/index.d.ts",
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
