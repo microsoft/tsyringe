@@ -7,8 +7,7 @@
     "build": "rimraf ./dist ./types && tsc -p ./src",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p src && tslint -p tests",
-    "prepush": "npm test"
+    "lint": "tslint -p src && tslint -p tests"
   },
   "repository": {
     "type": "git",
