@@ -17,9 +17,14 @@ constructor injection.
 * [Contributing](#contributing)
 
 ## Installation
-
+Install by `npm`
 ```sh
 npm install --save tsyringe
+```
+
+**or** install with `yarn` (this project is developed using `yarn`)
+```sh
+yarn install --save tsyringe
 ```
 
 Modify your `tsconfig.json` to include the following settings
