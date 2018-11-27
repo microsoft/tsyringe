@@ -4,10 +4,10 @@
   "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rimraf ./dist ./types && tsc -p ./src",
+    "build": "rimraf ./dist ./types && tsc",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p src && tslint -p tests"
+    "lint": "tslint -p ."
   },
   "repository": {
     "type": "git",

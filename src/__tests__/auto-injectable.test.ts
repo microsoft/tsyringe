@@ -1,5 +1,5 @@
-import {autoInjectable, injectable} from "../src/decorators";
-import {instance as globalContainer} from "../src/dependency-container";
+import {autoInjectable, injectable} from "../decorators";
+import {instance as globalContainer} from "../dependency-container";
 
 afterEach(() => {
   globalContainer.reset();

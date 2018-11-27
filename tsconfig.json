@@ -13,6 +13,13 @@
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "declarationDir": "types",
+    "outDir": "dist",
+    "stripInternal": true
+  },
+  "include": [
+    "src/"
+  ]
 }

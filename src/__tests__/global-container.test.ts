@@ -1,7 +1,7 @@
-import {inject, injectable, registry, singleton} from "../src/decorators";
-import {instanceCachingFactory, predicateAwareClassFactory} from "../src/factories";
-import {DependencyContainer} from "../src/types";
-import {instance as globalContainer} from "../src/dependency-container";
+import {inject, injectable, registry, singleton} from "../decorators";
+import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
+import {DependencyContainer} from "../types";
+import {instance as globalContainer} from "../dependency-container";
 
 interface IBar {
   value: string;

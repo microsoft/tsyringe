@@ -1,4 +1,4 @@
-import {instance as globalContainer} from "../src/dependency-container";
+import {instance as globalContainer} from "../dependency-container";
 
 test("child container resolves even when parent doesn't have registration", () => {
   interface IFoo { } // tslint:disable-line no-empty-interface

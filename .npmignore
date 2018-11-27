@@ -1,6 +1,9 @@
 coverage/
 src/
-tests/
+dist/__tests__/
+types/__tests__/
 .travis.yml
-tsconfig-base.json
+tsconfig.json
 tslint.json
+.huskyrc.json
+jest.config.js
