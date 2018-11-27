@@ -7,8 +7,7 @@
     "build": "rimraf ./dist ./types && tsc -p ./src",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
-    "lint": "tslint -p src && tslint -p tests",
-    "prepush": "npm test"
+    "lint": "tslint -p src && tslint -p tests"
   },
   "repository": {
     "type": "git",
@@ -22,6 +21,9 @@
     "ioc",
     "container"
   ],
+  "engines": {
+    "node": ">= 6.0.0"
+  },
   "types": "types/index.d.ts",
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
@@ -35,12 +37,12 @@
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^8.10.16",
-    "husky": "^0.14.3",
+    "husky": "^1.2.0",
     "jest": "^23.6.0",
     "rimraf": "^2.6.2",
-    "ts-jest": "^22.4.6",
+    "ts-jest": "^23.10.5",
     "tslint": "^5.10.0",
     "tslint-eslint-rules": "^5.3.1",
-    "typescript": "^2.8.3"
+    "typescript": "^3.1.6"
   }
 }
