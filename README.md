@@ -38,7 +38,7 @@ Class decorator factory that allows the class' dependencies to be injected at
 runtime.
 
 #### Usage
-```TypeScript
+```typescript
 import {decorators} from "tsyringe";
 const {injectable} = decorators;
 
@@ -59,7 +59,7 @@ Class decorator factory that registers the class as a singleton within the
 global container.
 
 #### Usage
-```TypeScript
+```typescript
 import {decorators} from "tsyringe";
 const {singleton} = decorators;
 
@@ -82,7 +82,7 @@ a parameterless constructor that has dependencies auto-resolved.
 **Note** Resolution is performed using the global container
 
 #### Usage
-```TypeScript
+```typescript
 import {decorators} from "tsyringe";
 const {autoInjectable} = decorators;
 
@@ -105,7 +105,7 @@ Parameter decorator factory that allows for interface and other non-class
 information to be stored in the constructor's metadata
 
 #### Usage
-```TypeScript
+```typescript
 import {decorators} from "tsyringe";
 const {injectable, inject} = decorators;
 
@@ -124,11 +124,11 @@ class Foo {
 Since classes have type information at runtime, we can resolve them without any
 extra information.
 
-```TypeScript
+```typescript
 // Foo.ts
 export class Foo {}
 ```
-```TypeScript
+```typescript
 // Bar.ts
 import {Foo} from "./Foo";
 import {decorators} from "tsyringe";
@@ -139,7 +139,7 @@ export class Bar {
   constructor(public myFoo: Foo) {}
 }
 ```
-```TypeScript
+```typescript
 // main.ts
 import {container} from "tsyringe";
 import {Bar} from "./Bar";
@@ -152,20 +152,20 @@ const myBar = container.resolve(Bar);
 Interfaces don't have type information at runtime, so we need to decorate them
 with `@inject(...)` so the container knows how to resolve them.
 
-```TypeScript
+```typescript
 // SuperService.ts
 export interface SuperService {
   // ...
 }
 ```
-```TypeScript
+```typescript
 // TestService.ts
 import {SuperService} from "./SuperService";
 export class TestService implements SuperService {
   //...
 }
 ```
-```TypeScript
+```typescript
 // Client.ts
 import {decorators} from "tsyringe";
 const {injectable, inject} = decorators;
@@ -175,7 +175,7 @@ export class Client {
   constructor(@inject("SuperService") private service: SuperService) {}
 }
 ```
-```TypeScript
+```typescript
 // main.ts
 import {Client} from "./Client";
 import {TestService} from "./TestService";
