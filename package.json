@@ -29,42 +29,14 @@
     "url": "https://github.com/Microsoft/tsyringe/issues"
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
-  "jest": {
-    "collectCoverageFrom": [
-      "src/**/*.ts",
-      "tests/**/*.ts"
-    ],
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "types.ts"
-    ],
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tests/tsconfig.json",
-        "skipBabel": true
-      }
-    },
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testRegex": "/tests/.*\\.test\\.tsx?$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
-  },
   "dependencies": {
     "reflect-metadata": "^0.1.12"
   },
   "devDependencies": {
-    "@types/jest": "^22.2.3",
+    "@types/jest": "^23.3.9",
     "@types/node": "^8.10.16",
     "husky": "^0.14.3",
-    "jest": "^22.4.3",
+    "jest": "^23.6.0",
     "rimraf": "^2.6.2",
     "ts-jest": "^22.4.6",
     "tslint": "^5.10.0",
