@@ -1,7 +1,7 @@
 import {DependencyContainer} from "./types";
 import {constructor} from "./types";
 
-export type InjectionToken<T = any> = constructor<T> | string;
+export type InjectionToken<T = any> = constructor<T> | string | symbol;
 
 export interface ClassProvider<T> {
   useClass: constructor<T>;
@@ -40,4 +40,8 @@ export function isTokenProvider<T>(provider: Provider<T>): provider is TokenProv
 
 export function isFactoryProvider<T>(provider: Provider<T>): provider is FactoryProvider<any> {
   return !!(<FactoryProvider<T>>provider).useFactory;
+}
+
+export function isNormalToken(token?: InjectionToken<any>): token is string | symbol {
+    return typeof token === "string" || typeof token === "symbol";
 }

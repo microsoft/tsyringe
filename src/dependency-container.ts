@@ -8,6 +8,7 @@ import {
   ValueProvider,
   isClassProvider,
   isFactoryProvider,
+  isNormalToken,
   isTokenProvider,
   isValueProvider
 } from "./providers";
@@ -47,7 +48,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   }
 
   public registerType<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer {
-    if (typeof (to) === "string") {
+    if (isNormalToken(to)) {
       return this.register(from, {
         useToken: to
       });
@@ -67,8 +68,8 @@ export class DependencyContainer implements Types.DependencyContainer {
   public registerSingleton<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer;
   public registerSingleton<T>(token: constructor<T>): DependencyContainer;
   public registerSingleton<T>(from: InjectionToken<T>, to?: InjectionToken<T>): DependencyContainer {
-    if (typeof (from) === "string") {
-      if (typeof (to) === "string") {
+    if (isNormalToken(from)) {
+      if (isNormalToken(to)) {
         return this.register(from, {
           useToken: to
         }, {singleton: true});
@@ -96,8 +97,8 @@ export class DependencyContainer implements Types.DependencyContainer {
     const registration = this.getRegistration(token);
 
     if (!registration) {
-      if (typeof (token) === "string") {
-        throw `Attempted to resolve unregistered dependency token: ${token}`;
+      if (isNormalToken(token)) {
+        throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
       }
     }
 

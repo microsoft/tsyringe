@@ -444,6 +444,21 @@ test("registers mixed types", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
+test("registers by symbol token provider", () => {
+  const registration = {
+      token: Symbol("obj1"),
+      useValue: {}
+  };
+
+  @registry([registration])
+  class RegisteringFoo { }
+
+  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+
+  expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
+  expect(globalContainer.resolve(registration.token)).toEqual(registration.useValue);
+});
+
 // --- @inject ---
 
 test("allows interfaces to be resolved from the constructor with injection token", () => {
