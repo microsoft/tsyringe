@@ -43,6 +43,8 @@ Add a polyfill for the Reflect API (examples below use reflect-metadata). You ca
  * [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
  * [reflection](https://www.npmjs.com/package/@abraham/reflection)
 
+The Reflect polyfill import should only be added once before DI is used.
+
 ## API
 ### injectable()
 Class decorator factory that allows the class' dependencies to be injected at
