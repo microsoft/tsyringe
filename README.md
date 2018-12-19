@@ -59,7 +59,7 @@ class Foo {
 }
 
 // some other file
-import 'reflect-metadata';
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Foo} from "./foo";
 
@@ -81,7 +81,7 @@ class Foo {
 }
 
 // some other file
-import 'reflect-metadata';
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Foo} from "./foo";
 
@@ -154,7 +154,7 @@ export class Bar {
 ```
 ```typescript
 // main.ts
-import 'reflect-metadata';
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Bar} from "./Bar";
 
@@ -191,7 +191,7 @@ export class Client {
 ```
 ```typescript
 // main.ts
-import 'reflect-metadata';
+import "reflect-metadata";
 import {Client} from "./Client";
 import {TestService} from "./TestService";
 import {container} from "tsyringe";
