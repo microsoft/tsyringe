@@ -1,5 +1,3 @@
-import "reflect-metadata";
-
 import {instance as globalContainer} from "../dependency-container";
 
 test("child container resolves even when parent doesn't have registration", () => {

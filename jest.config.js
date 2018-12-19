@@ -19,6 +19,7 @@ module.exports = {
     "tsx",
     "js"
   ],
+  setupTestFrameworkScriptFile: "<rootDir>/jest.setup.ts",
   testEnvironment: "node",
   testMatch: [
     "**/src/**/__tests__/*.+(ts|tsx|js)"
