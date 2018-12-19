@@ -24,7 +24,7 @@ npm install --save tsyringe
 
 **or** install with `yarn` (this project is developed using `yarn`)
 ```sh
-yarn install --save tsyringe
+yarn add tsyringe
 ```
 
 Modify your `tsconfig.json` to include the following settings
