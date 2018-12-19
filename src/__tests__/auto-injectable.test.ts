@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import {autoInjectable, injectable} from "../decorators";
 import {instance as globalContainer} from "../dependency-container";
 

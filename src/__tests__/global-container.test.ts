@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 import {inject, injectable, registry, singleton} from "../decorators";
 import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {DependencyContainer} from "../types";
