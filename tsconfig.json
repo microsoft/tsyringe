@@ -2,6 +2,11 @@
   "compilerOptions": {
     "target": "es6",
     "module": "commonjs",
+    "types": [
+      "jest",
+      "node",
+      "reflect-metadata"
+    ],
     "removeComments": true,
     "strict": true,
     "noImplicitAny": true,
