@@ -1,3 +1,5 @@
+import("reflect-metadata");
+
 import {INJECTION_TOKEN_METADATA_KEY, getParamInfo} from "./reflection-helpers";
 import {InjectionToken, Provider} from "./providers";
 import {RegistrationOptions, constructor} from "./types";
