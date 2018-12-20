@@ -1,4 +1,4 @@
-import "reflect-metadata";
+import("reflect-metadata");
 
 import {INJECTION_TOKEN_METADATA_KEY, getParamInfo} from "./reflection-helpers";
 import {InjectionToken, Provider} from "./providers";

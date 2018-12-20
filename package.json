@@ -30,14 +30,13 @@
     "url": "https://github.com/Microsoft/tsyringe/issues"
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
-  "dependencies": {
-    "reflect-metadata": "^0.1.12"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/jest": "^23.3.9",
     "@types/node": "^8.10.16",
     "husky": "^1.2.0",
     "jest": "^23.6.0",
+    "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.5",
     "tslint": "^5.10.0",

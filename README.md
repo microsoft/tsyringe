@@ -37,6 +37,14 @@ Modify your `tsconfig.json` to include the following settings
 }
 ```
 
+Add a polyfill for the Reflect API (examples below use reflect-metadata). You can use:
+
+ * [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
+ * [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
+ * [reflection](https://www.npmjs.com/package/@abraham/reflection)
+
+The Reflect polyfill import should only be added once before DI is used.
+
 ## API
 ### injectable()
 Class decorator factory that allows the class' dependencies to be injected at
@@ -53,6 +61,7 @@ class Foo {
 }
 
 // some other file
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Foo} from "./foo";
 
@@ -74,6 +83,7 @@ class Foo {
 }
 
 // some other file
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Foo} from "./foo";
 
@@ -146,6 +156,7 @@ export class Bar {
 ```
 ```typescript
 // main.ts
+import "reflect-metadata";
 import {container} from "tsyringe";
 import {Bar} from "./Bar";
 
@@ -182,6 +193,7 @@ export class Client {
 ```
 ```typescript
 // main.ts
+import "reflect-metadata";
 import {Client} from "./Client";
 import {TestService} from "./TestService";
 import {container} from "tsyringe";
