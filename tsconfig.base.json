@@ -12,7 +12,6 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "declaration": true,
     "outDir": "dist",
     "stripInternal": true,
     "moduleResolution": "node",
