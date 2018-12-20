@@ -3,6 +3,6 @@
   "compilerOptions": {
     "target": "es2015",
     "module": "es2015",
-    "outDir": "./dist/es2015"
+    "outDir": "./dist/esm2015"
   }
 }

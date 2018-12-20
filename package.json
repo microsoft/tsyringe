@@ -3,11 +3,11 @@
   "version": "2.2.0",
   "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/cjs/index.js",
-  "module": "./dist/es5/index.js",
-  "es2015": "./dist/es2015/index.js",
+  "module": "./dist/esm5/index.js",
+  "es2015": "./dist/esm2015/index.js",
   "typings": "./dist/typings/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && tsc && tsc -p tsconfig.es5.json && tsc -p tsconfig.es2015.json && tsc -p tsconfig.types.json",
+    "build": "rimraf ./dist && tsc && tsc -p tsconfig.esm5.json && tsc -p tsconfig.esm2015.json && tsc -p tsconfig.types.json",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
     "lint": "tslint -p ."

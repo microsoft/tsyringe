@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "es5",
     "module": "es2015",
-    "outDir": "./dist/es5",
+    "outDir": "./dist/esm5",
     "lib": [
       "es5",
       "es2015.iterable",
