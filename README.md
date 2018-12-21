@@ -52,8 +52,7 @@ runtime.
 
 #### Usage
 ```typescript
-import {decorators} from "tsyringe";
-const {injectable} = decorators;
+import {injectable} from "tsyringe";
 
 @injectable()
 class Foo {
@@ -74,8 +73,7 @@ global container.
 
 #### Usage
 ```typescript
-import {decorators} from "tsyringe";
-const {singleton} = decorators;
+import {singleton} from "tsyringe";
 
 @singleton()
 class Foo {
@@ -98,8 +96,7 @@ a parameterless constructor that has dependencies auto-resolved.
 
 #### Usage
 ```typescript
-import {decorators} from "tsyringe";
-const {autoInjectable} = decorators;
+import {autoInjectable} from "tsyringe";
 
 @autoInjectable()
 class Foo {
@@ -121,8 +118,7 @@ information to be stored in the constructor's metadata
 
 #### Usage
 ```typescript
-import {decorators} from "tsyringe";
-const {injectable, inject} = decorators;
+import {injectable, inject} from "tsyringe";
 
 interface Database {
   // ...
@@ -146,8 +142,7 @@ export class Foo {}
 ```typescript
 // Bar.ts
 import {Foo} from "./Foo";
-import {decorators} from "tsyringe";
-const {injectable} = decorators;
+import {injectable} from "tsyringe";
 
 @injectable()
 export class Bar {
@@ -183,8 +178,7 @@ export class TestService implements SuperService {
 ```
 ```typescript
 // Client.ts
-import {decorators} from "tsyringe";
-const {injectable, inject} = decorators;
+import {injectable, inject} from "tsyringe";
 
 @injectable()
 export class Client {

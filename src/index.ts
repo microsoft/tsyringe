@@ -1,11 +1,8 @@
-import * as Types from "./types";
-import * as decorators from "./decorators";
-import * as factories from "./factories";
-import * as providers from "./providers";
+import {DependencyContainer} from "./types";
 import {instance} from "./dependency-container";
 
 export {DependencyContainer} from "./types";
-export {factories};
-export {providers};
-export {decorators};
-export const container: Types.DependencyContainer = instance;
+export * from "./decorators";
+export * from "./factories";
+export * from "./providers";
+export const container: DependencyContainer = instance;

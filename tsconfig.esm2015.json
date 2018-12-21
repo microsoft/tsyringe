@@ -2,7 +2,7 @@
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
     "target": "es2015",
-    "module": "commonjs",
-    "outDir": "./dist/cjs"
+    "module": "es2015",
+    "outDir": "./dist/esm2015"
   }
 }

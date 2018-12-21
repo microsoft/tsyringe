@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "alwaysStrict": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "outDir": "dist",
+    "stripInternal": true,
+    "moduleResolution": "node",
+    "importHelpers": true,
+  },
+  "include": [
+    "src/"
+  ]
+}
