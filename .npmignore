@@ -1,9 +1,20 @@
+# Generated Files
 coverage/
+
+# Source code
 src/
-dist/__tests__/
-types/__tests__/
+
+# Tests
+jest.config.js
+jest.setup.ts
+*.test.js
+
+# Configs
 .travis.yml
 tsconfig.json
+tsconfig.*.json
 tslint.json
 .huskyrc.json
-jest.config.js
+
+# Lock files
+yarn.lock
