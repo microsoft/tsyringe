@@ -17,12 +17,13 @@
     "url": "git+https://github.com/Microsoft/tsyringe.git"
   },
   "keywords": [
-    "javascript",
-    "typescript",
+    "dependency injection",
     "dependency",
     "injection",
     "ioc",
-    "container"
+    "container",
+    "javascript",
+    "typescript"
   ],
   "engines": {
     "node": ">= 6.0.0"
