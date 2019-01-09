@@ -334,16 +334,6 @@ test("passes through the given params", () => {
   expect(instance.c).toBe(c);
 });
 
-test("works with abstract class", () => {
-  @injectable()
-  abstract class MyAbsClass {
-    protected constructor() { }
-  }
-
-  const instance = globalContainer.resolve(MyAbsClass);
-  expect(instance instanceof MyAbsClass).toBeTruthy();
-});
-
 // --- @registry ---
 
 test("doesn't blow up with empty args", () => {
