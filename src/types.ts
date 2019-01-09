@@ -1,7 +1,8 @@
 import {ClassProvider, FactoryProvider, InjectionToken, TokenProvider, ValueProvider} from "./providers";
 
 /** Constructor type */
-export type constructor<T> = { new(...args: any[]): T };
+type abstract_ctor<T> = Function & { prototype: T };
+export type constructor<T> = { new(...args: any[]): T } | abstract_ctor<T>;
 
 export type Dictionary<T> = { [key: string]: T };
 

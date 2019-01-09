@@ -111,3 +111,19 @@ test("@autoInjectable classes resolve their @injectable dependencies", () => {
 
   expect(myFooBar.myBar!.myFoo instanceof Foo).toBeTruthy();
 });
+
+test("@autoInjectable works with abstract class", () => {
+    class Foo { }
+
+    @autoInjectable()
+    abstract class MyAbsParentClass {
+      protected constructor(public foo?: Foo) { }
+    }
+
+    @injectable()
+    class MyClass extends MyAbsParentClass {
+    }
+
+    const instance: MyAbsParentClass = globalContainer.resolve(MyClass);
+    expect(instance.foo instanceof Foo).toBeTruthy();
+});
