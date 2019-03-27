@@ -111,3 +111,13 @@ test("@autoInjectable classes resolve their @injectable dependencies", () => {
 
   expect(myFooBar.myBar!.myFoo instanceof Foo).toBeTruthy();
 });
+
+test("@autoInjectable throws a clear error if a dependency can't be resolved.", () => {
+  interface Bar { someval: string; }
+  @autoInjectable()
+  class Foo {
+    constructor(public myBar?: Bar) { }
+  }
+
+  expect(() => new Foo()).toThrow(/Cannot inject the dependency myBar of Foo constructor. TypeInfo/);
+});

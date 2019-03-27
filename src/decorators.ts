@@ -42,7 +42,18 @@ export function autoInjectable(): (target: constructor<any>) => any {
 
     return class extends target {
       constructor(...args: any[]) {
-        super(...args.concat(paramInfo.slice(args.length).map(type => globalContainer.resolve(type))));
+        super(...args.concat(paramInfo.slice(args.length).map((type, index) => {
+          try {
+            return globalContainer.resolve(type);
+          } catch (e) {
+            const argIndex = index + args.length;
+
+            const [, params = null] = target.toString().match(/constructor\(([\w, ]+)\)/) || [];
+            const argName = params ? params.split(",")[argIndex] : `#${argIndex}`;
+
+            throw `Cannot inject the dependency ${argName} of ${target.name} constructor. ${e}`;
+          }
+        })));
       }
     };
   };
