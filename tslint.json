@@ -1,7 +1,5 @@
 {
-  "extends": [
-    "tslint-eslint-rules"
-  ],
+  "extends": ["tslint-eslint-rules"],
   "rules": {
     "array-type": [true, "array"],
     "arrow-return-shorthand": [true, "multiline"],
@@ -18,17 +16,13 @@
     "no-debugger": true,
     "no-duplicate-super": true,
     "no-empty-interface": true,
-    "no-inferrable-types": [
-      true,
-      "ignore-params",
-      "ignore-properties"
-    ],
+    "no-inferrable-types": [true, "ignore-params", "ignore-properties"],
     "no-multi-spaces": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": [true, "allow-fast-null-checks"],
     "no-var-keyword": true,
     "no-var-requires": true,
-    "object-curly-spacing": [true, "never"],
+    "object-curly-spacing": [true, "always"],
     "object-literal-key-quotes": [true, "as-needed"],
     "one-line": [
       true,
@@ -39,11 +33,7 @@
     ],
     "prefer-const": true,
     "prefer-template": true,
-    "quotemark": [
-      true,
-      "double",
-      "avoid-escape"
-    ],
+    "quotemark": [true, "double", "avoid-escape"],
     "semicolon": true,
     "sort-imports": true,
     "space-before-function-paren": [
@@ -66,7 +56,12 @@
     ],
     "triple-equals": [true, "allow-undefined-check"],
     "typedef": [true, "call-signature"],
-    "variable-name": [true, "ban-keywords", "check-format", "allow-leading-underscore"],
+    "variable-name": [
+      true,
+      "ban-keywords",
+      "check-format",
+      "allow-leading-underscore"
+    ],
     "whitespace": [
       true,
       "check-branch",
