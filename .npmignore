@@ -18,3 +18,6 @@ tslint.json
 
 # Lock files
 yarn.lock
+
+# MacOS specific files
+.DS_Store
