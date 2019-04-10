@@ -66,7 +66,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   }
 
   public registerSingleton<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer;
-  public registerSingleton<T>(token: constructor<T>): DependencyContainer;
+  public registerSingleton<T>(token: constructor<T>, to?: constructor<any>): DependencyContainer;
   public registerSingleton<T>(from: InjectionToken<T>, to?: InjectionToken<T>): DependencyContainer {
     if (isNormalToken(from)) {
       if (isNormalToken(to)) {
@@ -82,8 +82,13 @@ export class DependencyContainer implements Types.DependencyContainer {
       throw "Cannot register a type name as a singleton without a \"to\" token";
     }
 
+    let useClass = from;
+    if (to && !isNormalToken(to)) {
+      useClass = to;
+    }
+
     return this.register(from, {
-      useClass: from
+      useClass
     }, {singleton: true});
   }
 

@@ -11,6 +11,25 @@ afterEach(() => {
   globalContainer.reset();
 });
 
+// --- registerSingleton() ---
+
+test("a singleton registration can be redirected", () => {
+  @singleton()
+  class MyService {}
+
+  class MyServiceMock {}
+
+  @injectable()
+  class MyClass {
+    constructor(public myService: MyService) { }
+  }
+
+  globalContainer.registerSingleton(MyService, MyServiceMock);
+  const myClass = globalContainer.resolve(MyClass);
+
+  expect(myClass.myService).toBeInstanceOf(MyServiceMock);
+});
+
 // --- resolve() ---
 
 test("fails to resolve unregistered dependency by name", () => {
