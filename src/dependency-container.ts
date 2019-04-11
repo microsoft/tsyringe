@@ -12,7 +12,7 @@ import {
   isTokenProvider,
   isValueProvider
 } from "./providers";
-import {RegistrationOptions, constructor} from "./types";
+import { RegistrationOptions, constructor } from "./types";
 
 type Registration<T = any> = {
   provider: Provider<T>;
@@ -24,30 +24,51 @@ type Registration<T = any> = {
 export class DependencyContainer implements Types.DependencyContainer {
   private _registry = new Map<InjectionToken<any>, Registration>();
 
-  public constructor(private parent?: DependencyContainer) { }
+  public constructor(private parent?: DependencyContainer) {}
 
   /**
    * Register a dependency provider.
    *
    * @param provider {Provider} The dependency provider
    */
-  public register<T>(token: InjectionToken<T>, provider: ValueProvider<T>): DependencyContainer;
-  public register<T>(token: InjectionToken<T>, provider: FactoryProvider<T>): DependencyContainer;
-  public register<T>(token: InjectionToken<T>, provider: TokenProvider<T>, options?: RegistrationOptions): DependencyContainer;
-  public register<T>(token: InjectionToken<T>, provider: ClassProvider<T>, options?: RegistrationOptions): DependencyContainer;
-  public register<T>(token: InjectionToken<T>, provider: Provider<T>, options: RegistrationOptions = {singleton: false}): DependencyContainer {
+  public register<T>(
+    token: InjectionToken<T>,
+    provider: ValueProvider<T>
+  ): DependencyContainer;
+  public register<T>(
+    token: InjectionToken<T>,
+    provider: FactoryProvider<T>
+  ): DependencyContainer;
+  public register<T>(
+    token: InjectionToken<T>,
+    provider: TokenProvider<T>,
+    options?: RegistrationOptions
+  ): DependencyContainer;
+  public register<T>(
+    token: InjectionToken<T>,
+    provider: ClassProvider<T>,
+    options?: RegistrationOptions
+  ): DependencyContainer;
+  public register<T>(
+    token: InjectionToken<T>,
+    provider: Provider<T>,
+    options: RegistrationOptions = { singleton: false }
+  ): DependencyContainer {
     if (options.singleton) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
         throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders";
       }
     }
 
-    this._registry.set(token, {provider, options});
+    this._registry.set(token, { provider, options });
 
     return this;
   }
 
-  public registerType<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer {
+  public registerType<T>(
+    from: InjectionToken<T>,
+    to: InjectionToken<T>
+  ): DependencyContainer {
     if (isNormalToken(to)) {
       return this.register(from, {
         useToken: to
@@ -59,24 +80,44 @@ export class DependencyContainer implements Types.DependencyContainer {
     });
   }
 
-  public registerInstance<T>(token: InjectionToken<T>, instance: T): DependencyContainer {
+  public registerInstance<T>(
+    token: InjectionToken<T>,
+    instance: T
+  ): DependencyContainer {
     return this.register(token, {
       useValue: instance
     });
   }
 
-  public registerSingleton<T>(from: InjectionToken<T>, to: InjectionToken<T>): DependencyContainer;
-  public registerSingleton<T>(token: constructor<T>, to?: constructor<any>): DependencyContainer;
-  public registerSingleton<T>(from: InjectionToken<T>, to?: InjectionToken<T>): DependencyContainer {
+  public registerSingleton<T>(
+    from: InjectionToken<T>,
+    to: InjectionToken<T>
+  ): DependencyContainer;
+  public registerSingleton<T>(
+    token: constructor<T>,
+    to?: constructor<any>
+  ): DependencyContainer;
+  public registerSingleton<T>(
+    from: InjectionToken<T>,
+    to?: InjectionToken<T>
+  ): DependencyContainer {
     if (isNormalToken(from)) {
       if (isNormalToken(to)) {
-        return this.register(from, {
-          useToken: to
-        }, {singleton: true});
+        return this.register(
+          from,
+          {
+            useToken: to
+          },
+          { singleton: true }
+        );
       } else if (to) {
-        return this.register(from, {
-          useClass: to
-        }, {singleton: true});
+        return this.register(
+          from,
+          {
+            useClass: to
+          },
+          { singleton: true }
+        );
       }
 
       throw "Cannot register a type name as a singleton without a \"to\" token";
@@ -87,9 +128,13 @@ export class DependencyContainer implements Types.DependencyContainer {
       useClass = to;
     }
 
-    return this.register(from, {
-      useClass
-    }, {singleton: true});
+    return this.register(
+      from,
+      {
+        useClass
+      },
+      { singleton: true }
+    );
   }
 
   /**
@@ -111,13 +156,19 @@ export class DependencyContainer implements Types.DependencyContainer {
       if (isValueProvider(registration.provider)) {
         return registration.provider.useValue;
       } else if (isTokenProvider(registration.provider)) {
-        return registration.options.singleton ?
-          (registration.instance || (registration.instance = this.resolve(registration.provider.useToken))) :
-          this.resolve(registration.provider.useToken);
+        return registration.options.singleton
+          ? registration.instance ||
+              (registration.instance = this.resolve(
+                registration.provider.useToken
+              ))
+          : this.resolve(registration.provider.useToken);
       } else if (isClassProvider(registration.provider)) {
-        return registration.options.singleton ?
-          (registration.instance || (registration.instance = this.construct(registration.provider.useClass))) :
-          this.construct(registration.provider.useClass);
+        return registration.options.singleton
+          ? registration.instance ||
+              (registration.instance = this.construct(
+                registration.provider.useClass
+              ))
+          : this.construct(registration.provider.useClass);
       } else if (isFactoryProvider(registration.provider)) {
         return registration.provider.useFactory(this);
       } else {

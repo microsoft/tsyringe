@@ -1,15 +1,15 @@
-import {autoInjectable, injectable} from "../decorators";
-import {instance as globalContainer} from "../dependency-container";
+import { autoInjectable, injectable } from "../decorators";
+import { instance as globalContainer } from "../dependency-container";
 
 afterEach(() => {
   globalContainer.reset();
 });
 
 test("@autoInjectable allows for injection to be performed without using .resolve()", () => {
-  class Bar { }
+  class Bar {}
   @autoInjectable()
   class Foo {
-    constructor(public myBar?: Bar) { }
+    constructor(public myBar?: Bar) {}
   }
 
   const myFoo = new Foo();
@@ -18,10 +18,10 @@ test("@autoInjectable allows for injection to be performed without using .resolv
 });
 
 test("@autoInjectable allows for parameters to be specified manually", () => {
-  class Bar { }
+  class Bar {}
   @autoInjectable()
   class Foo {
-    constructor(public myBar?: Bar) { }
+    constructor(public myBar?: Bar) {}
   }
 
   const myBar = new Bar();
@@ -31,11 +31,11 @@ test("@autoInjectable allows for parameters to be specified manually", () => {
 });
 
 test("@autoInjectable injects parameters beyond those specified manually", () => {
-  class Bar { }
-  class FooBar { }
+  class Bar {}
+  class FooBar {}
   @autoInjectable()
   class Foo {
-    constructor(public myFooBar: FooBar, public myBar?: Bar) { }
+    constructor(public myFooBar: FooBar, public myBar?: Bar) {}
   }
 
   const myFooBar = new FooBar();
@@ -47,12 +47,12 @@ test("@autoInjectable injects parameters beyond those specified manually", () =>
 
 test("@autoInjectable works when the @autoInjectable is a polymorphic ancestor", () => {
   class Foo {
-    constructor() { }
+    constructor() {}
   }
 
   @autoInjectable()
   class Ancestor {
-    constructor(public myFoo?: Foo) { }
+    constructor(public myFoo?: Foo) {}
   }
 
   class Child extends Ancestor {
@@ -70,7 +70,7 @@ test("@autoInjectable classes keep behavior from their ancestor's constructors",
   const a = 5;
   const b = 4;
   class Foo {
-    constructor() { }
+    constructor() {}
   }
 
   @autoInjectable()
@@ -97,14 +97,14 @@ test("@autoInjectable classes keep behavior from their ancestor's constructors",
 });
 
 test("@autoInjectable classes resolve their @injectable dependencies", () => {
-  class Foo { }
+  class Foo {}
   @injectable()
   class Bar {
-    constructor(public myFoo: Foo) { }
+    constructor(public myFoo: Foo) {}
   }
   @autoInjectable()
   class FooBar {
-    constructor(public myBar?: Bar) { }
+    constructor(public myBar?: Bar) {}
   }
 
   const myFooBar = new FooBar();
@@ -113,11 +113,15 @@ test("@autoInjectable classes resolve their @injectable dependencies", () => {
 });
 
 test("@autoInjectable throws a clear error if a dependency can't be resolved.", () => {
-  interface Bar { someval: string; }
+  interface Bar {
+    someval: string;
+  }
   @autoInjectable()
   class Foo {
-    constructor(public myBar?: Bar) { }
+    constructor(public myBar?: Bar) {}
   }
 
-  expect(() => new Foo()).toThrow(/Cannot inject the dependency myBar of Foo constructor. TypeInfo/);
+  expect(() => new Foo()).toThrow(
+    /Cannot inject the dependency myBar of Foo constructor. TypeInfo/
+  );
 });
