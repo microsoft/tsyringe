@@ -20,6 +20,8 @@ type Registration<T = any> = {
   instance?: T;
 };
 
+export const typeInfo = new Map<constructor<any>, any[]>();
+
 /** Dependency Container */
 export class DependencyContainer implements Types.DependencyContainer {
   private _registry = new Map<InjectionToken<any>, Registration>();
@@ -190,7 +192,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   }
 
   /**
-   * Clears all registered tokens
+   * Clears all registered tokens'
    */
   public reset(): void {
     this._registry.clear();
@@ -228,7 +230,5 @@ export class DependencyContainer implements Types.DependencyContainer {
     return new ctor(...params);
   }
 }
-
-export const typeInfo = new Map<constructor<any>, any[]>();
 
 export const instance: Types.DependencyContainer = new DependencyContainer();

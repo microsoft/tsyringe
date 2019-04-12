@@ -12,4 +12,9 @@ globals:
 parserOptions:
   ecmaVersion: 2018
 rules: 
+  "@typescript-eslint/ban-types": off
+  "@typescript-eslint/no-angle-bracket-type-assertion": off
+  "@typescript-eslint/no-explicit-any": off
+  "@typescript-eslint/no-non-null-assertion": off
   "@typescript-eslint/no-parameter-properties": off
+  "@typescript-eslint/prefer-interface": off

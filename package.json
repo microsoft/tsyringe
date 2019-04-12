@@ -10,7 +10,7 @@
     "build": "rimraf ./dist && tsc && tsc -p tsconfig.esm5.json && tsc -p tsconfig.esm2015.json && tsc -p tsconfig.types.json",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
-    "lint": "eslint **/*.ts"
+    "lint": "prettier --check \"src/**/*.ts\" && eslint **/*.ts"
   },
   "repository": {
     "type": "git",
