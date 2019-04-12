@@ -12,7 +12,7 @@ import {
   isTokenProvider,
   isValueProvider
 } from "./providers";
-import { RegistrationOptions, constructor } from "./types";
+import {RegistrationOptions, constructor} from "./types";
 
 type Registration<T = any> = {
   provider: Provider<T>;
@@ -52,7 +52,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   public register<T>(
     token: InjectionToken<T>,
     provider: Provider<T>,
-    options: RegistrationOptions = { singleton: false }
+    options: RegistrationOptions = {singleton: false}
   ): DependencyContainer {
     if (options.singleton) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
@@ -60,7 +60,7 @@ export class DependencyContainer implements Types.DependencyContainer {
       }
     }
 
-    this._registry.set(token, { provider, options });
+    this._registry.set(token, {provider, options});
 
     return this;
   }
@@ -108,7 +108,7 @@ export class DependencyContainer implements Types.DependencyContainer {
           {
             useToken: to
           },
-          { singleton: true }
+          {singleton: true}
         );
       } else if (to) {
         return this.register(
@@ -116,7 +116,7 @@ export class DependencyContainer implements Types.DependencyContainer {
           {
             useClass: to
           },
-          { singleton: true }
+          {singleton: true}
         );
       }
 
@@ -133,7 +133,7 @@ export class DependencyContainer implements Types.DependencyContainer {
       {
         useClass
       },
-      { singleton: true }
+      {singleton: true}
     );
   }
 

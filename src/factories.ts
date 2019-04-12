@@ -1,4 +1,4 @@
-import { DependencyContainer, constructor } from "./types";
+import {DependencyContainer, constructor} from "./types";
 
 export type FactoryFunction<T> = (
   dependencyContainer: DependencyContainer

@@ -11,4 +11,5 @@ globals:
   SharedArrayBuffer: readonly
 parserOptions:
   ecmaVersion: 2018
-rules: {}
+rules: 
+  "@typescript-eslint/no-parameter-properties": off

@@ -45,6 +45,7 @@
     "eslint-config-prettier": "^4.1.0",
     "husky": "^1.2.0",
     "jest": "^23.6.0",
+    "prettier": "1.16.4",
     "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "ts-jest": "^23.10.5",

@@ -1,5 +1,5 @@
-import { DependencyContainer } from "./types";
-import { constructor } from "./types";
+import {DependencyContainer} from "./types";
+import {constructor} from "./types";
 
 export type InjectionToken<T = any> = constructor<T> | string | symbol;
 

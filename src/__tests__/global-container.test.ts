@@ -1,10 +1,7 @@
-import { inject, injectable, registry, singleton } from "../decorators";
-import {
-  instanceCachingFactory,
-  predicateAwareClassFactory
-} from "../factories";
-import { DependencyContainer } from "../types";
-import { instance as globalContainer } from "../dependency-container";
+import {inject, injectable, registry, singleton} from "../decorators";
+import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
+import {DependencyContainer} from "../types";
+import {instance as globalContainer} from "../dependency-container";
 
 interface IBar {
   value: string;
@@ -54,7 +51,7 @@ test("resolves transient instances when not registered", () => {
 
 test("resolves a transient instance when registered by class provider", () => {
   class Bar {}
-  globalContainer.register("Bar", { useClass: Bar });
+  globalContainer.register("Bar", {useClass: Bar});
 
   const myBar = globalContainer.resolve<Bar>("Bar");
   const myBar2 = globalContainer.resolve<Bar>("Bar");
@@ -66,7 +63,7 @@ test("resolves a transient instance when registered by class provider", () => {
 
 test("resolves a singleton instance when class provider registered as singleton", () => {
   class Bar {}
-  globalContainer.register("Bar", { useClass: Bar }, { singleton: true });
+  globalContainer.register("Bar", {useClass: Bar}, {singleton: true});
 
   const myBar = globalContainer.resolve<Bar>("Bar");
   const myBar2 = globalContainer.resolve<Bar>("Bar");
@@ -77,8 +74,8 @@ test("resolves a singleton instance when class provider registered as singleton"
 
 test("resolves a transient instance when using token alias", () => {
   class Bar {}
-  globalContainer.register("Bar", { useClass: Bar });
-  globalContainer.register("BarAlias", { useToken: "Bar" });
+  globalContainer.register("Bar", {useClass: Bar});
+  globalContainer.register("BarAlias", {useToken: "Bar"});
 
   const myBar = globalContainer.resolve<Bar>("BarAlias");
   const myBar2 = globalContainer.resolve<Bar>("BarAlias");
@@ -89,11 +86,11 @@ test("resolves a transient instance when using token alias", () => {
 
 test("resolves a singleton instance when token alias registered as singleton", () => {
   class Bar {}
-  globalContainer.register("Bar", { useClass: Bar });
+  globalContainer.register("Bar", {useClass: Bar});
   globalContainer.register(
     "SingletonBar",
-    { useToken: "Bar" },
-    { singleton: true }
+    {useToken: "Bar"},
+    {singleton: true}
   );
 
   const myBar = globalContainer.resolve<Bar>("SingletonBar");
@@ -136,7 +133,7 @@ test("registerType() allows for names to be registered for a given type", () => 
 
 test("executes a registered factory each time resolve is called", () => {
   const factoryMock = jest.fn();
-  globalContainer.register("Test", { useFactory: factoryMock });
+  globalContainer.register("Test", {useFactory: factoryMock});
 
   globalContainer.resolve("Test");
   globalContainer.resolve("Test");
@@ -146,7 +143,7 @@ test("executes a registered factory each time resolve is called", () => {
 
 test("resolves to factory result each time resolve is called", () => {
   const factoryMock = jest.fn();
-  globalContainer.register("Test", { useFactory: factoryMock });
+  globalContainer.register("Test", {useFactory: factoryMock});
   const value1 = 1;
   const value2 = 2;
 
@@ -197,7 +194,7 @@ test("returns true for a registered class provider", () => {
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  globalContainer.register(Foo, { useClass: Foo });
+  globalContainer.register(Foo, {useClass: Foo});
 
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
@@ -212,7 +209,7 @@ test("returns true for a registered value provider", () => {
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  globalContainer.register(Foo, { useValue: {} });
+  globalContainer.register(Foo, {useValue: {}});
 
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
@@ -227,7 +224,7 @@ test("returns true for a registered token provider", () => {
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  globalContainer.register(Foo, { useToken: "Bar" });
+  globalContainer.register(Foo, {useToken: "Bar"});
 
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
@@ -374,7 +371,7 @@ test("registers by type provider", () => {
   class Bar implements IBar {
     public value: string = "";
   }
-  @registry([{ token: Bar, useClass: Bar }])
+  @registry([{token: Bar, useClass: Bar}])
   class RegisteringFoo {}
 
   new RegisteringFoo(); // tslint:disable-line no-unused-expression
@@ -462,7 +459,7 @@ test("registers mixed types", () => {
     useClass: Bar
   };
 
-  @registry([registration, { token: Foo, useClass: Foo }])
+  @registry([registration, {token: Foo, useClass: Foo}])
   class RegisteringFoo {}
 
   new RegisteringFoo(); // tslint:disable-line no-unused-expression
@@ -497,7 +494,7 @@ test("allows interfaces to be resolved from the constructor with injection token
   }
 
   @injectable()
-  @registry([{ token: Bar, useClass: Bar }])
+  @registry([{token: Bar, useClass: Bar}])
   class FooWithInterface {
     constructor(@inject(Bar) public myBar: IBar) {}
   }

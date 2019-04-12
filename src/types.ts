@@ -7,9 +7,9 @@ import {
 } from "./providers";
 
 /** Constructor type */
-export type constructor<T> = { new (...args: any[]): T };
+export type constructor<T> = {new (...args: any[]): T};
 
-export type Dictionary<T> = { [key: string]: T };
+export type Dictionary<T> = {[key: string]: T};
 
 export type RegistrationOptions = {
   singleton: boolean;
