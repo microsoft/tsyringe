@@ -1,4 +1,4 @@
-import {autoInjectable, injectable} from "../decorators";
+import {autoInjectable, injectable, singleton} from "../decorators";
 import {instance as globalContainer} from "../dependency-container";
 
 afterEach(() => {
@@ -124,4 +124,20 @@ test("@autoInjectable throws a clear error if a dependency can't be resolved.", 
   expect(() => new Foo()).toThrow(
     /Cannot inject the dependency myBar of Foo constructor. TypeInfo/
   );
+});
+
+test("@autoInjectable works with @singleton", () => {
+  class Bar {}
+
+  @singleton()
+  @autoInjectable()
+  class Foo {
+    constructor(public bar: Bar) {}
+  }
+
+  const instance1 = globalContainer.resolve(Foo);
+  const instance2 = globalContainer.resolve(Foo);
+
+  expect(instance1).toBe(instance2);
+  expect(instance1.bar).toBe(instance2.bar);
 });
