@@ -2,16 +2,19 @@ env:
   browser: true
   commonjs: true
   es6: true
-extends: 
-    - "plugin:@typescript-eslint/recommended"
-    - "prettier"
-    - "prettier/@typescript-eslint"
+extends:
+  - "plugin:@typescript-eslint/recommended"
+  - "prettier"
+  - "prettier/@typescript-eslint"
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
 parserOptions:
   ecmaVersion: 2018
-rules: 
+rules:
+  "@typescript-eslint/explicit-function-return-type":
+    - warn
+    - allowExpressions: true
   "@typescript-eslint/ban-types": off
   "@typescript-eslint/no-angle-bracket-type-assertion": off
   "@typescript-eslint/no-explicit-any": off
