@@ -12,8 +12,9 @@ jest.setup.ts
 # Configs
 .travis.yml
 tsconfig.json
-tsconfig.*.json
-tslint.json
+typescript/
+.eslintrc.yml
+.prettierrc.yml
 .huskyrc.json
 
 # Lock files

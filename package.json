@@ -7,7 +7,12 @@
   "es2015": "./dist/esm2015/index.js",
   "typings": "./dist/typings/index.d.ts",
   "scripts": {
-    "build": "rimraf ./dist && tsc && tsc -p tsconfig.esm5.json && tsc -p tsconfig.esm2015.json && tsc -p tsconfig.types.json",
+    "build": "npm run clean && npm run build:cjs && npm run build:es5 && npm run build:es2015 && npm run build:types",
+    "build:cjs": "tsc",
+    "build:es5": "tsc -p ./typescript/tsconfig.esm5.json",
+    "build:es2015": "tsc -p ./typescript/tsconfig.esm2015.json",
+    "build:types": "tsc -p ./typescript/tsconfig.types.json",
+    "clean": "rimraf ./dist",
     "test": "npm run lint && jest",
     "test:coverage": "jest --coverage",
     "lint": "prettier --check \"src/**/*.ts\" && eslint **/*.ts"

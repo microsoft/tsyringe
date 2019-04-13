@@ -15,9 +15,7 @@
     "outDir": "dist",
     "stripInternal": true,
     "moduleResolution": "node",
-    "importHelpers": true,
+    "importHelpers": true
   },
-  "include": [
-    "src/"
-  ]
+  "include": ["../src/"]
 }

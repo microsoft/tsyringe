@@ -5,10 +5,8 @@
     "target": "esnext",
     "removeComments": false,
     "declaration": true,
-    "declarationDir": "./dist/typings",
+    "declarationDir": "../dist/typings",
     "emitDeclarationOnly": true
   },
-  "exclude": [
-    "src/__tests__"
-  ]
+  "exclude": ["../src/__tests__"]
 }
