@@ -1,6 +1,6 @@
-import { constructor } from "../types";
+import {constructor} from "../types";
 import injectable from "./injectable";
-import { instance as globalContainer } from "../dependency-container";
+import {instance as globalContainer} from "../dependency-container";
 
 /**
  * Class decorator factory that registers the class as a singleton within

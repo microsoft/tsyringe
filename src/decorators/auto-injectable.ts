@@ -1,6 +1,6 @@
-import { constructor } from "../types";
-import { getParamInfo } from "../reflection-helpers";
-import { instance as globalContainer } from "../dependency-container";
+import {constructor} from "../types";
+import {getParamInfo} from "../reflection-helpers";
+import {instance as globalContainer} from "../dependency-container";
 
 /**
  * Class decorator factory that replaces the decorated class' constructor with

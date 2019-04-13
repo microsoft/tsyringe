@@ -1,5 +1,5 @@
-import { Dictionary, constructor } from "./types";
-import { InjectionToken } from "./providers";
+import {Dictionary, constructor} from "./types";
+import {InjectionToken} from "./providers";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 

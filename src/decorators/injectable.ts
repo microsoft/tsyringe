@@ -1,6 +1,6 @@
-import { constructor } from "../types";
-import { getParamInfo } from "../reflection-helpers";
-import { typeInfo } from "../dependency-container";
+import {constructor} from "../types";
+import {getParamInfo} from "../reflection-helpers";
+import {typeInfo} from "../dependency-container";
 
 /**
  * Class decorator factory that allows the class' dependencies to be injected
