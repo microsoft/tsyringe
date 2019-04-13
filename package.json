@@ -13,7 +13,7 @@
     "build:es2015": "tsc -p ./typescript/tsconfig.esm2015.json",
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
-    "test": "npm run lint && jest",
+    "test": "npm run lint && jest --config test/jest.config.js",
     "test:coverage": "jest --coverage",
     "lint": "prettier --check \"src/**/*.ts\" && eslint **/*.ts"
   },
