@@ -2,11 +2,16 @@ module.exports = {
   rootDir: "..",
   clearMocks: true,
   coverageDirectory: "coverage",
-  collectCoverageFrom: ["src/**/*.ts", "tests/**/*.ts"],
-  coveragePathIgnorePatterns: ["/node_modules/", "types.ts"],
+  collectCoverageFrom: ["src/**/*.ts"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "types\\.ts",
+    "index\\.ts",
+    ".+\\.d\\.ts"
+  ],
   globals: {
     "ts-jest": {
-      tsConfig: "<rootDir>/typescript/tsconfig.test.json"
+      tsConfig: "typescript/tsconfig.test.json"
     }
   },
   moduleFileExtensions: ["ts", "tsx", "js"],

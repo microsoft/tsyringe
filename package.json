@@ -14,7 +14,7 @@
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
     "test": "npm run lint && jest --config test/jest.config.js",
-    "test:coverage": "jest --coverage",
+    "test:coverage": "jest --config test/jest.config.js --coverage",
     "lint": "prettier --check \"src/**/*.ts\" && eslint **/*.ts"
   },
   "repository": {

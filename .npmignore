@@ -5,8 +5,7 @@ coverage/
 src/
 
 # Tests
-jest.config.js
-jest.setup.ts
+test/
 *.test.js
 
 # Configs
