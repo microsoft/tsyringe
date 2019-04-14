@@ -15,6 +15,7 @@ rules:
   "@typescript-eslint/explicit-function-return-type":
     - warn
     - allowExpressions: true
+  "@typescript-eslint/explicit-member-accessibility": off
   "@typescript-eslint/ban-types": off
   "@typescript-eslint/no-angle-bracket-type-assertion": off
   "@typescript-eslint/no-explicit-any": off

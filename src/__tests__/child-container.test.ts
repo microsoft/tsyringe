@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix, @typescript-eslint/no-empty-interface */
+
 import {instance as globalContainer} from "../dependency-container";
 
 test("child container resolves even when parent doesn't have registration", () => {
-  interface IFoo {} // tslint:disable-line no-empty-interface
+  interface IFoo {}
   class Foo implements IFoo {}
 
   const container = globalContainer.createChildContainer();
@@ -13,7 +15,7 @@ test("child container resolves even when parent doesn't have registration", () =
 });
 
 test("child container resolves using parents' registration when child container doesn't have registration", () => {
-  interface IFoo {} // tslint:disable-line no-empty-interface
+  interface IFoo {}
   class Foo implements IFoo {}
 
   globalContainer.register("IFoo", {useClass: Foo});

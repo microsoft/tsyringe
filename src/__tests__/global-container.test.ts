@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/interface-name-prefix */
+
 import {inject, injectable, registry, singleton} from "../decorators";
 import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {DependencyContainer} from "../types";
@@ -157,8 +159,8 @@ test("resolves to factory result each time resolve is called", () => {
 });
 
 test("resolves anonymous classes separately", () => {
-  const ctor1 = class {};
-  const ctor2 = class {};
+  const ctor1 = (() => class {})();
+  const ctor2 = (() => class {})();
 
   globalContainer.registerInstance(ctor1, new ctor1());
   globalContainer.registerInstance(ctor2, new ctor2());
@@ -426,16 +428,16 @@ test("registers by token provider", () => {
 });
 
 test("registers by factory provider", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value: string = "";
+  }
+
   const registration = {
     token: "IBar",
     useFactory: (globalContainer: DependencyContainer) =>
       globalContainer.resolve(Bar)
   };
-
-  @injectable()
-  class Bar implements IBar {
-    public value: string = "";
-  }
 
   @registry([registration])
   class RegisteringFoo {}
