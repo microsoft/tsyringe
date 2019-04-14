@@ -7,27 +7,31 @@
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
-* [Installation](#installation)
-* [API](#api)
-  * [injectable()](#injectable)
-  * [singleton()](#singleton)
-  * [autoInjectable()](#autoinjectable)
-  * [inject()](#inject)
-* [Full Examples](#full-examples)
-* [Contributing](#contributing)
+- [Installation](#installation)
+- [API](#api)
+  - [injectable()](#injectable)
+  - [singleton()](#singleton)
+  - [autoInjectable()](#autoinjectable)
+  - [inject()](#inject)
+- [Full Examples](#full-examples)
+- [Contributing](#contributing)
 
 ## Installation
+
 Install by `npm`
+
 ```sh
 npm install --save tsyringe
 ```
 
 **or** install with `yarn` (this project is developed using `yarn`)
+
 ```sh
 yarn add tsyringe
 ```
 
 Modify your `tsconfig.json` to include the following settings
+
 ```json
 {
   "compilerOptions": {
@@ -39,18 +43,28 @@ Modify your `tsconfig.json` to include the following settings
 
 Add a polyfill for the Reflect API (examples below use reflect-metadata). You can use:
 
- * [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
- * [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
- * [reflection](https://www.npmjs.com/package/@abraham/reflection)
+- [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
+- [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
+- [reflection](https://www.npmjs.com/package/@abraham/reflection)
 
-The Reflect polyfill import should only be added once before DI is used.
+The Reflect polyfill import should only be added once, and before before DI is used:
+
+```typescript
+// main.ts
+import "reflect-metadata";
+
+// Your code here...
+```
 
 ## API
+
 ### injectable()
+
 Class decorator factory that allows the class' dependencies to be injected at
 runtime.
 
 #### Usage
+
 ```typescript
 import {injectable} from "tsyringe";
 
@@ -68,10 +82,12 @@ const instance = container.resolve(Foo);
 ```
 
 ### singleton()
+
 Class decorator factory that registers the class as a singleton within the
 global container.
 
 #### Usage
+
 ```typescript
 import {singleton} from "tsyringe";
 
@@ -89,12 +105,14 @@ const instance = container.resolve(Foo);
 ```
 
 ### autoInjectable()
+
 Class decorator factory that replaces the decorated class' constructor with
 a parameterless constructor that has dependencies auto-resolved.
 
 **Note** Resolution is performed using the global container
 
 #### Usage
+
 ```typescript
 import {autoInjectable} from "tsyringe";
 
@@ -113,10 +131,12 @@ Notice how in order to allow the use of the empty constructor `new Foo()`, we
 need to make the parameters optional, e.g. `database?: Database`
 
 ### inject()
+
 Parameter decorator factory that allows for interface and other non-class
 information to be stored in the constructor's metadata
 
 #### Usage
+
 ```typescript
 import {injectable, inject} from "tsyringe";
 
@@ -131,7 +151,9 @@ class Foo {
 ```
 
 ## Full examples
+
 ### Example without interfaces
+
 Since classes have type information at runtime, we can resolve them without any
 extra information.
 
@@ -139,6 +161,7 @@ extra information.
 // Foo.ts
 export class Foo {}
 ```
+
 ```typescript
 // Bar.ts
 import {Foo} from "./Foo";
@@ -149,6 +172,7 @@ export class Bar {
   constructor(public myFoo: Foo) {}
 }
 ```
+
 ```typescript
 // main.ts
 import "reflect-metadata";
@@ -160,6 +184,7 @@ const myBar = container.resolve(Bar);
 ```
 
 ### Example with interfaces
+
 Interfaces don't have type information at runtime, so we need to decorate them
 with `@inject(...)` so the container knows how to resolve them.
 
@@ -169,6 +194,7 @@ export interface SuperService {
   // ...
 }
 ```
+
 ```typescript
 // TestService.ts
 import {SuperService} from "./SuperService";
@@ -176,6 +202,7 @@ export class TestService implements SuperService {
   //...
 }
 ```
+
 ```typescript
 // Client.ts
 import {injectable, inject} from "tsyringe";
@@ -185,6 +212,7 @@ export class Client {
   constructor(@inject("SuperService") private service: SuperService) {}
 }
 ```
+
 ```typescript
 // main.ts
 import "reflect-metadata";
@@ -192,8 +220,7 @@ import {Client} from "./Client";
 import {TestService} from "./TestService";
 import {container} from "tsyringe";
 
-container.register(
-  "SuperService", {
+container.register("SuperService", {
   useClass: TestService
 });
 
@@ -203,7 +230,7 @@ const client = container.resolve(Client);
 
 ## Contributing
 
-This project welcomes contributions and suggestions.  Most contributions require you to agree to a
+This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
 the rights to use your contribution. For details, visit [https://cla.microsoft.com](https://cla.microsoft.com).
 
