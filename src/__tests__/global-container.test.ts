@@ -376,7 +376,7 @@ test("registers by type provider", () => {
   @registry([{token: Bar, useClass: Bar}])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(Bar)).toBeTruthy();
 });
@@ -394,7 +394,7 @@ test("registers by class provider", () => {
   @registry([registration])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
@@ -408,7 +408,7 @@ test("registers by value provider", () => {
   @registry([registration])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
@@ -422,7 +422,7 @@ test("registers by token provider", () => {
   @registry([registration])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
@@ -442,7 +442,7 @@ test("registers by factory provider", () => {
   @registry([registration])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
@@ -464,7 +464,7 @@ test("registers mixed types", () => {
   @registry([registration, {token: Foo, useClass: Foo}])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
@@ -479,7 +479,7 @@ test("registers by symbol token provider", () => {
   @registry([registration])
   class RegisteringFoo {}
 
-  new RegisteringFoo(); // tslint:disable-line no-unused-expression
+  new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
   expect(globalContainer.resolve(registration.token)).toEqual(
