@@ -1,18 +1,19 @@
-import * as Types from "./types";
+import DependencyContainer from "./types/dependency-container";
 import {
-  ClassProvider,
-  FactoryProvider,
-  InjectionToken,
-  Provider,
-  TokenProvider,
-  ValueProvider,
   isClassProvider,
   isFactoryProvider,
   isNormalToken,
   isTokenProvider,
   isValueProvider
 } from "./providers";
-import {RegistrationOptions, constructor} from "./types";
+import Provider from "./providers/provider";
+import FactoryProvider from "./providers/factory-provider";
+import InjectionToken from "./providers/injection-token";
+import TokenProvider from "./providers/token-provider";
+import ValueProvider from "./providers/value-provider";
+import ClassProvider from "./providers/class-provider";
+import RegistrationOptions from "./types/registration-options";
+import constructor from "./types/constructor";
 
 type Registration<T = any> = {
   provider: Provider<T>;
@@ -23,10 +24,10 @@ type Registration<T = any> = {
 export const typeInfo = new Map<constructor<any>, any[]>();
 
 /** Dependency Container */
-export class DependencyContainer implements Types.DependencyContainer {
+class InternalDependencyContainer implements DependencyContainer {
   private _registry = new Map<InjectionToken<any>, Registration>();
 
-  public constructor(private parent?: DependencyContainer) {}
+  public constructor(private parent?: InternalDependencyContainer) {}
 
   /**
    * Register a dependency provider.
@@ -36,26 +37,26 @@ export class DependencyContainer implements Types.DependencyContainer {
   public register<T>(
     token: InjectionToken<T>,
     provider: ValueProvider<T>
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public register<T>(
     token: InjectionToken<T>,
     provider: FactoryProvider<T>
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public register<T>(
     token: InjectionToken<T>,
     provider: TokenProvider<T>,
     options?: RegistrationOptions
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public register<T>(
     token: InjectionToken<T>,
     provider: ClassProvider<T>,
     options?: RegistrationOptions
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public register<T>(
     token: InjectionToken<T>,
     provider: Provider<T>,
     options: RegistrationOptions = {singleton: false}
-  ): DependencyContainer {
+  ): InternalDependencyContainer {
     if (options.singleton) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
         throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders";
@@ -70,7 +71,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   public registerType<T>(
     from: InjectionToken<T>,
     to: InjectionToken<T>
-  ): DependencyContainer {
+  ): InternalDependencyContainer {
     if (isNormalToken(to)) {
       return this.register(from, {
         useToken: to
@@ -85,7 +86,7 @@ export class DependencyContainer implements Types.DependencyContainer {
   public registerInstance<T>(
     token: InjectionToken<T>,
     instance: T
-  ): DependencyContainer {
+  ): InternalDependencyContainer {
     return this.register(token, {
       useValue: instance
     });
@@ -94,15 +95,15 @@ export class DependencyContainer implements Types.DependencyContainer {
   public registerSingleton<T>(
     from: InjectionToken<T>,
     to: InjectionToken<T>
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public registerSingleton<T>(
     token: constructor<T>,
     to?: constructor<any>
-  ): DependencyContainer;
+  ): InternalDependencyContainer;
   public registerSingleton<T>(
     from: InjectionToken<T>,
     to?: InjectionToken<T>
-  ): DependencyContainer {
+  ): InternalDependencyContainer {
     if (isNormalToken(from)) {
       if (isNormalToken(to)) {
         return this.register(
@@ -198,8 +199,8 @@ export class DependencyContainer implements Types.DependencyContainer {
     this._registry.clear();
   }
 
-  public createChildContainer(): Types.DependencyContainer {
-    return new DependencyContainer(this);
+  public createChildContainer(): DependencyContainer {
+    return new InternalDependencyContainer(this);
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
@@ -231,4 +232,6 @@ export class DependencyContainer implements Types.DependencyContainer {
   }
 }
 
-export const instance: Types.DependencyContainer = new DependencyContainer();
+export const instance: DependencyContainer = new InternalDependencyContainer();
+
+export default instance;

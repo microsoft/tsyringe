@@ -1,24 +1,8 @@
-import {DependencyContainer, constructor} from "./types";
+import DependencyContainer from "../types/dependency-container";
+import constructor from "../types/constructor";
+import FactoryFunction from "./factory-function";
 
-export type FactoryFunction<T> = (
-  dependencyContainer: DependencyContainer
-) => T;
-
-export function instanceCachingFactory<T>(
-  factoryFunc: FactoryFunction<T>
-): FactoryFunction<T> {
-  let instance: T;
-
-  return (dependencyContainer: DependencyContainer) => {
-    if (instance == undefined) {
-      instance = factoryFunc(dependencyContainer);
-    }
-
-    return instance;
-  };
-}
-
-export function predicateAwareClassFactory<T>(
+export default function predicateAwareClassFactory<T>(
   predicate: (dependencyContainer: DependencyContainer) => boolean,
   trueConstructor: constructor<T>,
   falseConstructor: constructor<T>,
@@ -26,7 +10,6 @@ export function predicateAwareClassFactory<T>(
 ): FactoryFunction<T> {
   let instance: T;
   let previousPredicate: boolean;
-
   return (dependencyContainer: DependencyContainer) => {
     const currentPredicate = predicate(dependencyContainer);
     if (!useCaching || previousPredicate !== currentPredicate) {
@@ -36,7 +19,6 @@ export function predicateAwareClassFactory<T>(
         instance = dependencyContainer.resolve(falseConstructor);
       }
     }
-
     return instance;
   };
 }

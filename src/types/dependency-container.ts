@@ -1,21 +1,12 @@
-import {
-  ClassProvider,
-  FactoryProvider,
-  InjectionToken,
-  TokenProvider,
-  ValueProvider
-} from "./providers";
+import FactoryProvider from "../providers/factory-provider";
+import InjectionToken from "../providers/injection-token";
+import TokenProvider from "../providers/token-provider";
+import ValueProvider from "../providers/value-provider";
+import ClassProvider from "../providers/class-provider";
+import constructor from "./constructor";
+import RegistrationOptions from "./registration-options";
 
-/** Constructor type */
-export type constructor<T> = {new (...args: any[]): T};
-
-export type Dictionary<T> = {[key: string]: T};
-
-export type RegistrationOptions = {
-  singleton: boolean;
-};
-
-export interface DependencyContainer {
+export default interface DependencyContainer {
   register<T>(
     token: InjectionToken<T>,
     provider: ValueProvider<T>
@@ -34,13 +25,11 @@ export interface DependencyContainer {
     provider: ClassProvider<T>,
     options?: RegistrationOptions
   ): DependencyContainer;
-
   registerSingleton<T>(
     from: InjectionToken<T>,
     to: InjectionToken<T>
   ): DependencyContainer;
   registerSingleton<T>(token: constructor<T>): DependencyContainer;
-
   registerType<T>(
     from: InjectionToken<T>,
     to: InjectionToken<T>

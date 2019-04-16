@@ -1,5 +1,6 @@
-import {InjectionToken, Provider} from "../providers";
-import {RegistrationOptions} from "../types";
+import Provider from "../providers/provider";
+import InjectionToken from "../providers/injection-token";
+import RegistrationOptions from "../types/registration-options";
 import {instance as globalContainer} from "../dependency-container";
 
 /**
