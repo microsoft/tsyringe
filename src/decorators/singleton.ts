@@ -1,4 +1,4 @@
-import {constructor} from "../types";
+import constructor from "../types/constructor";
 import injectable from "./injectable";
 import {instance as globalContainer} from "../dependency-container";
 

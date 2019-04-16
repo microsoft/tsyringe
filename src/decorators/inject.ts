@@ -1,5 +1,5 @@
 import {INJECTION_TOKEN_METADATA_KEY} from "../reflection-helpers";
-import {InjectionToken} from "../providers";
+import InjectionToken from "../providers/injection-token";
 
 /**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata

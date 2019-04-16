@@ -1,4 +1,4 @@
-import {constructor} from "../types";
+import constructor from "../types/constructor";
 import {getParamInfo} from "../reflection-helpers";
 import {instance as globalContainer} from "../dependency-container";
 
