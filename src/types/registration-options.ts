@@ -1,5 +1,8 @@
+import Lifestyle from "./lifestyle";
+
 type RegistrationOptions = {
-  singleton: boolean;
+  lifestyle?: Lifestyle;
+  singleton?: boolean;
 };
 
 export default RegistrationOptions;

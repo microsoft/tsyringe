@@ -13,6 +13,7 @@ import TokenProvider from "./providers/token-provider";
 import ValueProvider from "./providers/value-provider";
 import ClassProvider from "./providers/class-provider";
 import RegistrationOptions from "./types/registration-options";
+import Lifestyle from "./types/lifestyle";
 import constructor from "./types/constructor";
 
 type Registration<T = any> = {
@@ -25,9 +26,9 @@ export const typeInfo = new Map<constructor<any>, any[]>();
 
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
-  private _registry = new Map<InjectionToken<any>, Registration>();
+  protected _registry = new Map<InjectionToken<any>, Registration>();
 
-  public constructor(private parent?: InternalDependencyContainer) {}
+  public constructor(protected parent?: InternalDependencyContainer) {}
 
   /**
    * Register a dependency provider.
@@ -55,11 +56,11 @@ class InternalDependencyContainer implements DependencyContainer {
   public register<T>(
     token: InjectionToken<T>,
     provider: Provider<T>,
-    options: RegistrationOptions = {singleton: false}
+    options: RegistrationOptions = {lifestyle: Lifestyle.TRANSIENT}
   ): InternalDependencyContainer {
-    if (options.singleton) {
+    if (options.lifestyle === Lifestyle.SINGLETON) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
-        throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders";
+        throw "Cannot use {scope: Scope.SINGLETON} with ValueProviders or FactoryProviders";
       }
     }
 
@@ -111,7 +112,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useToken: to
           },
-          {singleton: true}
+          {lifestyle: Lifestyle.SINGLETON}
         );
       } else if (to) {
         return this.register(
@@ -119,7 +120,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useClass: to
           },
-          {singleton: true}
+          {lifestyle: Lifestyle.SINGLETON}
         );
       }
 
@@ -136,7 +137,17 @@ class InternalDependencyContainer implements DependencyContainer {
       {
         useClass
       },
-      {singleton: true}
+      {lifestyle: Lifestyle.SINGLETON}
+    );
+  }
+
+  public registerScoped<T>(token: constructor<T>): InternalDependencyContainer {
+    return this.register(
+      token,
+      {
+        useClass: token
+      },
+      {lifestyle: Lifestyle.SCOPED}
     );
   }
 
@@ -156,17 +167,22 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
+      // backwards compatible
+      if (registration.options.singleton) {
+        registration.options.lifestyle = Lifestyle.SINGLETON;
+      }
+
       if (isValueProvider(registration.provider)) {
         return registration.provider.useValue;
       } else if (isTokenProvider(registration.provider)) {
-        return registration.options.singleton
+        return registration.options.lifestyle !== Lifestyle.TRANSIENT
           ? registration.instance ||
               (registration.instance = this.resolve(
                 registration.provider.useToken
               ))
           : this.resolve(registration.provider.useToken);
       } else if (isClassProvider(registration.provider)) {
-        return registration.options.singleton
+        return registration.options.lifestyle !== Lifestyle.TRANSIENT
           ? registration.instance ||
               (registration.instance = this.construct(
                 registration.provider.useClass
@@ -203,7 +219,73 @@ class InternalDependencyContainer implements DependencyContainer {
     return new InternalDependencyContainer(this);
   }
 
-  private getRegistration<T>(token: InjectionToken<T>): Registration | null {
+  public enterScope(scope: (container: DependencyContainer) => any): void {
+    const ScopedContainer = class extends InternalDependencyContainer {
+      public resolve<T>(token: InjectionToken<T>): T {
+        const registration = this.getRegistration(token);
+
+        if (!registration) {
+          if (isNormalToken(token)) {
+            throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
+          }
+        }
+
+        if (
+          registration &&
+          registration.options.lifestyle === Lifestyle.SCOPED
+        ) {
+          if (isValueProvider(registration.provider)) {
+            return registration.provider.useValue;
+          } else if (isTokenProvider(registration.provider)) {
+            return (
+              registration.instance ||
+              (registration.instance = this.resolve(
+                registration.provider.useToken
+              ))
+            );
+          } else if (isClassProvider(registration.provider)) {
+            return (
+              registration.instance ||
+              (registration.instance = this.construct(
+                registration.provider.useClass
+              ))
+            );
+          } else if (isFactoryProvider(registration.provider)) {
+            return (
+              registration.instance ||
+              (registration.instance = registration.provider.useFactory(this))
+            );
+          } else {
+            return (
+              registration.instance ||
+              (registration.instance = this.construct(registration.provider))
+            );
+          }
+        }
+        return super.resolve(token);
+      }
+
+      protected getRegistration<T>(
+        token: InjectionToken<T>
+      ): Registration | null {
+        if (this.isRegistered(token)) {
+          return this._registry.get(token)!;
+        }
+
+        const registered = super.getRegistration(token);
+        if (registered && registered.options.lifestyle === Lifestyle.SCOPED) {
+          const resetInstance = {...registered, instance: undefined};
+          this._registry.set(token, resetInstance);
+          return resetInstance;
+        }
+
+        return registered;
+      }
+    };
+    scope(new ScopedContainer(this));
+  }
+
+  protected getRegistration<T>(token: InjectionToken<T>): Registration | null {
     if (this.isRegistered(token)) {
       return this._registry.get(token)!;
     }
@@ -215,7 +297,7 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private construct<T>(ctor: constructor<T>): T {
+  protected construct<T>(ctor: constructor<T>): T {
     if (ctor.length === 0) {
       return new ctor();
     }

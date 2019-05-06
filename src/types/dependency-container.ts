@@ -38,8 +38,10 @@ export default interface DependencyContainer {
     token: InjectionToken<T>,
     instance: T
   ): DependencyContainer;
+  registerScoped<T>(token: constructor<T>): DependencyContainer;
   resolve<T>(token: InjectionToken<T>): T;
   isRegistered<T>(token: InjectionToken<T>): boolean;
   reset(): void;
   createChildContainer(): DependencyContainer;
+  enterScope(scope: (container: DependencyContainer) => any): void;
 }
