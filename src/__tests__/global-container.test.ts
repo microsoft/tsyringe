@@ -169,6 +169,30 @@ test("resolves anonymous classes separately", () => {
   expect(globalContainer.resolve(ctor2) instanceof ctor2).toBeTruthy();
 });
 
+// --- resolveAll() ---
+
+test("resolves an array of transient instances bound to a single interface", () => {
+  interface FooInterface {
+    bar: string;
+  }
+
+  class FooOne implements FooInterface {
+    public bar: string = "foo1";
+  }
+
+  class FooTwo implements FooInterface {
+    public bar: string = "foo2";
+  }
+
+  globalContainer.register<FooInterface>("FooInterface", {useClass: FooOne});
+  globalContainer.register<FooInterface>("FooInterface", {useClass: FooTwo});
+
+  const fooArray = globalContainer.resolveAll<FooInterface>("FooInterface");
+  expect(Array.isArray(fooArray)).toBeTruthy();
+  expect(fooArray[0]).toBeInstanceOf(FooOne);
+  expect(fooArray[1]).toBeInstanceOf(FooTwo);
+});
+
 // --- isRegistered() ---
 
 test("returns true for a registered singleton class", () => {

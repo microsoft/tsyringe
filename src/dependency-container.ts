@@ -8,14 +8,15 @@ import {
 } from "./providers";
 import Provider from "./providers/provider";
 import FactoryProvider from "./providers/factory-provider";
-import InjectionToken from "./providers/injection-token";
+import InjectionToken, {isTokenDescriptor} from "./providers/injection-token";
 import TokenProvider from "./providers/token-provider";
 import ValueProvider from "./providers/value-provider";
 import ClassProvider from "./providers/class-provider";
 import RegistrationOptions from "./types/registration-options";
 import constructor from "./types/constructor";
+import Registry from "./registry";
 
-type Registration<T = any> = {
+export type Registration<T = any> = {
   provider: Provider<T>;
   options: RegistrationOptions;
   instance?: T;
@@ -25,7 +26,7 @@ export const typeInfo = new Map<constructor<any>, any[]>();
 
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
-  private _registry = new Map<InjectionToken<any>, Registration>();
+  private _registry = new Registry();
 
   public constructor(private parent?: InternalDependencyContainer) {}
 
@@ -149,10 +150,8 @@ class InternalDependencyContainer implements DependencyContainer {
   public resolve<T>(token: InjectionToken<T>): T {
     const registration = this.getRegistration(token);
 
-    if (!registration) {
-      if (isNormalToken(token)) {
-        throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
-      }
+    if (!registration && isNormalToken(token)) {
+      throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
     }
 
     if (registration) {
@@ -181,6 +180,45 @@ class InternalDependencyContainer implements DependencyContainer {
 
     // No registration for this token, but since it's a constructor, return an instance
     return this.construct(<constructor<T>>token);
+  }
+
+  private resolveToken<T>(registration: Registration): T {
+    if (isValueProvider(registration.provider)) {
+      return registration.provider.useValue;
+    } else if (isTokenProvider(registration.provider)) {
+      return registration.options.singleton
+        ? registration.instance ||
+            (registration.instance = this.resolve(
+              registration.provider.useToken
+            ))
+        : this.resolve(registration.provider.useToken);
+    } else if (isClassProvider(registration.provider)) {
+      return registration.options.singleton
+        ? registration.instance ||
+            (registration.instance = this.construct(
+              registration.provider.useClass
+            ))
+        : this.construct(registration.provider.useClass);
+    } else if (isFactoryProvider(registration.provider)) {
+      return registration.provider.useFactory(this);
+    } else {
+      return this.construct(registration.provider);
+    }
+  }
+
+  public resolveAll<T>(token: InjectionToken<T>): T[] {
+    const registration = this.getAllRegistration(token);
+
+    if (!registration && isNormalToken(token)) {
+      throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
+    }
+
+    if (registration) {
+      return registration.map(item => this.resolveToken<T>(item));
+    }
+
+    // No registration for this token, but since it's a constructor, return an instance
+    return [this.construct(<constructor<T>>token)];
   }
 
   /**
@@ -215,6 +253,20 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
+  private getAllRegistration<T>(
+    token: InjectionToken<T>
+  ): Registration[] | null {
+    if (this.isRegistered(token)) {
+      return this._registry.getAll(token);
+    }
+
+    if (this.parent) {
+      return this.parent.getAllRegistration(token);
+    }
+
+    return null;
+  }
+
   private construct<T>(ctor: constructor<T>): T {
     if (ctor.length === 0) {
       return new ctor();
@@ -226,7 +278,14 @@ class InternalDependencyContainer implements DependencyContainer {
       throw `TypeInfo not known for ${ctor}`;
     }
 
-    const params = paramInfo.map(param => this.resolve(param));
+    const params = paramInfo.map(param => {
+      if (isTokenDescriptor(param)) {
+        return param.multiple
+          ? this.resolveAll(param.token)
+          : this.resolve(param.token);
+      }
+      return this.resolve(param);
+    });
 
     return new ctor(...params);
   }

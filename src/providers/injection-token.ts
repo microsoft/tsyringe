@@ -8,4 +8,15 @@ export function isNormalToken(
   return typeof token === "string" || typeof token === "symbol";
 }
 
+export function isTokenDescriptor(
+  descriptor: any
+): descriptor is TokenDescriptor {
+  return "token" in descriptor && "multiple" in descriptor;
+}
+
+export interface TokenDescriptor {
+  token: InjectionToken<any>;
+  multiple: boolean;
+}
+
 export default InjectionToken;

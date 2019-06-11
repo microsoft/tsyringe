@@ -9,7 +9,12 @@ export function getParamInfo(target: constructor<any>): any[] {
   const injectionTokens: Dictionary<InjectionToken<any>> =
     Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
   Object.keys(injectionTokens).forEach(key => {
-    params[+key] = injectionTokens[key];
+    // TODO this propably should be moved to a decorator
+    const type = params[+key];
+    params[+key] = {
+      token: injectionTokens[key],
+      multiple: type === Array
+    };
   });
 
   return params;
