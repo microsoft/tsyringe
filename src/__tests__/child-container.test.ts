@@ -41,7 +41,7 @@ test("child container resolves all even when parent doesn't have registration", 
 
   expect(Array.isArray(myFoo)).toBeTruthy();
   expect(myFoo.length).toBe(1);
-  expect(myFoo[0] instanceof Foo).toBeTruthy
+  expect(myFoo[0] instanceof Foo).toBeTruthy();
 });
 
 test("child container resolves all using parent's registration when child container doesn't have registration", () => {
