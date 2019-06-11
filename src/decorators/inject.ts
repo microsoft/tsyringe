@@ -1,4 +1,4 @@
-import {INJECTION_TOKEN_METADATA_KEY} from "../reflection-helpers";
+import {defineInjectionTokenMetadata} from "../reflection-helpers";
 import InjectionToken from "../providers/injection-token";
 
 /**
@@ -9,20 +9,7 @@ import InjectionToken from "../providers/injection-token";
 function inject(
   token: InjectionToken<any>
 ): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
-  return function(
-    target: any,
-    _propertyKey: string | symbol,
-    parameterIndex: number
-  ): any {
-    const injectionTokens =
-      Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-    injectionTokens[parameterIndex] = token;
-    Reflect.defineMetadata(
-      INJECTION_TOKEN_METADATA_KEY,
-      injectionTokens,
-      target
-    );
-  };
+  return defineInjectionTokenMetadata(token);
 }
 
 export default inject;

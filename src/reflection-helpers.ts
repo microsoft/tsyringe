@@ -14,3 +14,22 @@ export function getParamInfo(target: constructor<any>): any[] {
 
   return params;
 }
+
+export function defineInjectionTokenMetadata(
+  data: any
+): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+  return function(
+    target: any,
+    _propertyKey: string | symbol,
+    parameterIndex: number
+  ): any {
+    const injectionTokens =
+      Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
+    injectionTokens[parameterIndex] = data;
+    Reflect.defineMetadata(
+      INJECTION_TOKEN_METADATA_KEY,
+      injectionTokens,
+      target
+    );
+  };
+}

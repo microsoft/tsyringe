@@ -1,5 +1,5 @@
-import {INJECTION_TOKEN_METADATA_KEY} from "../reflection-helpers";
-import InjectionToken from "../providers/injection-token";
+import {defineInjectionTokenMetadata} from "../reflection-helpers";
+import InjectionToken, {TokenDescriptor} from "../providers/injection-token";
 
 /**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata
@@ -9,20 +9,8 @@ import InjectionToken from "../providers/injection-token";
 function injectAll(
   token: InjectionToken<any>
 ): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
-  return function(
-    target: any,
-    _propertyKey: string | symbol,
-    parameterIndex: number
-  ): any {
-    const injectionTokens =
-      Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-    injectionTokens[parameterIndex] = {token, multiple: true};
-    Reflect.defineMetadata(
-      INJECTION_TOKEN_METADATA_KEY,
-      injectionTokens,
-      target
-    );
-  };
+  const data: TokenDescriptor = {token, multiple: true};
+  return defineInjectionTokenMetadata(data);
 }
 
 export default injectAll;
