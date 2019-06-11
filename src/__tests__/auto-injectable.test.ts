@@ -141,3 +141,15 @@ test("@autoInjectable works with @singleton", () => {
   expect(instance1).toBe(instance2);
   expect(instance1.bar).toBe(instance2.bar);
 });
+
+test("@autoInjectable throws for array dependency", () => {
+  @injectable()
+  class Bar {}
+
+  @autoInjectable()
+  class Foo {
+    constructor(public bar?: Bar[]) {}
+  }
+
+  expect(() => new Foo()).toThrow();
+});
