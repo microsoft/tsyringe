@@ -11,7 +11,11 @@ export function isNormalToken(
 export function isTokenDescriptor(
   descriptor: any
 ): descriptor is TokenDescriptor {
-  return "token" in descriptor && "multiple" in descriptor;
+  return (
+    typeof descriptor === "object" &&
+    "token" in descriptor &&
+    "multiple" in descriptor
+  );
 }
 
 export interface TokenDescriptor {
