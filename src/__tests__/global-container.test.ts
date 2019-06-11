@@ -199,6 +199,12 @@ test("resolves anonymous classes separately", () => {
 
 // --- resolveAll() ---
 
+test("fails to resolveAll unregistered dependency by name", () => {
+  expect(() => {
+    globalContainer.resolveAll("NotRegistered");
+  }).toThrow();
+});
+
 test("resolves an array of transient instances bound to a single interface", () => {
   interface FooInterface {
     bar: string;
@@ -219,6 +225,19 @@ test("resolves an array of transient instances bound to a single interface", () 
   expect(Array.isArray(fooArray)).toBeTruthy();
   expect(fooArray[0]).toBeInstanceOf(FooOne);
   expect(fooArray[1]).toBeInstanceOf(FooTwo);
+});
+
+test("resolves all transient instances when not registered", () => {
+  class Foo {}
+
+  const foo1 = globalContainer.resolveAll<Foo>(Foo);
+  const foo2 = globalContainer.resolveAll<Foo>(Foo);
+
+  expect(Array.isArray(foo1)).toBeTruthy();
+  expect(Array.isArray(foo2)).toBeTruthy();
+  expect(foo1[0]).toBeInstanceOf(Foo);
+  expect(foo2[0]).toBeInstanceOf(Foo);
+  expect(foo1[0]).not.toBe(foo2[0]);
 });
 
 // --- isRegistered() ---

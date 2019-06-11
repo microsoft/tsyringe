@@ -155,34 +155,14 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      if (isValueProvider(registration.provider)) {
-        return registration.provider.useValue;
-      } else if (isTokenProvider(registration.provider)) {
-        return registration.options.singleton
-          ? registration.instance ||
-              (registration.instance = this.resolve(
-                registration.provider.useToken
-              ))
-          : this.resolve(registration.provider.useToken);
-      } else if (isClassProvider(registration.provider)) {
-        return registration.options.singleton
-          ? registration.instance ||
-              (registration.instance = this.construct(
-                registration.provider.useClass
-              ))
-          : this.construct(registration.provider.useClass);
-      } else if (isFactoryProvider(registration.provider)) {
-        return registration.provider.useFactory(this);
-      } else {
-        return this.construct(registration.provider);
-      }
+      return this.resolveRegistration(registration);
     }
 
     // No registration for this token, but since it's a constructor, return an instance
     return this.construct(<constructor<T>>token);
   }
 
-  private resolveToken<T>(registration: Registration): T {
+  private resolveRegistration<T>(registration: Registration): T {
     if (isValueProvider(registration.provider)) {
       return registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
@@ -214,7 +194,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return registration.map(item => this.resolveToken<T>(item));
+      return registration.map(item => this.resolveRegistration<T>(item));
     }
 
     // No registration for this token, but since it's a constructor, return an instance
