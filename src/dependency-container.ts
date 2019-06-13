@@ -73,19 +73,30 @@ class InternalDependencyContainer implements DependencyContainer {
     return this;
   }
 
+  private registerTokenOrClass<T>(
+    from: InjectionToken<T>,
+    to: InjectionToken<T>,
+    options: RegistrationOptions = {lifetime: Lifetime.TRANSIENT}
+  ): InternalDependencyContainer {
+    if (isNormalToken(to)) {
+      return this.register(from, {useToken: to}, options);
+    }
+
+    return this.register(from, {useClass: to}, options);
+  }
+
   public registerType<T>(
     from: InjectionToken<T>,
     to: InjectionToken<T>
   ): InternalDependencyContainer {
-    if (isNormalToken(to)) {
-      return this.register(from, {
-        useToken: to
-      });
-    }
+    return this.registerTokenOrClass(from, to);
+  }
 
-    return this.register(from, {
-      useClass: to
-    });
+  public registerScoped<T>(
+    from: InjectionToken<T>,
+    to: InjectionToken<T>
+  ): InternalDependencyContainer {
+    return this.registerTokenOrClass(from, to, {lifetime: Lifetime.SCOPED});
   }
 
   public registerInstance<T>(
@@ -113,17 +124,13 @@ class InternalDependencyContainer implements DependencyContainer {
       if (isNormalToken(to)) {
         return this.register(
           from,
-          {
-            useToken: to
-          },
+          {useToken: to},
           {lifetime: Lifetime.SINGLETON}
         );
       } else if (to) {
         return this.register(
           from,
-          {
-            useClass: to
-          },
+          {useClass: to},
           {lifetime: Lifetime.SINGLETON}
         );
       }
@@ -136,13 +143,7 @@ class InternalDependencyContainer implements DependencyContainer {
       useClass = to;
     }
 
-    return this.register(
-      from,
-      {
-        useClass
-      },
-      {lifetime: Lifetime.SINGLETON}
-    );
+    return this.register(from, {useClass}, {lifetime: Lifetime.SINGLETON});
   }
 
   /**

@@ -38,6 +38,10 @@ export default interface DependencyContainer {
     token: InjectionToken<T>,
     instance: T
   ): DependencyContainer;
+  registerScoped<T>(
+    from: InjectionToken<T>,
+    to: InjectionToken<T>
+  ): DependencyContainer;
   resolve<T>(token: InjectionToken<T>): T;
   resolveAll<T>(token: InjectionToken<T>): T[];
   isRegistered<T>(token: InjectionToken<T>): boolean;

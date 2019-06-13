@@ -2,6 +2,7 @@
 
 import {instance as globalContainer} from "../dependency-container";
 import {Lifetime} from "../types";
+import scoped from "../decorators/scoped";
 
 beforeEach(() => {
   globalContainer.reset();
@@ -10,7 +11,7 @@ beforeEach(() => {
 test("creates a new instance of requested service within a scope using class provider", () => {
   class Foo {}
 
-  globalContainer.register(Foo, {useClass: Foo}, {lifetime: Lifetime.SCOPED});
+  globalContainer.registerScoped(Foo, Foo);
 
   const foo1 = globalContainer.resolve(Foo);
 
@@ -34,11 +35,11 @@ test("creates a new instance of requested service within a scope using token pro
     void: string = "";
   }
 
-  globalContainer.register("IBar", {useClass: Foo});
+  globalContainer.registerScoped("IBar", Foo);
   globalContainer.register(
     Foo,
     {useToken: "IBar"},
-    {lifetime: Lifetime.SCOPED}
+    {lifetime: Lifetime.TRANSIENT}
   );
 
   const foo1 = globalContainer.resolve(Foo);
@@ -69,4 +70,40 @@ test("should not create a new instance of requested singleton service", () => {
 
   expect(bar2).toBeInstanceOf(Bar);
   expect(bar1 === bar2).toBeTruthy();
+});
+
+test("@scoped decorator registers class as scoped", () => {
+  @scoped()
+  class Foo {}
+
+  const foo1 = globalContainer.resolve(Foo);
+
+  expect(foo1).toBeInstanceOf(Foo);
+
+  const scope = globalContainer.createScope();
+  const foo2 = scope.resolve(Foo);
+  const foo3 = scope.resolve(Foo);
+
+  expect(foo2).toBeInstanceOf(Foo);
+  expect(foo3).toBeInstanceOf(Foo);
+  expect(foo1 === foo2).toBeFalsy();
+  expect(foo2 === foo3).toBeTruthy();
+});
+
+test("@scoped decorator registers class as scoped using custom token", () => {
+  @scoped("Foo")
+  class Foo {}
+
+  const foo1 = globalContainer.resolve("Foo");
+
+  expect(foo1).toBeInstanceOf(Foo);
+
+  const scope = globalContainer.createScope();
+  const foo2 = scope.resolve("Foo");
+  const foo3 = scope.resolve("Foo");
+
+  expect(foo2).toBeInstanceOf(Foo);
+  expect(foo3).toBeInstanceOf(Foo);
+  expect(foo1 === foo2).toBeFalsy();
+  expect(foo2 === foo3).toBeTruthy();
 });
