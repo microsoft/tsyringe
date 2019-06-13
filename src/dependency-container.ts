@@ -248,7 +248,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     const registered = this.parent && this.parent.getRegistration(token);
     if (registered && registered.options.lifetime === Lifetime.SCOPED) {
-      const reset = {...registered, instance: undefined};
+      const reset = this.resetInstance(registered);
       this._registry.set(token, reset);
       return reset;
     }
