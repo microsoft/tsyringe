@@ -12,7 +12,7 @@ import InjectionToken, {isTokenDescriptor} from "./providers/injection-token";
 import TokenProvider from "./providers/token-provider";
 import ValueProvider from "./providers/value-provider";
 import ClassProvider from "./providers/class-provider";
-import RegistrationOptions from "./types/registration-options";
+import RegistrationOptions, {Lifetime} from "./types/registration-options";
 import constructor from "./types/constructor";
 import Registry from "./registry";
 
@@ -26,9 +26,12 @@ export const typeInfo = new Map<constructor<any>, any[]>();
 
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
-  private _registry = new Registry();
+  protected _registry = new Registry();
 
-  public constructor(private parent?: InternalDependencyContainer) {}
+  public constructor(
+    protected parent?: InternalDependencyContainer,
+    protected scoped: boolean = false
+  ) {}
 
   /**
    * Register a dependency provider.
@@ -56,11 +59,12 @@ class InternalDependencyContainer implements DependencyContainer {
   public register<T>(
     token: InjectionToken<T>,
     provider: Provider<T>,
-    options: RegistrationOptions = {singleton: false}
+    options: RegistrationOptions = {lifetime: Lifetime.TRANSIENT}
   ): InternalDependencyContainer {
-    if (options.singleton) {
+    const lifetime = options.lifetime;
+    if (lifetime === Lifetime.SINGLETON || lifetime === Lifetime.SCOPED) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
-        throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders";
+        throw `Cannot use lifetime "${lifetime}" with ValueProviders or FactoryProviders`;
       }
     }
 
@@ -112,7 +116,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useToken: to
           },
-          {singleton: true}
+          {lifetime: Lifetime.SINGLETON}
         );
       } else if (to) {
         return this.register(
@@ -120,7 +124,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useClass: to
           },
-          {singleton: true}
+          {lifetime: Lifetime.SINGLETON}
         );
       }
 
@@ -137,7 +141,7 @@ class InternalDependencyContainer implements DependencyContainer {
       {
         useClass
       },
-      {singleton: true}
+      {lifetime: Lifetime.SINGLETON}
     );
   }
 
@@ -163,17 +167,28 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   private resolveRegistration<T>(registration: Registration): T {
+    // backwards compatibility
+    if (registration.options.singleton) {
+      registration.options.lifetime = Lifetime.SINGLETON;
+    }
+
+    const inScope =
+      registration.options.lifetime === Lifetime.SCOPED && this.scoped;
+
+    const returnInstance =
+      registration.options.lifetime === Lifetime.SINGLETON || inScope;
+
     if (isValueProvider(registration.provider)) {
       return registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
-      return registration.options.singleton
+      return returnInstance
         ? registration.instance ||
             (registration.instance = this.resolve(
               registration.provider.useToken
             ))
         : this.resolve(registration.provider.useToken);
     } else if (isClassProvider(registration.provider)) {
-      return registration.options.singleton
+      return returnInstance
         ? registration.instance ||
             (registration.instance = this.construct(
               registration.provider.useClass
@@ -221,16 +236,23 @@ class InternalDependencyContainer implements DependencyContainer {
     return new InternalDependencyContainer(this);
   }
 
+  public createScope(): DependencyContainer {
+    return new InternalDependencyContainer(this, true);
+  }
+
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
     if (this.isRegistered(token)) {
       return this._registry.get(token)!;
     }
 
-    if (this.parent) {
-      return this.parent.getRegistration(token);
+    const registered = this.parent && this.parent.getRegistration(token);
+    if (registered && registered.options.lifetime === Lifetime.SCOPED) {
+      const reset = {...registered, instance: undefined};
+      this._registry.set(token, reset);
+      return reset;
     }
 
-    return null;
+    return registered || null;
   }
 
   private getAllRegistrations<T>(
@@ -240,11 +262,22 @@ class InternalDependencyContainer implements DependencyContainer {
       return this._registry.getAll(token);
     }
 
-    if (this.parent) {
-      return this.parent.getAllRegistrations(token);
+    const registered = this.parent && this.parent.getAllRegistrations(token);
+    if (registered) {
+      const reset = registered.map(item =>
+        item.options.lifetime === Lifetime.SCOPED
+          ? this.resetInstance(item)
+          : item
+      );
+      this._registry.setAll(token, reset);
+      return reset;
     }
 
     return null;
+  }
+
+  private resetInstance(registered: Registration<any>): Registration<any> {
+    return {...registered, instance: undefined};
   }
 
   private construct<T>(ctor: constructor<T>): T {

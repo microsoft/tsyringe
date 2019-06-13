@@ -20,6 +20,10 @@ export default class Registry {
     this._registryMap.get(key)!.push(value);
   }
 
+  public setAll(key: InjectionToken<any>, value: Registration[]): void {
+    this._registryMap.set(key, value);
+  }
+
   public has(key: InjectionToken<any>): boolean {
     this.ensure(key);
     return this._registryMap.get(key)!.length > 0;

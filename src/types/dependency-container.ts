@@ -43,4 +43,5 @@ export default interface DependencyContainer {
   isRegistered<T>(token: InjectionToken<T>): boolean;
   reset(): void;
   createChildContainer(): DependencyContainer;
+  createScope(): DependencyContainer;
 }
