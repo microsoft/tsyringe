@@ -50,6 +50,21 @@ test("get returns null when there is no registration", () => {
   expect(registry.get("FooBar")).toBeNull();
 });
 
+test("setAll replaces everything with new value", () => {
+  const registration: Registration = {
+    options: {singleton: false},
+    provider: {useValue: "provider"}
+  };
+
+  expect(registry.has("Foo")).toBeFalsy();
+
+  registry.set("Foo", registration);
+  const fooArray = registry.getAll("Foo");
+  registry.setAll("Foo", [registration]);
+
+  expect(fooArray === registry.getAll("Foo")).toBeFalsy();
+});
+
 test("clear removes all registrations", () => {
   const registration: Registration = {
     options: {singleton: false},

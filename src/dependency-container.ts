@@ -276,7 +276,7 @@ class InternalDependencyContainer implements DependencyContainer {
       return reset;
     }
 
-    return null;
+    return registered || null;
   }
 
   private resetInstance(registered: Registration<any>): Registration<any> {
