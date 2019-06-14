@@ -128,3 +128,38 @@ test("@scoped decorator registers class as scoped using custom token", () => {
   expect(foo1 === foo2).toBeFalsy();
   expect(foo2 === foo3).toBeTruthy();
 });
+
+test("resolve all resolves scoped dependencies properly", () => {
+  interface Foo {
+    test: string;
+  }
+
+  class FooBar implements Foo {
+    test: string = "bar";
+  }
+
+  class FooQux implements Foo {
+    test: string = "qux";
+  }
+
+  globalContainer.registerSingleton<Foo>("Foo", FooBar);
+  globalContainer.registerScoped<Foo>("Foo", FooQux);
+  const foo1 = globalContainer.resolveAll<Foo>("Foo");
+  const foo2 = globalContainer.resolveAll<Foo>("Foo");
+
+  expect(foo1[0] === foo2[0]).toBeTruthy();
+  expect(foo1[1] === foo2[1]).toBeFalsy();
+
+  const scope = globalContainer.createScope();
+  const foo3 = scope.resolveAll<Foo>("Foo");
+  const foo4 = scope.resolveAll<Foo>("Foo");
+
+  expect(foo3[0] === foo4[0]).toBeTruthy();
+  expect(foo3[1] === foo4[1]).toBeTruthy();
+
+  expect(foo3[0] === foo1[0]).toBeTruthy();
+  expect(foo4[0] === foo2[0]).toBeTruthy();
+
+  expect(foo3[1] === foo1[1]).toBeFalsy();
+  expect(foo4[1] === foo2[1]).toBeFalsy();
+});
