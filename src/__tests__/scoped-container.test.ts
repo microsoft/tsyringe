@@ -81,7 +81,7 @@ test("allows multiple scope levels", () => {
   const scope1 = globalContainer.createScope();
   const bar1 = scope1.resolve(Bar);
 
-  const scope2 = globalContainer.createScope();
+  const scope2 = scope1.createScope();
   const bar2 = scope2.resolve(Bar);
 
   expect(bar === bar1).toBeFalsy();

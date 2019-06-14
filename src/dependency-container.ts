@@ -27,11 +27,12 @@ export const typeInfo = new Map<constructor<any>, any[]>();
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
   protected _registry = new Registry();
+  /**
+   * Wether this container is within a scope
+   */
+  public readonly scoped: boolean = false;
 
-  public constructor(
-    protected parent?: InternalDependencyContainer,
-    protected scoped: boolean = false
-  ) {}
+  public constructor(protected parent?: InternalDependencyContainer) {}
 
   /**
    * Register a dependency provider.
@@ -238,7 +239,8 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   public createScope(): DependencyContainer {
-    return new InternalDependencyContainer(this, true);
+    // eslint-disable-next-line @typescript-eslint/no-use-before-define
+    return new ScopedInternalDependencyContainer(this);
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
@@ -303,6 +305,14 @@ class InternalDependencyContainer implements DependencyContainer {
 
     return new ctor(...params);
   }
+}
+
+/** scoped dependency container */
+class ScopedInternalDependencyContainer extends InternalDependencyContainer {
+  /**
+   * @inheritdoc
+   */
+  public readonly scoped: boolean = true;
 }
 
 export const instance: DependencyContainer = new InternalDependencyContainer();
