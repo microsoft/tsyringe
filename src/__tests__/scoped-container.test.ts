@@ -72,6 +72,27 @@ test("should not create a new instance of requested singleton service", () => {
   expect(bar1 === bar2).toBeTruthy();
 });
 
+test("allows multiple scope levels", () => {
+  class Bar {}
+
+  globalContainer.registerScoped(Bar, Bar);
+  const bar = globalContainer.resolve(Bar);
+
+  const scope1 = globalContainer.createScope();
+  const bar1 = scope1.resolve(Bar);
+
+  const scope2 = globalContainer.createScope();
+  const bar2 = scope2.resolve(Bar);
+
+  expect(bar === bar1).toBeFalsy();
+  expect(bar === bar2).toBeFalsy();
+  expect(bar1 === bar2).toBeFalsy();
+
+  expect(bar === globalContainer.resolve(Bar)).toBeFalsy();
+  expect(bar1 === scope1.resolve(Bar)).toBeTruthy();
+  expect(bar2 === scope2.resolve(Bar)).toBeTruthy();
+});
+
 test("@scoped decorator registers class as scoped", () => {
   @scoped()
   class Foo {}
