@@ -223,8 +223,16 @@ class InternalDependencyContainer implements DependencyContainer {
    *
    * @return {boolean}
    */
-  public isRegistered<T>(token: InjectionToken<T>): boolean {
-    return this._registry.has(token);
+  public isRegistered<T>(
+    token: InjectionToken<T>,
+    recursive: boolean = false
+  ): boolean {
+    return (
+      this._registry.has(token) ||
+      (recursive &&
+        (this.parent || false) &&
+        this.parent.isRegistered(token, true))
+    );
   }
 
   /**

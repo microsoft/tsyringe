@@ -57,3 +57,14 @@ test("child container resolves all using parent's registration when child contai
   expect(myFoo.length).toBe(1);
   expect(myFoo[0] instanceof Foo).toBeTruthy();
 });
+
+test("isRegistered check parent containers recursively", () => {
+  class A {}
+
+  globalContainer.registerType(A, A);
+  const child = globalContainer.createChildContainer();
+
+  expect(globalContainer.isRegistered(A)).toBeTruthy();
+  expect(child.isRegistered(A)).toBeFalsy();
+  expect(child.isRegistered(A, true)).toBeTruthy();
+});

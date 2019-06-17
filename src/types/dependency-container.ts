@@ -44,7 +44,7 @@ export default interface DependencyContainer {
   ): DependencyContainer;
   resolve<T>(token: InjectionToken<T>): T;
   resolveAll<T>(token: InjectionToken<T>): T[];
-  isRegistered<T>(token: InjectionToken<T>): boolean;
+  isRegistered<T>(token: InjectionToken<T>, recursive?: boolean): boolean;
   reset(): void;
   createChildContainer(): DependencyContainer;
   createScope(): DependencyContainer;
