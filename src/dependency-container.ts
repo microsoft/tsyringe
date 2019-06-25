@@ -187,7 +187,7 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   public resolveAll<T>(token: InjectionToken<T>): T[] {
-    const registration = this.getAllRegistration(token);
+    const registration = this.getAllRegistrations(token);
 
     if (!registration && isNormalToken(token)) {
       throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
@@ -233,7 +233,7 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private getAllRegistration<T>(
+  private getAllRegistrations<T>(
     token: InjectionToken<T>
   ): Registration[] | null {
     if (this.isRegistered(token)) {
@@ -241,7 +241,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (this.parent) {
-      return this.parent.getAllRegistration(token);
+      return this.parent.getAllRegistrations(token);
     }
 
     return null;
