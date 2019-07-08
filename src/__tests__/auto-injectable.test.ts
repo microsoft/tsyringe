@@ -1,5 +1,6 @@
 import {autoInjectable, injectable, singleton} from "../decorators";
 import {instance as globalContainer} from "../dependency-container";
+import injectAll from "../decorators/inject-all";
 
 afterEach(() => {
   globalContainer.reset();
@@ -140,4 +141,41 @@ test("@autoInjectable works with @singleton", () => {
 
   expect(instance1).toBe(instance2);
   expect(instance1.bar).toBe(instance2.bar);
+});
+
+test("@autoInjectable resolves multiple registered dependencies", () => {
+  interface Bar {
+    str: string;
+  }
+
+  @injectable()
+  class FooBar implements Bar {
+    str: string = "";
+  }
+
+  globalContainer.register<Bar>("Bar", {useClass: FooBar});
+
+  @autoInjectable()
+  class Foo {
+    constructor(@injectAll("Bar") public bar?: Bar[]) {}
+  }
+
+  const foo = new Foo();
+  expect(Array.isArray(foo.bar)).toBeTruthy();
+  expect(foo.bar!.length).toBe(1);
+  expect(foo.bar![0]).toBeInstanceOf(FooBar);
+});
+
+test("@autoInjectable resolves multiple transient dependencies", () => {
+  class Foo {}
+
+  @autoInjectable()
+  class Bar {
+    constructor(@injectAll(Foo) public foo?: Foo[]) {}
+  }
+
+  const bar = new Bar();
+  expect(Array.isArray(bar.foo)).toBeTruthy();
+  expect(bar.foo!.length).toBe(1);
+  expect(bar.foo![0]).toBeInstanceOf(Foo);
 });

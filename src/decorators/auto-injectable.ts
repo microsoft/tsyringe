@@ -1,6 +1,7 @@
 import constructor from "../types/constructor";
 import {getParamInfo} from "../reflection-helpers";
 import {instance as globalContainer} from "../dependency-container";
+import {isTokenDescriptor} from "../providers/injection-token";
 
 /**
  * Class decorator factory that replaces the decorated class' constructor with
@@ -20,6 +21,11 @@ function autoInjectable(): (target: constructor<any>) => any {
           ...args.concat(
             paramInfo.slice(args.length).map((type, index) => {
               try {
+                if (isTokenDescriptor(type)) {
+                  return type.multiple
+                    ? globalContainer.resolveAll(type.token)
+                    : globalContainer.resolve(type.token);
+                }
                 return globalContainer.resolve(type);
               } catch (e) {
                 const argIndex = index + args.length;

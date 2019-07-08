@@ -39,6 +39,7 @@ export default interface DependencyContainer {
     instance: T
   ): DependencyContainer;
   resolve<T>(token: InjectionToken<T>): T;
+  resolveAll<T>(token: InjectionToken<T>): T[];
   isRegistered<T>(token: InjectionToken<T>): boolean;
   reset(): void;
   createChildContainer(): DependencyContainer;

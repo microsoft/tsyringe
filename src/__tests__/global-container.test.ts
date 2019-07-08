@@ -4,6 +4,7 @@ import {inject, injectable, registry, singleton} from "../decorators";
 import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {DependencyContainer} from "../types";
 import {instance as globalContainer} from "../dependency-container";
+import injectAll from "../decorators/inject-all";
 
 interface IBar {
   value: string;
@@ -38,6 +39,33 @@ test("fails to resolve unregistered dependency by name", () => {
   expect(() => {
     globalContainer.resolve("NotRegistered");
   }).toThrow();
+});
+
+test("allows arrays to be registered by value provider", () => {
+  class Bar {}
+
+  const value = [new Bar()];
+  globalContainer.register<Bar[]>("BarArray", {useValue: value});
+
+  const barArray = globalContainer.resolve<Bar[]>("BarArray");
+  expect(Array.isArray(barArray)).toBeTruthy();
+  expect(value === barArray).toBeTruthy();
+});
+
+test("allows arrays to be registered by factory provider", () => {
+  class Bar {}
+
+  globalContainer.register<Bar>(Bar, {useClass: Bar});
+  globalContainer.register<Bar[]>("BarArray", {
+    useFactory: (container): Bar[] => {
+      return [container.resolve(Bar)];
+    }
+  });
+
+  const barArray = globalContainer.resolve<Bar[]>("BarArray");
+  expect(Array.isArray(barArray)).toBeTruthy();
+  expect(barArray.length).toBe(1);
+  expect(barArray[0]).toBeInstanceOf(Bar);
 });
 
 test("resolves transient instances when not registered", () => {
@@ -167,6 +195,49 @@ test("resolves anonymous classes separately", () => {
 
   expect(globalContainer.resolve(ctor1) instanceof ctor1).toBeTruthy();
   expect(globalContainer.resolve(ctor2) instanceof ctor2).toBeTruthy();
+});
+
+// --- resolveAll() ---
+
+test("fails to resolveAll unregistered dependency by name", () => {
+  expect(() => {
+    globalContainer.resolveAll("NotRegistered");
+  }).toThrow();
+});
+
+test("resolves an array of transient instances bound to a single interface", () => {
+  interface FooInterface {
+    bar: string;
+  }
+
+  class FooOne implements FooInterface {
+    public bar: string = "foo1";
+  }
+
+  class FooTwo implements FooInterface {
+    public bar: string = "foo2";
+  }
+
+  globalContainer.register<FooInterface>("FooInterface", {useClass: FooOne});
+  globalContainer.register<FooInterface>("FooInterface", {useClass: FooTwo});
+
+  const fooArray = globalContainer.resolveAll<FooInterface>("FooInterface");
+  expect(Array.isArray(fooArray)).toBeTruthy();
+  expect(fooArray[0]).toBeInstanceOf(FooOne);
+  expect(fooArray[1]).toBeInstanceOf(FooTwo);
+});
+
+test("resolves all transient instances when not registered", () => {
+  class Foo {}
+
+  const foo1 = globalContainer.resolveAll<Foo>(Foo);
+  const foo2 = globalContainer.resolveAll<Foo>(Foo);
+
+  expect(Array.isArray(foo1)).toBeTruthy();
+  expect(Array.isArray(foo2)).toBeTruthy();
+  expect(foo1[0]).toBeInstanceOf(Foo);
+  expect(foo2[0]).toBeInstanceOf(Foo);
+  expect(foo1[0]).not.toBe(foo2[0]);
 });
 
 // --- isRegistered() ---
@@ -526,6 +597,53 @@ test("allows interfaces to be resolved from the constructor with just a name", (
   const myFoo = globalContainer.resolve(FooWithInterface);
 
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
+});
+
+test("allows explicit array dependencies to be resolved by inject decorator", () => {
+  @injectable()
+  class Foo {}
+
+  @injectable()
+  class Bar {
+    constructor(@inject("FooArray") public foo: Foo[]) {}
+  }
+
+  const fooArray = [new Foo()];
+  globalContainer.register<Foo[]>("FooArray", {useValue: fooArray});
+  globalContainer.register<Bar>(Bar, {useClass: Bar});
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(bar.foo === fooArray).toBeTruthy();
+});
+
+// --- @injectAll ---
+
+test("injects all dependencies bound to a given interface", () => {
+  interface Foo {
+    str: string;
+  }
+
+  class FooImpl1 implements Foo {
+    public str: string = "foo1";
+  }
+
+  class FooImpl2 implements Foo {
+    public str: string = "foo2";
+  }
+
+  @injectable()
+  class Bar {
+    constructor(@injectAll("Foo") public foo: Foo[]) {}
+  }
+
+  globalContainer.register<Foo>("Foo", {useClass: FooImpl1});
+  globalContainer.register<Foo>("Foo", {useClass: FooImpl2});
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(Array.isArray(bar.foo)).toBeTruthy();
+  expect(bar.foo.length).toBe(2);
+  expect(bar.foo[0]).toBeInstanceOf(FooImpl1);
+  expect(bar.foo[1]).toBeInstanceOf(FooImpl2);
 });
 
 // --- factories ---
