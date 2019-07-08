@@ -48,7 +48,7 @@
     "@typescript-eslint/eslint-plugin": "^1.6.0",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.1.0",
-    "husky": "^1.2.0",
+    "husky": "^3.0.0",
     "jest": "^24.7.1",
     "prettier": "1.17.0",
     "reflect-metadata": "^0.1.12",
