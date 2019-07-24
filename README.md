@@ -342,6 +342,15 @@ You can also resolve all instances registered against a given token with `resolv
 ```typescript
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
 ```
+### Child Containers
+If you need to have multiple containers that have disparate sets of registrations, you can create child containers
+
+```typescript
+const childContainer1 = container.createChildContainer();
+const childContainer2 = container.createChildContainer();
+const grandChildContainer = childContainer1.createChildContainer();
+```
+Each of the child containers will have independent registrations, but if a registration is absent in the child container at resolution, the token will be resolved from the parent. This allows for a set of common services to be registered at the root, with specialized services registered on the child. This can be useful, for example, if you wish to create per-request containers that use common stateless services from the root container.
 
 # Full examples
 
