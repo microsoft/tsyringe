@@ -7,14 +7,20 @@
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
-- [Installation](#installation)
+<!-- TOC depthFrom:1 depthTo:2 -->
+
+- [TSyringe](#tsyringe)
+  - [Installation](#installation)
 - [API](#api)
-  - [injectable()](#injectable)
-  - [singleton()](#singleton)
-  - [autoInjectable()](#autoinjectable)
-  - [inject()](#inject)
-- [Full Examples](#full-examples)
+  - [Decorators](#decorators)
+  - [Container](#container)
+  - [Manual resolution](#manual-resolution)
+- [Full examples](#full-examples)
+  - [Example without interfaces](#example-without-interfaces)
+  - [Example with interfaces](#example-with-interfaces)
 - [Contributing](#contributing)
+
+<!-- /TOC -->
 
 ## Installation
 
@@ -56,12 +62,18 @@ import "reflect-metadata";
 // Your code here...
 ```
 
-## API
+# API
+
+TSyringe performs [Constructor Injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection)
+on the constructors of decorated classes.
+
+## Decorators
 
 ### injectable()
 
 Class decorator factory that allows the class' dependencies to be injected at
-runtime.
+runtime. TSyringe relies on several decorators in order to collect metadata about classes
+to be instantiated.
 
 #### Usage
 
@@ -109,7 +121,7 @@ const instance = container.resolve(Foo);
 Class decorator factory that replaces the decorated class' constructor with
 a parameterless constructor that has dependencies auto-resolved.
 
-**Note** Resolution is performed using the global container
+**Note** Resolution is performed using the global container.
 
 #### Usage
 
@@ -128,12 +140,12 @@ const instance = new Foo();
 ```
 
 Notice how in order to allow the use of the empty constructor `new Foo()`, we
-need to make the parameters optional, e.g. `database?: Database`
+need to make the parameters optional, e.g. `database?: Database`.
 
 ### inject()
 
 Parameter decorator factory that allows for interface and other non-class
-information to be stored in the constructor's metadata
+information to be stored in the constructor's metadata.
 
 #### Usage
 
@@ -150,9 +162,190 @@ class Foo {
 }
 ```
 
-## Full examples
+### injectAll()
 
-### Example without interfaces
+Parameter decorator for array parameters where the array contents will come from the container.
+It will inject an array using the specified injection token to resolve the values.
+
+#### Usage
+
+```typescript
+import {injectable, injectAll} from "tsyringe";
+
+@injectable
+class Foo {}
+
+@injectable
+class Bar {
+  constructor(@injectAll(Foo) fooArray: Foo[]) {
+    // ...
+  }
+}
+```
+
+## Container
+
+The general principle behind [Inversion of Control](https://en.wikipedia.org/wiki/Inversion_of_control) (IoC) containers
+is you give the container a _token_, and in exchange you get an instance/value. Our container automatically figures out the tokens most of the time, with 2 major exceptions, interfaces and non-class types, which require the `@inject()` decorator to be used on the constructor parameter to be injected (see above).
+
+In order for your decorated classes to be used, they need to be registered with the container. Registrations take the
+form of a Token/Provider pair, so we need to take a brief diversion to discuss tokens and providers.
+
+### Injection Token
+
+A token may be either a string, a symbol, or a class constructor.
+
+```typescript
+type InjectionToken<T = any> = constructor<T> | string | symbol;
+```
+
+### Providers
+
+Our container has the notion of a _provider_. A provider is registered with the DI
+container and provides the container the information
+needed to resolve an instance for a given token. In our implementation, we have the following 4
+provider types:
+
+#### Class Provider
+
+```TypeScript
+{
+  token: InjectionToken<T>;
+  useClass: constructor<T>;
+}
+```
+
+This provider is used to resolve classes by their constructor. When registering a class provider
+you can simply use the constructor itself, unless of course you're making an alias (a
+class provider where the token isn't the class itself).
+
+#### Value Provider
+
+```TypeScript
+{
+  token: InjectionToken<T>;
+  useValue: T
+}
+```
+
+This provider is used to resolve a token to a given value. This is useful for registering
+constants, or things that have a already been instantiated in a particular way.
+
+#### Factory provider
+
+```TypeScript
+{
+  token: InjectionToken<T>;
+  useFactory: FactoryFunction<T>;
+}
+```
+
+This provider is used to resolve a token using a given factory. The factory has full access
+to the dependency container.
+
+We have provided 2 factories for you to use, though any function that matches the `FactoryFunction<T>` signature
+can be used as a factory:
+```typescript
+type FactoryFunction<T> = (dependencyContainer: DependencyContainer) => T;
+```
+
+##### instanceCachingFactory
+
+This factory is used to lazy construct an object and cache result, returning the single instance for each subsequent
+resolution. This is very similar to `@singleton()`
+
+```typescript
+import {instanceCachingFactory} from "tsyringe";
+
+{
+  token: "SingletonFoo";
+  useFactory: instanceCachingFactory<Foo>(c => c.resolve(Foo))
+}
+```
+
+##### predicateAwareClassFactory
+
+This factory is used to provide conditional behavior upon resolution. It caches the result by default, but 
+has an optional parameter to resolve fresh each time.
+
+```typescript
+import {predicateAwareClassFactory} from "tsyringe";
+
+{
+  token: 
+  useFactory: predicateAwareClassFactory<Foo>(
+    c => c.resolve(Bar).useHttps,
+    FooHttps, // A FooHttps will be resolved from the container
+    FooHttp
+  )
+}
+```
+#### Token Provider
+
+```TypeScript
+{
+  token: InjectionToken<T>;
+  useToken: InjectionToken<T>;
+}
+```
+
+This provider can be thought of as a redirect or an alias, it simply states that given token _x_,
+resolve using token _y_.
+
+### Register
+
+The normal way to achieve this is to add `DependencyContainer.register()` statements somewhere
+in your program some time before your first decorated class is instantiated.
+
+```typescript
+container.register<Foo>(Foo, {useClass: Foo});
+container.register<Bar>(Bar, {useValue: new Bar()});
+container.register<Baz>("MyBaz", {useValue: new Baz()});
+```
+
+### Registry
+
+You can also mark up any class with the `@registry()` decorator to have the given providers registered
+upon first use of the marked up class. `@registry()` takes an array of providers like so:
+
+```TypeScript
+@injectable()
+@registry([
+  Foo,
+  Bar,
+  {
+    token: "IFoobar",
+    useClass: MockFoobar
+  }
+])
+class MyClass {}
+```
+
+This is useful when you don't control the entry point for your code (e.g. being instantiated by a framework), and need
+an opportunity to do registration. Otherwise, it's preferable to use `.register()`. **Note** the `@injectable()` decorator
+must precede the `@registry()` decorator, since TypeScript executes decorators inside out.
+
+### Resolution
+
+Resolution is the process of exchanging a token for an instance. Our container will recursively fulfill the
+dependencies of the token being resolved in order to return a fully constructed object.
+
+The typical way that an object is resolved is from the container using `resolve()`.
+
+```typescript
+const myFoo = container.resolve(Foo);
+const myBar = container.resolve<Bar>("Bar");
+```
+
+You can also resolve all instances registered against a given token with `resolveAll()`.
+
+```typescript
+const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
+```
+
+# Full examples
+
+## Example without interfaces
 
 Since classes have type information at runtime, we can resolve them without any
 extra information.
@@ -183,7 +376,7 @@ const myBar = container.resolve(Bar);
 // myBar.myFoo => An instance of Foo
 ```
 
-### Example with interfaces
+## Example with interfaces
 
 Interfaces don't have type information at runtime, so we need to decorate them
 with `@inject(...)` so the container knows how to resolve them.
@@ -228,7 +421,7 @@ const client = container.resolve(Client);
 // client's dependencies will have been resolved
 ```
 
-## Contributing
+# Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a
 Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
