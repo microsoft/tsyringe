@@ -306,7 +306,7 @@ container.register<Baz>("MyBaz", {useValue: new Baz()});
 ### Registry
 
 You can also mark up any class with the `@registry()` decorator to have the given providers registered
-upon first use of the marked up class. `@registry()` takes an array of providers like so:
+upon importing the marked up class. `@registry()` takes an array of providers like so:
 
 ```TypeScript
 @injectable()
