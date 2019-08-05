@@ -338,7 +338,7 @@ test("@injectable resolves when using DI", () => {
   expect(myFoo.myBar.value).toBe("");
 });
 
-test("@injectable resolves nested depenencies when using DI", () => {
+test("@injectable resolves nested dependencies when using DI", () => {
   @injectable()
   class Bar implements IBar {
     public value: string = "";
@@ -644,6 +644,21 @@ test("injects all dependencies bound to a given interface", () => {
   expect(bar.foo.length).toBe(2);
   expect(bar.foo[0]).toBeInstanceOf(FooImpl1);
   expect(bar.foo[1]).toBeInstanceOf(FooImpl2);
+});
+
+test("allows array dependencies to be resolved if a single instance is in the container", () => {
+  @injectable()
+  class Foo {}
+
+  @injectable()
+  class Bar {
+    constructor(@injectAll(Foo) public foo: Foo[]) {}
+  }
+  globalContainer.register<Foo>(Foo, {useClass: Foo});
+  globalContainer.register<Bar>(Bar, {useClass: Bar});
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(bar.foo.length).toBe(1);
 });
 
 // --- factories ---
