@@ -1,5 +1,6 @@
 import DependencyContainer from "../types/dependency-container";
 import Provider from "./provider";
+import {constructor} from "../types";
 
 /**
  * Provide a dependency using a factory.
@@ -7,7 +8,10 @@ import Provider from "./provider";
  * you need instance caching, your factory method must implement it.
  */
 export default interface FactoryProvider<T> {
-  useFactory: (dependencyContainer: DependencyContainer) => T;
+  useFactory: (
+    dependencyContainer: DependencyContainer,
+    target?: constructor<T>
+  ) => T;
 }
 
 export function isFactoryProvider<T>(
