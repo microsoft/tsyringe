@@ -15,6 +15,7 @@ import ClassProvider from "./providers/class-provider";
 import RegistrationOptions from "./types/registration-options";
 import constructor from "./types/constructor";
 import Registry from "./registry";
+import Lifecycle from './types/lifecycle';
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -56,11 +57,11 @@ class InternalDependencyContainer implements DependencyContainer {
   public register<T>(
     token: InjectionToken<T>,
     provider: Provider<T>,
-    options: RegistrationOptions = {singleton: false}
+    options: RegistrationOptions = {lifecycle: Lifecycle.Transient}
   ): InternalDependencyContainer {
-    if (options.singleton) {
+    if (options.lifecycle === Lifecycle.Singleton) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
-        throw "Cannot use {singleton: true} with ValueProviders or FactoryProviders";
+        throw "Cannot use singleton lifecycle with ValueProviders or FactoryProviders";
       }
     }
 
@@ -112,7 +113,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useToken: to
           },
-          {singleton: true}
+          {lifecycle: Lifecycle.Singleton}
         );
       } else if (to) {
         return this.register(
@@ -120,7 +121,7 @@ class InternalDependencyContainer implements DependencyContainer {
           {
             useClass: to
           },
-          {singleton: true}
+          {lifecycle: Lifecycle.Singleton}
         );
       }
 
@@ -137,7 +138,7 @@ class InternalDependencyContainer implements DependencyContainer {
       {
         useClass
       },
-      {singleton: true}
+      {lifecycle: Lifecycle.Singleton}
     );
   }
 
@@ -166,14 +167,14 @@ class InternalDependencyContainer implements DependencyContainer {
     if (isValueProvider(registration.provider)) {
       return registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
-      return registration.options.singleton
+      return registration.options.lifecycle === Lifecycle.Singleton
         ? registration.instance ||
             (registration.instance = this.resolve(
               registration.provider.useToken
             ))
         : this.resolve(registration.provider.useToken);
     } else if (isClassProvider(registration.provider)) {
-      return registration.options.singleton
+      return registration.options.lifecycle === Lifecycle.Singleton
         ? registration.instance ||
             (registration.instance = this.construct(
               registration.provider.useClass

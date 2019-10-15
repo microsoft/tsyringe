@@ -1,5 +1,7 @@
+import Lifecycle from "./lifecycle";
+
 type RegistrationOptions = {
-  singleton: boolean;
+  lifecycle: Lifecycle;
 };
 
 export default RegistrationOptions;

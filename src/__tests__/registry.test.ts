@@ -1,5 +1,6 @@
 import Registry from "../registry";
 import {Registration} from "../dependency-container";
+import Lifecycle from '../types/lifecycle';
 
 let registry: Registry;
 beforeEach(() => {
@@ -8,11 +9,11 @@ beforeEach(() => {
 
 test("getAll returns all registrations of a given key", () => {
   const registration1: Registration = {
-    options: {singleton: false},
+    options: {lifecycle: Lifecycle.Singleton},
     provider: {useValue: "provider"}
   };
   const registration2: Registration = {
-    options: {singleton: false},
+    options: {lifecycle: Lifecycle.Singleton},
     provider: {useValue: "provider"}
   };
 
@@ -30,11 +31,11 @@ test("getAll returns all registrations of a given key", () => {
 
 test("get returns the last registration", () => {
   const registration1: Registration = {
-    options: {singleton: false},
+    options: {lifecycle: Lifecycle.Singleton},
     provider: {useValue: "provider"}
   };
   const registration2: Registration = {
-    options: {singleton: false},
+    options: {lifecycle: Lifecycle.Singleton},
     provider: {useValue: "provider"}
   };
 
@@ -52,7 +53,7 @@ test("get returns null when there is no registration", () => {
 
 test("clear removes all registrations", () => {
   const registration: Registration = {
-    options: {singleton: false},
+    options: {lifecycle: Lifecycle.Singleton},
     provider: {useValue: "provider"}
   };
 

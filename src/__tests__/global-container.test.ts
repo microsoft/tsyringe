@@ -5,6 +5,7 @@ import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {DependencyContainer} from "../types";
 import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
+import Lifecycle from '../types/lifecycle';
 
 interface IBar {
   value: string;
@@ -93,7 +94,7 @@ test("resolves a transient instance when registered by class provider", () => {
 
 test("resolves a singleton instance when class provider registered as singleton", () => {
   class Bar {}
-  globalContainer.register("Bar", {useClass: Bar}, {singleton: true});
+  globalContainer.register("Bar", {useClass: Bar}, {lifecycle: Lifecycle.Singleton});
 
   const myBar = globalContainer.resolve<Bar>("Bar");
   const myBar2 = globalContainer.resolve<Bar>("Bar");
@@ -120,7 +121,7 @@ test("resolves a singleton instance when token alias registered as singleton", (
   globalContainer.register(
     "SingletonBar",
     {useToken: "Bar"},
-    {singleton: true}
+    {lifecycle: Lifecycle.Singleton}
   );
 
   const myBar = globalContainer.resolve<Bar>("SingletonBar");
