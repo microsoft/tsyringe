@@ -16,6 +16,7 @@ import RegistrationOptions from "./types/registration-options";
 import constructor from "./types/constructor";
 import Registry from "./registry";
 import Lifecycle from './types/lifecycle';
+import ResolutionContext from './resolution-context';
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -148,7 +149,7 @@ class InternalDependencyContainer implements DependencyContainer {
    * @param token {InjectionToken} The dependency token
    * @return {T} An instance of the dependency
    */
-  public resolve<T>(token: InjectionToken<T>): T {
+  public resolve<T>(token: InjectionToken<T>, context: ResolutionContext = new ResolutionContext()): T {
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
@@ -156,50 +157,66 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return this.resolveRegistration(registration);
+      return this.resolveRegistration(registration, context);
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return this.construct(<constructor<T>>token);
+    return this.construct(<constructor<T>>token, context);
   }
 
-  private resolveRegistration<T>(registration: Registration): T {
+  private resolveRegistration<T>(registration: Registration, context: ResolutionContext): T {
+    // If we have already resolved this scoped dependency, return it
+    if (registration.options.lifecycle === Lifecycle.Scoped && context.scopedResolutions.has(registration)) {
+      return context.scopedResolutions.get(registration);
+    }
+
+    let resolved: T;
+
     if (isValueProvider(registration.provider)) {
-      return registration.provider.useValue;
+      resolved = registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
-      return registration.options.lifecycle === Lifecycle.Singleton
+      resolved = registration.options.lifecycle === Lifecycle.Singleton
         ? registration.instance ||
             (registration.instance = this.resolve(
-              registration.provider.useToken
+              registration.provider.useToken,
+              context
             ))
-        : this.resolve(registration.provider.useToken);
+        : this.resolve(registration.provider.useToken, context);
     } else if (isClassProvider(registration.provider)) {
-      return registration.options.lifecycle === Lifecycle.Singleton
+      resolved = registration.options.lifecycle === Lifecycle.Singleton
         ? registration.instance ||
             (registration.instance = this.construct(
-              registration.provider.useClass
+              registration.provider.useClass,
+              context
             ))
-        : this.construct(registration.provider.useClass);
+        : this.construct(registration.provider.useClass, context);
     } else if (isFactoryProvider(registration.provider)) {
-      return registration.provider.useFactory(this);
+      resolved = registration.provider.useFactory(this);
     } else {
-      return this.construct(registration.provider);
+      resolved = this.construct(registration.provider, context);
     }
+
+    // If this is a scoped dependency, store resolved instance in context
+    if (registration.options.lifecycle === Lifecycle.Scoped) {
+      context.scopedResolutions.set(registration, resolved);
+    }
+
+    return resolved;
   }
 
-  public resolveAll<T>(token: InjectionToken<T>): T[] {
-    const registration = this.getAllRegistrations(token);
+  public resolveAll<T>(token: InjectionToken<T>, context: ResolutionContext = new ResolutionContext()): T[] {
+    const registrations = this.getAllRegistrations(token);
 
-    if (!registration && isNormalToken(token)) {
+    if (!registrations && isNormalToken(token)) {
       throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
     }
 
-    if (registration) {
-      return registration.map(item => this.resolveRegistration<T>(item));
+    if (registrations) {
+      return registrations.map(item => this.resolveRegistration<T>(item, context));
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return [this.construct(<constructor<T>>token)];
+    return [this.construct(<constructor<T>>token, context)];
   }
 
   /**
@@ -248,7 +265,7 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private construct<T>(ctor: constructor<T>): T {
+  private construct<T>(ctor: constructor<T>, context: ResolutionContext): T {
     if (ctor.length === 0) {
       return new ctor();
     }
@@ -263,9 +280,9 @@ class InternalDependencyContainer implements DependencyContainer {
       if (isTokenDescriptor(param)) {
         return param.multiple
           ? this.resolveAll(param.token)
-          : this.resolve(param.token);
+          : this.resolve(param.token, context);
       }
-      return this.resolve(param);
+      return this.resolve(param, context);
     });
 
     return new ctor(...params);
