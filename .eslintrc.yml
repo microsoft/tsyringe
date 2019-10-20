@@ -2,10 +2,13 @@ env:
   browser: true
   commonjs: true
   es6: true
+parser: "@typescript-eslint/parser"
+plugins:
+  - "@typescript-eslint"
+  - "prettier"
 extends:
   - "plugin:@typescript-eslint/recommended"
-  - "prettier"
-  - "prettier/@typescript-eslint"
+  - "plugin:prettier/recommended"
 globals:
   Atomics: readonly
   SharedArrayBuffer: readonly
@@ -22,3 +25,4 @@ rules:
   "@typescript-eslint/no-non-null-assertion": off
   "@typescript-eslint/no-parameter-properties": off
   "@typescript-eslint/prefer-interface": off
+  "@typescript-eslint/indent": off
