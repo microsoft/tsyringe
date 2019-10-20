@@ -1,7 +1,7 @@
 enum Lifecycle {
-    Transient,
-    Singleton,
-    Scoped
+  Transient,
+  Singleton,
+  Scoped
 }
 
 export default Lifecycle;

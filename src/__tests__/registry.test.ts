@@ -1,6 +1,6 @@
 import Registry from "../registry";
 import {Registration} from "../dependency-container";
-import Lifecycle from '../types/lifecycle';
+import Lifecycle from "../types/lifecycle";
 
 let registry: Registry;
 beforeEach(() => {
