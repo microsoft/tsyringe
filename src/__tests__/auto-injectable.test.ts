@@ -1,6 +1,7 @@
 import {autoInjectable, injectable, singleton} from "../decorators";
 import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
+import {constructor} from "../types";
 
 afterEach(() => {
   globalContainer.reset();
@@ -178,4 +179,27 @@ test("@autoInjectable resolves multiple transient dependencies", () => {
   expect(Array.isArray(bar.foo)).toBeTruthy();
   expect(bar.foo!.length).toBe(1);
   expect(bar.foo![0]).toBeInstanceOf(Foo);
+});
+
+test("@autoInjectable with factory allows factory to see target class", () => {
+  class Bar {
+    public target?: constructor<any>;
+  }
+  @autoInjectable()
+  class Foo {
+    constructor(public myBar?: Bar) {}
+  }
+
+  globalContainer.register(Bar, {
+    useFactory: (_, target) => {
+      const bar = new Bar();
+      bar.target = target;
+      return bar;
+    }
+  });
+
+  const myFoo = new Foo();
+
+  // It is impossible to compare Foo type to target, because Foo here is extended by @autoInjectable
+  expect(myFoo.myBar!.target!.name).toBe(Foo.name);
 });

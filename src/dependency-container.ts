@@ -145,9 +145,10 @@ class InternalDependencyContainer implements DependencyContainer {
    * Resolve a token into an instance
    *
    * @param token {InjectionToken} The dependency token
+   * @param target {constructor<any>} Constructor resolving the dependency token
    * @return {T} An instance of the dependency
    */
-  public resolve<T>(token: InjectionToken<T>): T {
+  public resolve<T>(token: InjectionToken<T>, target?: constructor<any>): T {
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
@@ -155,23 +156,27 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return this.resolveRegistration(registration);
+      return this.resolveRegistration(registration, target);
     }
 
     // No registration for this token, but since it's a constructor, return an instance
     return this.construct(<constructor<T>>token);
   }
 
-  private resolveRegistration<T>(registration: Registration): T {
+  private resolveRegistration<T>(
+    registration: Registration,
+    target?: constructor<T>
+  ): T {
     if (isValueProvider(registration.provider)) {
       return registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
       return registration.options.singleton
         ? registration.instance ||
             (registration.instance = this.resolve(
-              registration.provider.useToken
+              registration.provider.useToken,
+              target
             ))
-        : this.resolve(registration.provider.useToken);
+        : this.resolve(registration.provider.useToken, target);
     } else if (isClassProvider(registration.provider)) {
       return registration.options.singleton
         ? registration.instance ||
@@ -180,13 +185,16 @@ class InternalDependencyContainer implements DependencyContainer {
             ))
         : this.construct(registration.provider.useClass);
     } else if (isFactoryProvider(registration.provider)) {
-      return registration.provider.useFactory(this);
+      return registration.provider.useFactory(this, target);
     } else {
       return this.construct(registration.provider);
     }
   }
 
-  public resolveAll<T>(token: InjectionToken<T>): T[] {
+  public resolveAll<T>(
+    token: InjectionToken<T>,
+    parent?: constructor<any>
+  ): T[] {
     const registration = this.getAllRegistrations(token);
 
     if (!registration && isNormalToken(token)) {
@@ -194,7 +202,9 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return registration.map(item => this.resolveRegistration<T>(item));
+      return registration.map(item =>
+        this.resolveRegistration<T>(item, parent)
+      );
     }
 
     // No registration for this token, but since it's a constructor, return an instance
@@ -261,10 +271,10 @@ class InternalDependencyContainer implements DependencyContainer {
     const params = paramInfo.map(param => {
       if (isTokenDescriptor(param)) {
         return param.multiple
-          ? this.resolveAll(param.token)
-          : this.resolve(param.token);
+          ? this.resolveAll(param.token, ctor)
+          : this.resolve(param.token, ctor);
       }
-      return this.resolve(param);
+      return this.resolve(param, ctor);
     });
 
     return new ctor(...params);
