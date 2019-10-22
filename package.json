@@ -14,6 +14,7 @@
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
     "test": "npm run lint && jest --config test/jest.config.js",
+    "test:inspect": "npm run lint && node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js",
     "test:coverage": "jest --config test/jest.config.js --coverage",
     "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
     "lint:fix": "eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\""

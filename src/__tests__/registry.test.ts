@@ -63,3 +63,18 @@ test("clear removes all registrations", () => {
   registry.clear();
   expect(registry.has("Foo")).toBeFalsy();
 });
+
+test("setAll replaces everything with new value", () => {
+  const registration: Registration = {
+    options: {lifecycle: Lifecycle.Transient},
+    provider: {useValue: "provider"}
+  };
+
+  expect(registry.has("Foo")).toBeFalsy();
+
+  registry.set("Foo", registration);
+  const fooArray = registry.getAll("Foo");
+  registry.setAll("Foo", [registration]);
+
+  expect(fooArray === registry.getAll("Foo")).toBeFalsy();
+});

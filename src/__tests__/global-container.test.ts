@@ -6,6 +6,7 @@ import {DependencyContainer} from "../types";
 import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
 import Lifecycle from "../types/lifecycle";
+import {ValueProvider} from "../providers";
 
 interface IBar {
   value: string;
@@ -287,7 +288,7 @@ test("returns true for a registered value provider", () => {
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  globalContainer.register(Foo, {useValue: {}});
+  globalContainer.register(Foo, {useValue: {}} as ValueProvider<any>);
 
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });

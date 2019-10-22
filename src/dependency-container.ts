@@ -6,7 +6,7 @@ import {
   isTokenProvider,
   isValueProvider
 } from "./providers";
-import Provider from "./providers/provider";
+import Provider, {isProvider} from "./providers/provider";
 import FactoryProvider from "./providers/factory-provider";
 import InjectionToken, {isTokenDescriptor} from "./providers/injection-token";
 import TokenProvider from "./providers/token-provider";
@@ -57,12 +57,31 @@ class InternalDependencyContainer implements DependencyContainer {
   ): InternalDependencyContainer;
   public register<T>(
     token: InjectionToken<T>,
-    provider: Provider<T>,
+    provider: constructor<T>,
+    options?: RegistrationOptions
+  ): InternalDependencyContainer;
+  public register<T>(
+    token: InjectionToken<T>,
+    providerOrConstructor: Provider<T> | constructor<T>,
     options: RegistrationOptions = {lifecycle: Lifecycle.Transient}
   ): InternalDependencyContainer {
-    if (options.lifecycle === Lifecycle.Singleton) {
+    let provider: Provider<T>;
+
+    if (!isProvider(providerOrConstructor)) {
+      provider = {useClass: providerOrConstructor};
+    } else {
+      provider = providerOrConstructor;
+    }
+
+    if (
+      options.lifecycle === Lifecycle.Singleton ||
+      options.lifecycle == Lifecycle.ContainerScoped ||
+      options.lifecycle == Lifecycle.ResolutionScoped
+    ) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
-        throw "Cannot use singleton lifecycle with ValueProviders or FactoryProviders";
+        throw `Cannot use lifecycle "${
+          Lifecycle[options.lifecycle]
+        }" with ValueProviders or FactoryProviders`;
       }
     }
 
@@ -143,12 +162,6 @@ class InternalDependencyContainer implements DependencyContainer {
     );
   }
 
-  /**
-   * Resolve a token into an instance
-   *
-   * @param token {InjectionToken} The dependency token
-   * @return {T} An instance of the dependency
-   */
   public resolve<T>(
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
@@ -179,28 +192,32 @@ class InternalDependencyContainer implements DependencyContainer {
       return context.scopedResolutions.get(registration);
     }
 
+    const isSingleton = registration.options.lifecycle === Lifecycle.Singleton;
+    const isContainerScoped =
+      registration.options.lifecycle === Lifecycle.ContainerScoped;
+
+    const returnInstance = isSingleton || isContainerScoped;
+
     let resolved: T;
 
     if (isValueProvider(registration.provider)) {
       resolved = registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
-      resolved =
-        registration.options.lifecycle === Lifecycle.Singleton
-          ? registration.instance ||
-            (registration.instance = this.resolve(
-              registration.provider.useToken,
-              context
-            ))
-          : this.resolve(registration.provider.useToken, context);
+      resolved = returnInstance
+        ? registration.instance ||
+          (registration.instance = this.resolve(
+            registration.provider.useToken,
+            context
+          ))
+        : this.resolve(registration.provider.useToken, context);
     } else if (isClassProvider(registration.provider)) {
-      resolved =
-        registration.options.lifecycle === Lifecycle.Singleton
-          ? registration.instance ||
-            (registration.instance = this.construct(
-              registration.provider.useClass,
-              context
-            ))
-          : this.construct(registration.provider.useClass, context);
+      resolved = returnInstance
+        ? registration.instance ||
+          (registration.instance = this.construct(
+            registration.provider.useClass,
+            context
+          ))
+        : this.construct(registration.provider.useClass, context);
     } else if (isFactoryProvider(registration.provider)) {
       resolved = registration.provider.useFactory(this);
     } else {
@@ -235,24 +252,48 @@ class InternalDependencyContainer implements DependencyContainer {
     return [this.construct(token as constructor<T>, context)];
   }
 
-  /**
-   * Check if the given dependency is registered
-   *
-   * @return {boolean}
-   */
-  public isRegistered<T>(token: InjectionToken<T>): boolean {
-    return this._registry.has(token);
+  public isRegistered<T>(token: InjectionToken<T>, recursive = false): boolean {
+    return (
+      this._registry.has(token) ||
+      (recursive &&
+        (this.parent || false) &&
+        this.parent.isRegistered(token, true))
+    );
   }
 
-  /**
-   * Clears all registered tokens'
-   */
   public reset(): void {
     this._registry.clear();
   }
 
   public createChildContainer(): DependencyContainer {
-    return new InternalDependencyContainer(this);
+    const childContainer = new InternalDependencyContainer(this);
+
+    for (const [token, registrations] of this._registry.entries()) {
+      // If there are any ContainerScoped registrations, we need to copy
+      // ALL registrations to the child container, if we were to copy just
+      // the ContainerScoped registrations, we would lose access to the others
+      if (
+        registrations.some(
+          ({options}) => options.lifecycle === Lifecycle.ContainerScoped
+        )
+      ) {
+        childContainer._registry.setAll(
+          token,
+          registrations.map<Registration>(registration => {
+            if (registration.options.lifecycle === Lifecycle.ContainerScoped) {
+              return {
+                provider: registration.provider,
+                options: registration.options
+              };
+            }
+
+            return registration;
+          })
+        );
+      }
+    }
+
+    return childContainer;
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {

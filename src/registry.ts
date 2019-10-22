@@ -4,6 +4,10 @@ import {Registration} from "./dependency-container";
 export default class Registry {
   protected _registryMap = new Map<InjectionToken<any>, Registration[]>();
 
+  public entries(): IterableIterator<[InjectionToken<any>, Registration[]]> {
+    return this._registryMap.entries();
+  }
+
   public getAll(key: InjectionToken<any>): Registration[] {
     this.ensure(key);
     return this._registryMap.get(key)!;
@@ -18,6 +22,10 @@ export default class Registry {
   public set(key: InjectionToken<any>, value: Registration): void {
     this.ensure(key);
     this._registryMap.get(key)!.push(value);
+  }
+
+  public setAll(key: InjectionToken<any>, value: Registration[]): void {
+    this._registryMap.set(key, value);
   }
 
   public has(key: InjectionToken<any>): boolean {
