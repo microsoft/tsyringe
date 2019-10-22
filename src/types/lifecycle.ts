@@ -1,7 +1,8 @@
 enum Lifecycle {
   Transient,
   Singleton,
-  Scoped
+  ResolutionScoped,
+  ContainerScoped
 }
 
 export default Lifecycle;

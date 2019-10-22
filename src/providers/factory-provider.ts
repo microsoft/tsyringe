@@ -13,5 +13,5 @@ export default interface FactoryProvider<T> {
 export function isFactoryProvider<T>(
   provider: Provider<T>
 ): provider is FactoryProvider<any> {
-  return !!(<FactoryProvider<T>>provider).useFactory;
+  return !!(provider as FactoryProvider<T>).useFactory;
 }

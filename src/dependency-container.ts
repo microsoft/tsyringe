@@ -164,7 +164,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return this.construct(<constructor<T>>token, context);
+    return this.construct(token as constructor<T>, context);
   }
 
   private resolveRegistration<T>(
@@ -173,7 +173,7 @@ class InternalDependencyContainer implements DependencyContainer {
   ): T {
     // If we have already resolved this scoped dependency, return it
     if (
-      registration.options.lifecycle === Lifecycle.Scoped &&
+      registration.options.lifecycle === Lifecycle.ResolutionScoped &&
       context.scopedResolutions.has(registration)
     ) {
       return context.scopedResolutions.get(registration);
@@ -208,7 +208,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     // If this is a scoped dependency, store resolved instance in context
-    if (registration.options.lifecycle === Lifecycle.Scoped) {
+    if (registration.options.lifecycle === Lifecycle.ResolutionScoped) {
       context.scopedResolutions.set(registration, resolved);
     }
 
@@ -232,7 +232,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return [this.construct(<constructor<T>>token, context)];
+    return [this.construct(token as constructor<T>, context)];
   }
 
   /**

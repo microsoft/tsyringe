@@ -15,8 +15,8 @@
     "clean": "rimraf ./dist",
     "test": "npm run lint && jest --config test/jest.config.js",
     "test:coverage": "jest --config test/jest.config.js --coverage",
-    "lint": "prettier --check \"./src/**/*.ts\" && eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
-    "lint:fix": "prettier \"./src/**/*.ts\" && eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\""
+    "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
+    "lint:fix": "eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\""
   },
   "repository": {
     "type": "git",
@@ -46,14 +46,14 @@
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "@types/node": "^8.10.16",
-    "@typescript-eslint/eslint-plugin": "^1.6.0",
-    "@typescript-eslint/parser": "^1.11.0",
-    "eslint": "^5.16.0",
+    "@typescript-eslint/eslint-plugin": "^2.5.0",
+    "@typescript-eslint/parser": "^2.5.0",
+    "eslint": "^6.5.1",
     "eslint-config-prettier": "^6.4.0",
     "eslint-plugin-prettier": "^3.1.1",
     "husky": "^3.0.0",
     "jest": "^24.7.1",
-    "prettier": "1.17.0",
+    "prettier": "1.18.2",
     "reflect-metadata": "^0.1.12",
     "rimraf": "^2.6.2",
     "ts-jest": "^24.0.2",

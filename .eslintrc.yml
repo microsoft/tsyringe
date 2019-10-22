@@ -8,6 +8,7 @@ plugins:
   - "prettier"
 extends:
   - "plugin:@typescript-eslint/recommended"
+  - "prettier/@typescript-eslint"
   - "plugin:prettier/recommended"
 globals:
   Atomics: readonly
@@ -26,3 +27,9 @@ rules:
   "@typescript-eslint/no-parameter-properties": off
   "@typescript-eslint/prefer-interface": off
   "@typescript-eslint/indent": off
+overrides:
+  - files:
+      - "*.test.ts"
+      - "*.spec.ts"
+    rules:
+      "@typescript-eslint/no-empty-function": off

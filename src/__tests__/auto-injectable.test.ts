@@ -150,7 +150,7 @@ test("@autoInjectable resolves multiple registered dependencies", () => {
 
   @injectable()
   class FooBar implements Bar {
-    str: string = "";
+    str = "";
   }
 
   globalContainer.register<Bar>("Bar", {useClass: FooBar});

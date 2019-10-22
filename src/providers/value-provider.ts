@@ -7,5 +7,5 @@ export default interface ValueProvider<T> {
 export function isValueProvider<T>(
   provider: Provider<T>
 ): provider is ValueProvider<T> {
-  return (<ValueProvider<T>>provider).useValue != undefined;
+  return (provider as ValueProvider<T>).useValue != undefined;
 }
