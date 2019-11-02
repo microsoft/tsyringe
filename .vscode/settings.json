@@ -33,4 +33,5 @@
   "[typescriptreact]": {
     "editor.formatOnSave": false,
   },
+  "markdown.extension.toc.levels": "1..3",
 }
