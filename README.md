@@ -7,34 +7,21 @@
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection.
 
-<!-- TOC depthFrom:1 depthTo:2 -->
+<!-- TOC depthFrom:1 depthTo:3 -->
 
 - [TSyringe](#tsyringe)
   - [Installation](#installation)
 - [API](#api)
   - [Decorators](#decorators)
     - [injectable()](#injectable)
-      - [Usage](#usage)
     - [singleton()](#singleton)
-      - [Usage](#usage-1)
     - [autoInjectable()](#autoinjectable)
-      - [Usage](#usage-2)
     - [inject()](#inject)
-      - [Usage](#usage-3)
     - [injectAll()](#injectall)
-      - [Usage](#usage-4)
     - [scoped()](#scoped)
-      - [Available scopes](#available-scopes)
-      - [Usage](#usage-5)
   - [Container](#container)
     - [Injection Token](#injection-token)
     - [Providers](#providers)
-      - [Class Provider](#class-provider)
-      - [Value Provider](#value-provider)
-      - [Factory provider](#factory-provider)
-        - [instanceCachingFactory](#instancecachingfactory)
-        - [predicateAwareClassFactory](#predicateawareclassfactory)
-      - [Token Provider](#token-provider)
     - [Register](#register)
     - [Registry](#registry)
     - [Resolution](#resolution)
