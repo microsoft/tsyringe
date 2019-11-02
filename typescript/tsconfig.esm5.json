@@ -4,7 +4,15 @@
     "target": "es5",
     "module": "es2015",
     "outDir": "../dist/esm5",
-    "lib": ["es5", "es2015.iterable", "es2015.collection", "es2015.symbol"]
+    "lib": [
+      "es5",
+      "es2015.iterable",
+      "es2015.collection",
+      "es2015.symbol"
+    ],
+    "downlevelIteration": true
   },
-  "files": ["./es5Types.d.ts"]
+  "files": [
+    "./es5Types.d.ts"
+  ]
 }

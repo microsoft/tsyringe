@@ -8,5 +8,5 @@ export default interface ClassProvider<T> {
 export function isClassProvider<T>(
   provider: Provider<T>
 ): provider is ClassProvider<any> {
-  return !!(<ClassProvider<T>>provider).useClass;
+  return !!(provider as ClassProvider<T>).useClass;
 }

@@ -5,6 +5,8 @@ import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {DependencyContainer} from "../types";
 import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
+import Lifecycle from "../types/lifecycle";
+import {ValueProvider} from "../providers";
 
 interface IBar {
   value: string;
@@ -93,7 +95,11 @@ test("resolves a transient instance when registered by class provider", () => {
 
 test("resolves a singleton instance when class provider registered as singleton", () => {
   class Bar {}
-  globalContainer.register("Bar", {useClass: Bar}, {singleton: true});
+  globalContainer.register(
+    "Bar",
+    {useClass: Bar},
+    {lifecycle: Lifecycle.Singleton}
+  );
 
   const myBar = globalContainer.resolve<Bar>("Bar");
   const myBar2 = globalContainer.resolve<Bar>("Bar");
@@ -120,7 +126,7 @@ test("resolves a singleton instance when token alias registered as singleton", (
   globalContainer.register(
     "SingletonBar",
     {useToken: "Bar"},
-    {singleton: true}
+    {lifecycle: Lifecycle.Singleton}
   );
 
   const myBar = globalContainer.resolve<Bar>("SingletonBar");
@@ -211,11 +217,11 @@ test("resolves an array of transient instances bound to a single interface", () 
   }
 
   class FooOne implements FooInterface {
-    public bar: string = "foo1";
+    public bar = "foo1";
   }
 
   class FooTwo implements FooInterface {
-    public bar: string = "foo2";
+    public bar = "foo2";
   }
 
   globalContainer.register<FooInterface>("FooInterface", {useClass: FooOne});
@@ -245,7 +251,7 @@ test("resolves all transient instances when not registered", () => {
 test("returns true for a registered singleton class", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -260,7 +266,7 @@ test("returns true for a registered singleton class", () => {
 test("returns true for a registered class provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -275,14 +281,14 @@ test("returns true for a registered class provider", () => {
 test("returns true for a registered value provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  globalContainer.register(Foo, {useValue: {}});
+  globalContainer.register(Foo, {useValue: {}} as ValueProvider<any>);
 
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
@@ -290,7 +296,7 @@ test("returns true for a registered value provider", () => {
 test("returns true for a registered token provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -307,7 +313,7 @@ test("returns true for a registered token provider", () => {
 test("@injectable resolves when not using DI", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -326,7 +332,7 @@ test("@injectable resolves when not using DI", () => {
 test("@injectable resolves when using DI", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -341,7 +347,7 @@ test("@injectable resolves when using DI", () => {
 test("@injectable resolves nested dependencies when using DI", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
   @injectable()
   class Foo {
@@ -375,7 +381,7 @@ test("@injectable preserves static members", () => {
 test("@injectable handles optional params", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
   @injectable()
   class Foo {
@@ -442,7 +448,7 @@ test("doesn't blow up with empty args", () => {
 test("registers by type provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
   @registry([{token: Bar, useClass: Bar}])
   class RegisteringFoo {}
@@ -455,7 +461,7 @@ test("registers by type provider", () => {
 test("registers by class provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
   const registration = {
     token: "IBar",
@@ -501,7 +507,7 @@ test("registers by token provider", () => {
 test("registers by factory provider", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   const registration = {
@@ -521,7 +527,7 @@ test("registers by factory provider", () => {
 test("registers mixed types", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
   @injectable()
   class Foo {
@@ -563,7 +569,7 @@ test("registers by symbol token provider", () => {
 test("allows interfaces to be resolved from the constructor with injection token", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -580,7 +586,7 @@ test("allows interfaces to be resolved from the constructor with injection token
 test("allows interfaces to be resolved from the constructor with just a name", () => {
   @injectable()
   class Bar implements IBar {
-    public value: string = "";
+    public value = "";
   }
 
   @injectable()
@@ -624,11 +630,11 @@ test("injects all dependencies bound to a given interface", () => {
   }
 
   class FooImpl1 implements Foo {
-    public str: string = "foo1";
+    public str = "foo1";
   }
 
   class FooImpl2 implements Foo {
-    public str: string = "foo2";
+    public str = "foo2";
   }
 
   @injectable()

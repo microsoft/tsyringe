@@ -16,7 +16,7 @@ function registry(
 ): (target: any) => any {
   return function(target: any): any {
     registrations.forEach(({token, options, ...provider}) =>
-      globalContainer.register(token, <any>provider, options)
+      globalContainer.register(token, provider as any, options)
     );
 
     return target;
