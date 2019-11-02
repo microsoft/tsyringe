@@ -13,8 +13,32 @@ constructor injection.
   - [Installation](#installation)
 - [API](#api)
   - [Decorators](#decorators)
+    - [injectable()](#injectable)
+      - [Usage](#usage)
+    - [singleton()](#singleton)
+      - [Usage](#usage-1)
+    - [autoInjectable()](#autoinjectable)
+      - [Usage](#usage-2)
+    - [inject()](#inject)
+      - [Usage](#usage-3)
+    - [injectAll()](#injectall)
+      - [Usage](#usage-4)
+    - [scoped()](#scoped)
+      - [Available scopes](#available-scopes)
+      - [Usage](#usage-5)
   - [Container](#container)
-  - [Manual resolution](#manual-resolution)
+    - [Injection Token](#injection-token)
+    - [Providers](#providers)
+      - [Class Provider](#class-provider)
+      - [Value Provider](#value-provider)
+      - [Factory provider](#factory-provider)
+        - [instanceCachingFactory](#instancecachingfactory)
+        - [predicateAwareClassFactory](#predicateawareclassfactory)
+      - [Token Provider](#token-provider)
+    - [Register](#register)
+    - [Registry](#registry)
+    - [Resolution](#resolution)
+    - [Child Containers](#child-containers)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -181,6 +205,26 @@ class Bar {
     // ...
   }
 }
+```
+
+### scoped()
+
+Class decorator factory that registers the class as a scoped dependency within the global container.
+
+#### Available scopes
+- ResolutionScoped
+  - The same instance will be resolved for each resolution of this dependency during a single
+  resolution chain
+- ContainerScoped
+  - The dependency container will return the same instance each time a resolution for this dependency
+  is requested. This is similar to being a singleton, however if a child container is made, that child
+  container will resolve an instance unique to it.
+
+#### Usage
+
+```typescript
+@scoped(Lifecycle.ContainerScoped)
+class Foo {}
 ```
 
 ## Container
