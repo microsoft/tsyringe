@@ -4,17 +4,23 @@ coverage/
 # Source code
 src/
 
+# Logs
+*.log
+
 # Tests
 test/
 *.test.js
 
 # Configs
+.github/
+.vscode/
 .travis.yml
 tsconfig.json
 typescript/
 .eslintrc.yml
 .prettierrc.yml
 .huskyrc.json
+.nvmrc
 
 # Lock files
 yarn.lock
