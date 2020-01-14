@@ -371,6 +371,19 @@ const myBar = container.resolve<Bar>("Bar");
 You can also resolve all instances registered against a given token with `resolveAll()`.
 
 ```typescript
+interface Bar {}
+
+@injectable()
+class Foo implements Bar {}
+@injectable()
+class Baz implements Bar {}
+
+@registry([ // registry is optional, all you need is to use the same token when registering
+  { token: 'Bar', useToken: Foo }, // can be any provider
+  { token: 'Bar', useToken: Baz },
+])
+class MyRegistry {}
+
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
 ```
 ### Child Containers
