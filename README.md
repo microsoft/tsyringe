@@ -29,6 +29,7 @@ constructor injection.
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
+- [Non Goals](#non-goals)
 - [Contributing](#contributing)
 
 <!-- /TOC -->
@@ -460,6 +461,10 @@ container.register("SuperService", {
 const client = container.resolve(Client);
 // client's dependencies will have been resolved
 ```
+
+# Non goals
+The following is a list of features we explicitly plan on not adding:
+- Property Injection
 
 # Contributing
 
