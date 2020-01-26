@@ -79,9 +79,11 @@ class InternalDependencyContainer implements DependencyContainer {
       options.lifecycle == Lifecycle.ResolutionScoped
     ) {
       if (isValueProvider(provider) || isFactoryProvider(provider)) {
-        throw `Cannot use lifecycle "${
-          Lifecycle[options.lifecycle]
-        }" with ValueProviders or FactoryProviders`;
+        throw new Error(
+          `Cannot use lifecycle "${
+            Lifecycle[options.lifecycle]
+          }" with ValueProviders or FactoryProviders`
+        );
       }
     }
 
@@ -145,7 +147,9 @@ class InternalDependencyContainer implements DependencyContainer {
         );
       }
 
-      throw "Cannot register a type name as a singleton without a \"to\" token";
+      throw new Error(
+        'Cannot register a type name as a singleton without a "to" token'
+      );
     }
 
     let useClass = from;
@@ -169,7 +173,9 @@ class InternalDependencyContainer implements DependencyContainer {
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
-      throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
+      throw new Error(
+        `Attempted to resolve unregistered dependency token: ${token.toString()}`
+      );
     }
 
     if (registration) {
@@ -239,7 +245,9 @@ class InternalDependencyContainer implements DependencyContainer {
     const registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
-      throw `Attempted to resolve unregistered dependency token: ${token.toString()}`;
+      throw new Error(
+        `Attempted to resolve unregistered dependency token: ${token.toString()}`
+      );
     }
 
     if (registrations) {
@@ -330,7 +338,7 @@ class InternalDependencyContainer implements DependencyContainer {
     const paramInfo = typeInfo.get(ctor);
 
     if (!paramInfo || paramInfo.length === 0) {
-      throw `TypeInfo not known for ${ctor}`;
+      throw new Error(`TypeInfo not known for ${ctor}`);
     }
 
     const params = paramInfo.map(param => {

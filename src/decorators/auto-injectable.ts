@@ -36,7 +36,9 @@ function autoInjectable(): (target: constructor<any>) => any {
                   ? params.split(",")[argIndex]
                   : `#${argIndex}`;
 
-                throw `Cannot inject the dependency ${argName} of ${target.name} constructor. ${e}`;
+                throw new Error(
+                  `Cannot inject the dependency ${argName} of ${target.name} constructor. ${e}`
+                );
               }
             })
           )
