@@ -123,7 +123,7 @@ test("@autoInjectable throws a clear error if a dependency can't be resolved.", 
   }
 
   expect(() => new Foo()).toThrow(
-    /Cannot inject the dependency myBar of Foo constructor. TypeInfo/
+    /Cannot inject the dependency myBar of Foo constructor. Error: TypeInfo/
   );
 });
 
