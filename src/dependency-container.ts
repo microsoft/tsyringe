@@ -17,6 +17,7 @@ import constructor from "./types/constructor";
 import Registry from "./registry";
 import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
+import {formatErrorCtor} from "./error-helpers";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -174,7 +175,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     if (!registration && isNormalToken(token)) {
       throw new Error(
-        `Attempted to resolve unregistered dependency token: ${token.toString()}`
+        `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
     }
 
@@ -246,7 +247,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     if (!registrations && isNormalToken(token)) {
       throw new Error(
-        `Attempted to resolve unregistered dependency token: ${token.toString()}`
+        `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
     }
 
@@ -338,19 +339,27 @@ class InternalDependencyContainer implements DependencyContainer {
     const paramInfo = typeInfo.get(ctor);
 
     if (!paramInfo || paramInfo.length === 0) {
-      throw new Error(`TypeInfo not known for ${ctor}`);
+      throw new Error(`TypeInfo not known for "${ctor.name}"`);
     }
 
-    const params = paramInfo.map(param => {
-      if (isTokenDescriptor(param)) {
-        return param.multiple
-          ? this.resolveAll(param.token)
-          : this.resolve(param.token, context);
-      }
-      return this.resolve(param, context);
-    });
+    const params = paramInfo.map(this.resolveParams(context, ctor));
 
     return new ctor(...params);
+  }
+
+  private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
+    return (param: any, idx: number) => {
+      try {
+        if (isTokenDescriptor(param)) {
+          return param.multiple
+            ? this.resolveAll(param.token)
+            : this.resolve(param.token, context);
+        }
+        return this.resolve(param, context);
+      } catch (e) {
+        throw new Error(formatErrorCtor(ctor, idx, e));
+      }
+    };
   }
 }
 
