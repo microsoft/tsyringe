@@ -22,10 +22,20 @@ test("Error message composition", () => {
   class A {
     constructor(public d: Ok, public b: B) {}
   }
+
   expect(() => {
     globalContainer.resolve(A);
   }).toThrow(
-    /Cannot inject the dependency "b" at position #1 of "A" constructor. Reason:\s+Cannot inject the dependency "c" at position #0 of "B" constructor. Reason:\s+Cannot inject the dependency "s" at position #0 of "C" constructor. Reason:\s+TypeInfo not known for "Object"/
+    new RegExp(
+      [
+        /Cannot inject the dependency "b" at position #1 of "A" constructor\. Reason:/,
+        /Cannot inject the dependency "c" at position #0 of "B" constructor\. Reason:/,
+        /Cannot inject the dependency "s" at position #0 of "C" constructor\. Reason:/,
+        /TypeInfo not known for "Object"/
+      ]
+        .map(x => x.source)
+        .join("\\s+")
+    )
   );
 });
 
@@ -34,9 +44,17 @@ test("Param position", () => {
   class A {
     constructor(@inject("missing") public j: any) {}
   }
+
   expect(() => {
     globalContainer.resolve(A);
   }).toThrow(
-    /Cannot inject the dependency "j" at position #0 of "A" constructor. Reason:\s+Attempted to resolve unregistered dependency token: "missing"/
+    new RegExp(
+      [
+        /Cannot inject the dependency "j" at position #0 of "A" constructor\. Reason:/,
+        /Attempted to resolve unregistered dependency token: "missing"/
+      ]
+        .map(x => x.source)
+        .join("\\s+")
+    )
   );
 });
