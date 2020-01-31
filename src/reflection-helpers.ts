@@ -1,10 +1,11 @@
 import Dictionary from "./types/dictionary";
 import constructor from "./types/constructor";
 import InjectionToken from "./providers/injection-token";
+import {ParamInfo} from "./dependency-container";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 
-export function getParamInfo(target: constructor<any>): any[] {
+export function getParamInfo(target: constructor<any>): ParamInfo[] {
   const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
   const injectionTokens: Dictionary<InjectionToken<any>> =
     Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};

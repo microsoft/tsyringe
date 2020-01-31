@@ -2,6 +2,7 @@ import constructor from "../types/constructor";
 import {getParamInfo} from "../reflection-helpers";
 import {instance as globalContainer} from "../dependency-container";
 import {isTokenDescriptor} from "../providers/injection-token";
+import {formatErrorCtor} from "../error-helpers";
 
 /**
  * Class decorator factory that replaces the decorated class' constructor with
@@ -29,16 +30,7 @@ function autoInjectable(): (target: constructor<any>) => any {
                 return globalContainer.resolve(type);
               } catch (e) {
                 const argIndex = index + args.length;
-
-                const [, params = null] =
-                  target.toString().match(/constructor\(([\w, ]+)\)/) || [];
-                const argName = params
-                  ? params.split(",")[argIndex]
-                  : `#${argIndex}`;
-
-                throw new Error(
-                  `Cannot inject the dependency ${argName} of ${target.name} constructor. ${e}`
-                );
+                throw new Error(formatErrorCtor(target, argIndex, e));
               }
             })
           )
