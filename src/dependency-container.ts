@@ -8,7 +8,10 @@ import {
 } from "./providers";
 import Provider, {isProvider} from "./providers/provider";
 import FactoryProvider from "./providers/factory-provider";
-import InjectionToken, {isTokenDescriptor} from "./providers/injection-token";
+import InjectionToken, {
+  isTokenDescriptor,
+  TokenDescriptor
+} from "./providers/injection-token";
 import TokenProvider from "./providers/token-provider";
 import ValueProvider from "./providers/value-provider";
 import ClassProvider from "./providers/class-provider";
@@ -25,7 +28,9 @@ export type Registration<T = any> = {
   instance?: T;
 };
 
-export const typeInfo = new Map<constructor<any>, any[]>();
+export type ParamInfo = TokenDescriptor | InjectionToken<any>;
+
+export const typeInfo = new Map<constructor<any>, ParamInfo[]>();
 
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
@@ -348,7 +353,7 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
-    return (param: any, idx: number) => {
+    return (param: ParamInfo, idx: number) => {
       try {
         if (isTokenDescriptor(param)) {
           return param.multiple
