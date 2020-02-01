@@ -1,6 +1,7 @@
 import {instance as globalContainer} from "../dependency-container";
 import {inject, injectable} from "../decorators";
-
+import {A01} from "./imports/01-test-case-A01-injects-B01";
+import {errorMatch} from "../error-helpers";
 afterEach(() => {
   globalContainer.reset();
 });
@@ -26,16 +27,12 @@ test("Error message composition", () => {
   expect(() => {
     globalContainer.resolve(A);
   }).toThrow(
-    new RegExp(
-      [
-        /Cannot inject the dependency "b" at position #1 of "A" constructor\. Reason:/,
-        /Cannot inject the dependency "c" at position #0 of "B" constructor\. Reason:/,
-        /Cannot inject the dependency "s" at position #0 of "C" constructor\. Reason:/,
-        /TypeInfo not known for "Object"/
-      ]
-        .map(x => x.source)
-        .join("\\s+")
-    )
+    errorMatch([
+      /Cannot inject the dependency "b" at position #1 of "A" constructor\. Reason:/,
+      /Cannot inject the dependency "c" at position #0 of "B" constructor\. Reason:/,
+      /Cannot inject the dependency "s" at position #0 of "C" constructor\. Reason:/,
+      /TypeInfo not known for "Object"/
+    ])
   );
 });
 
@@ -48,13 +45,21 @@ test("Param position", () => {
   expect(() => {
     globalContainer.resolve(A);
   }).toThrow(
-    new RegExp(
-      [
-        /Cannot inject the dependency "j" at position #0 of "A" constructor\. Reason:/,
-        /Attempted to resolve unregistered dependency token: "missing"/
-      ]
-        .map(x => x.source)
-        .join("\\s+")
-    )
+    errorMatch([
+      /Cannot inject the dependency "j" at position #0 of "A" constructor\. Reason:/,
+      /Attempted to resolve unregistered dependency token: "missing"/
+    ])
+  );
+});
+
+test("Detect circular dependency", () => {
+  expect(() => {
+    globalContainer.resolve(A01);
+  }).toThrow(
+    errorMatch([
+      /Cannot inject the dependency "b" at position #0 of "A01" constructor\. Reason:/,
+      /Cannot inject the dependency "a" at position #0 of "B01" constructor\. Reason:/,
+      /Attempted to construct an undefined constructor. Could means a circular dependency problem./
+    ])
   );
 });
