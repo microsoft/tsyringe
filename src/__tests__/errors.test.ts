@@ -59,7 +59,7 @@ test("Detect circular dependency", () => {
     errorMatch([
       /Cannot inject the dependency "b" at position #0 of "A01" constructor\. Reason:/,
       /Cannot inject the dependency "a" at position #0 of "B01" constructor\. Reason:/,
-      /Attempted to construct an undefined constructor. Could means a circular dependency problem./
+      /Attempted to construct an undefined constructor. Could mean a circular dependency problem./
     ])
   );
 });
