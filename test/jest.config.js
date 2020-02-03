@@ -14,7 +14,7 @@ module.exports = {
       tsConfig: "src/__tests__/tsconfig.json"
     }
   },
-  testPathIgnorePatterns: ["/node_modules/", "/fixtures/"],
+  testPathIgnorePatterns: ["/node_modules/", "/fixtures/", "/utils/"],
   moduleFileExtensions: ["ts", "tsx", "js"],
   setupFilesAfterEnv: ["<rootDir>/test/jest.setup.ts"],
   testEnvironment: "node",

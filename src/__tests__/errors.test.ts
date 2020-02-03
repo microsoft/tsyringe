@@ -1,7 +1,7 @@
 import {instance as globalContainer} from "../dependency-container";
 import {inject, injectable} from "../decorators";
 import {A01} from "./fixtures/01-test-case-A01-injects-B01";
-import {errorMatch} from "../error-helpers";
+import errorMatch from "./utils/error-match";
 afterEach(() => {
   globalContainer.reset();
 });
