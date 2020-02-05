@@ -337,6 +337,12 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   private construct<T>(ctor: constructor<T>, context: ResolutionContext): T {
+    if (typeof ctor === "undefined") {
+      throw new Error(
+        "Attempted to construct an undefined constructor. Could mean a circular dependency problem."
+      );
+    }
+
     if (ctor.length === 0) {
       return new ctor();
     }
