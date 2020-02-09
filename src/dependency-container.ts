@@ -349,7 +349,7 @@ class InternalDependencyContainer implements DependencyContainer {
   ): T {
     if (ctor instanceof DelayedConstructor) {
       return ctor.createProxy((target: constructor<T>) =>
-        this.construct(target, context)
+        this.resolve(target, context)
       );
     }
 

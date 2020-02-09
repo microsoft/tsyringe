@@ -3,10 +3,6 @@ import {delay, DelayedConstructor} from "../lazy-helpers";
 import {A02} from "./fixtures/02-test-case-A02-lazy-injects-B02";
 import {B02} from "./fixtures/02-test-case-B02-lazy-injects-A02";
 
-afterEach(() => {
-  globalContainer.reset();
-});
-
 test("DelayedConstructor delays creation until first usage", () => {
   let created = false;
   class Foo {
@@ -28,7 +24,10 @@ test("DelayedConstructor delays creation until first usage", () => {
 
 test("Lazy creation with proxies allow circular dependencies", () => {
   const a = globalContainer.resolve(A02);
+  const b = globalContainer.resolve(B02);
+  b.prop["defined"] = true;
   expect(a).toBeInstanceOf(A02);
   expect(a.b).toBeInstanceOf(B02);
+  expect(a.b.prop["defined"]).toBe(true);
   expect(a.b.name).toBe("B02");
 });
