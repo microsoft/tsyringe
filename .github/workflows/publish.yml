@@ -1,0 +1,48 @@
+name: Publish
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  publish_to_npm:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Check if version bump
+        id: check
+        uses: EndBug/version-check@v1.1.1
+
+      - name: Log when unchanged
+        if: steps.check.outputs.changed != 'true'
+        run: echo "No version change"
+
+      - name: Install yarn
+        if: steps.check.outputs.changed == 'true'
+        run: npm -g i yarn
+
+      - name: Install deps
+        if: steps.check.outputs.changed == 'true'
+        run: yarn
+        env:
+          CI: true
+
+      - name: Build
+        if: steps.check.outputs.changed == 'true'
+        run: yarn build
+        env:
+          CI: true
+
+      - name: Set NPM Token
+        if: steps.check.outputs.changed == 'true'
+        uses: filipstefansson/set-npm-token-action@v1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish new version
+        if: steps.check.outputs.changed == 'true'
+        run: npm publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
