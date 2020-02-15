@@ -11,6 +11,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "10.x"
+          registry-url: "https://registry.npmjs.org"
+
       - name: Check if version bump
         id: check
         uses: EndBug/version-check@v1.1.1
@@ -18,10 +23,6 @@ jobs:
       - name: Log when unchanged
         if: steps.check.outputs.changed != 'true'
         run: echo "No version change"
-
-      - name: Install yarn
-        if: steps.check.outputs.changed == 'true'
-        run: npm -g i yarn
 
       - name: Install deps
         if: steps.check.outputs.changed == 'true'

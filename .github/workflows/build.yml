@@ -3,10 +3,10 @@ name: Build and Test
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 jobs:
   build:
@@ -18,13 +18,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install yarn
         run: |
           npm -g i yarn
+
       - name: npm install, build, and test
         run: |
           yarn
