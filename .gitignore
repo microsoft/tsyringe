@@ -8,6 +8,10 @@ yarn-error.log*
 # VS code folder
 .vscode
 
+# Intellij IDEA
+.idea
+*.iml
+
 # Runtime data
 pids
 *.pid
