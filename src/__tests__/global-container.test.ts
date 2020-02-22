@@ -1,12 +1,20 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 
-import {inject, injectable, registry, singleton} from "../decorators";
-import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
-import {DependencyContainer} from "../types";
-import {instance as globalContainer} from "../dependency-container";
+import {
+  inject,
+  injectable,
+  lazyInject,
+  registry,
+  singleton,
+  scoped,
+  lazyInjectAll
+} from "../decorators";
 import injectAll from "../decorators/inject-all";
-import Lifecycle from "../types/lifecycle";
+import {instance as globalContainer} from "../dependency-container";
+import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
 import {ValueProvider} from "../providers";
+import {DependencyContainer} from "../types";
+import Lifecycle from "../types/lifecycle";
 
 interface IBar {
   value: string;
@@ -665,6 +673,88 @@ test("allows array dependencies to be resolved if a single instance is in the co
 
   const bar = globalContainer.resolve<Bar>(Bar);
   expect(bar.foo.length).toBe(1);
+});
+
+// --- @lazyInject ---
+test("@lazyInject allow resolved instance when used", () => {
+  @injectable()
+  class Foo {}
+
+  @injectable()
+  class Bar {
+    @lazyInject(Foo) foo!: Foo;
+    constructor() {}
+  }
+
+  expect(globalContainer.resolve(Bar).foo).toBeInstanceOf(Foo);
+});
+
+test("lazyInject resolved same value when multiple access", () => {
+  @injectable()
+  class Foo {}
+  @singleton()
+  class Bar {
+    @lazyInject(Foo) foo!: Foo;
+  }
+
+  const bar = globalContainer.resolve(Bar);
+  expect(bar.foo).toBe(bar.foo);
+});
+
+test("@lazyInject resolved same value that @inject resolved", () => {
+  @scoped(Lifecycle.ResolutionScoped)
+  class Foo {}
+  @singleton()
+  class Bar {
+    @lazyInject(Foo) foo2!: Foo;
+    constructor(@inject(Foo) public foo1: Foo) {}
+  }
+
+  const bar = globalContainer.resolve(Bar);
+  expect(bar.foo1).toBe(bar.foo2);
+});
+
+test("@lazyInject to handle circular dependency", () => {
+  const IBar = Symbol("IBar");
+  interface IBar {
+    foo: Foo;
+  }
+
+  @injectable()
+  class Foo {
+    @lazyInject(IBar) bar!: IBar;
+  }
+
+  @injectable()
+  class Bar implements IBar {
+    constructor(@inject(Foo) public foo: Foo) {}
+  }
+
+  globalContainer.register(
+    IBar,
+    {
+      useClass: Bar
+    },
+    {lifecycle: Lifecycle.Singleton}
+  );
+
+  const bar = globalContainer.resolve<IBar>(IBar);
+
+  expect(bar.foo.bar).toBe(bar);
+});
+
+// --- @lazyInjectAll ---
+test("@lazyInjectAll allow resolved instance when used", () => {
+  @injectable()
+  class Foo {}
+
+  @injectable()
+  class Bar {
+    @lazyInjectAll(Foo) foo!: Foo[];
+    constructor() {}
+  }
+
+  expect(globalContainer.resolve(Bar).foo[0]).toBeInstanceOf(Foo);
 });
 
 // --- factories ---

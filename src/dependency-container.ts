@@ -1,4 +1,4 @@
-import DependencyContainer from "./types/dependency-container";
+import {formatErrorCtor} from "./error-helpers";
 import {
   isClassProvider,
   isFactoryProvider,
@@ -6,21 +6,23 @@ import {
   isTokenProvider,
   isValueProvider
 } from "./providers";
-import Provider, {isProvider} from "./providers/provider";
+import ClassProvider from "./providers/class-provider";
 import FactoryProvider from "./providers/factory-provider";
 import InjectionToken, {
   isTokenDescriptor,
   TokenDescriptor
 } from "./providers/injection-token";
+import Provider, {isProvider} from "./providers/provider";
 import TokenProvider from "./providers/token-provider";
 import ValueProvider from "./providers/value-provider";
-import ClassProvider from "./providers/class-provider";
-import RegistrationOptions from "./types/registration-options";
-import constructor from "./types/constructor";
+import {getLazyInjectInfo} from "./reflection-helpers";
 import Registry from "./registry";
-import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
-import {formatErrorCtor} from "./error-helpers";
+import constructor from "./types/constructor";
+import DependencyContainer from "./types/dependency-container";
+import Lifecycle from "./types/lifecycle";
+import RegistrationOptions from "./types/registration-options";
+import {memoize} from "./utils";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -342,20 +344,35 @@ class InternalDependencyContainer implements DependencyContainer {
         "Attempted to construct an undefined constructor. Could mean a circular dependency problem."
       );
     }
+    let instance!: T;
 
     if (ctor.length === 0) {
-      return new ctor();
+      instance = new ctor();
+    } else {
+      const paramInfo = typeInfo.get(ctor);
+
+      if (!paramInfo || paramInfo.length === 0) {
+        throw new Error(`TypeInfo not known for "${ctor.name}"`);
+      }
+
+      const params = paramInfo.map(this.resolveParams(context, ctor));
+
+      instance = new ctor(...params);
     }
 
-    const paramInfo = typeInfo.get(ctor);
+    const lazyInjectInfo = getLazyInjectInfo(ctor);
 
-    if (!paramInfo || paramInfo.length === 0) {
-      throw new Error(`TypeInfo not known for "${ctor.name}"`);
+    for (const [propertyKey, tokenDescriptor] of lazyInjectInfo.entries()) {
+      Object.defineProperty(instance, propertyKey, {
+        get: memoize(() =>
+          tokenDescriptor.multiple
+            ? this.resolveAll(tokenDescriptor.token, context)
+            : this.resolve(tokenDescriptor.token, context)
+        )
+      });
     }
 
-    const params = paramInfo.map(this.resolveParams(context, ctor));
-
-    return new ctor(...params);
+    return instance;
   }
 
   private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
