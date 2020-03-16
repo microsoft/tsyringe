@@ -205,8 +205,9 @@ test("resolves anonymous classes separately", async () => {
 
 // --- resolveAll() ---
 
-test("fails to resolveAll unregistered dependency by name", async () => {
-  await expect(globalContainer.resolve("NotRegistered")).rejects.toThrow();
+test("resolveAll of unregistered dependency by name returns empty array", async () => {
+  const notRegisteredResult = await globalContainer.resolveAll("NotRegistered");
+  expect(notRegisteredResult).toEqual([]);
 });
 
 test("resolves an array of transient instances bound to a single interface", async () => {

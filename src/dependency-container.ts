@@ -254,12 +254,10 @@ class InternalDependencyContainer implements DependencyContainer {
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
   ): Promise<T[]> {
-    const registrations = this.getAllRegistrations(token);
+    let registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
-      throw new Error(
-        `Attempted to resolve unregistered dependency token: "${token.toString()}"`
-      );
+      registrations = [];
     }
 
     if (registrations) {
