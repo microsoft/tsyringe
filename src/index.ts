@@ -9,3 +9,4 @@ export * from "./decorators";
 export * from "./factories";
 export * from "./providers";
 export {instance as container} from "./dependency-container";
+export {resolveParams} from "./resolve-params";

@@ -15,13 +15,25 @@ function composeErrorMessage(msg: string, e: Error, indent = "    "): string {
 export function formatErrorCtor(
   ctor: constructor<any>,
   paramIdx: number,
-  error: Error
+  error: Error,
+  propertyKey: string | symbol | undefined = undefined
 ): string {
-  const [, params = null] =
-    ctor.toString().match(/constructor\(([\w, ]+)\)/) || [];
+  let params;
+  let targetName;
+  if (propertyKey) {
+    const methodName = String(propertyKey);
+    [, params] =
+      ctor.constructor
+        .toString()
+        .match(new RegExp(`${methodName}\\(([\\w, ]+)\\)`)) || [];
+    targetName = `${ctor.constructor.name}.${methodName}`;
+  } else {
+    [, params] = ctor.toString().match(/constructor\(([\w, ]+)\)/) || [];
+    targetName = `${ctor.name} constructor`;
+  }
   const dep = formatDependency(params, paramIdx);
   return composeErrorMessage(
-    `Cannot inject the dependency ${dep} of "${ctor.name}" constructor. Reason:`,
+    `Cannot inject the dependency ${dep} of ${targetName}. Reason:`,
     error
   );
 }

@@ -1,14 +1,27 @@
 import Dictionary from "./types/dictionary";
-import constructor from "./types/constructor";
 import InjectionToken from "./providers/injection-token";
 import {ParamInfo} from "./dependency-container";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 
-export function getParamInfo(target: constructor<any>): ParamInfo[] {
-  const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
-  const injectionTokens: Dictionary<InjectionToken<any>> =
-    Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
+// The following is a patch of tsyringe's internal getParamInfo to support method parameters
+export function getParamInfo(
+  target: any,
+  propertyKey: string | symbol | undefined = undefined
+): ParamInfo[] {
+  let params: any[] = [];
+  params = propertyKey
+    ? Reflect.getMetadata("design:paramtypes", target, propertyKey) || []
+    : Reflect.getMetadata("design:paramtypes", target) || [];
+
+  const injectionTokens: Dictionary<InjectionToken<any>> = propertyKey
+    ? Reflect.getOwnMetadata(
+        INJECTION_TOKEN_METADATA_KEY,
+        target,
+        propertyKey
+      ) || {}
+    : Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
+
   Object.keys(injectionTokens).forEach(key => {
     params[+key] = injectionTokens[key];
   });
@@ -21,16 +34,31 @@ export function defineInjectionTokenMetadata(
 ): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
   return function(
     target: any,
-    _propertyKey: string | symbol,
+    propertyKey: string | symbol,
     parameterIndex: number
   ): any {
-    const injectionTokens =
-      Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
+    const injectionTokens: Dictionary<InjectionToken<any>> = propertyKey
+      ? Reflect.getOwnMetadata(
+          INJECTION_TOKEN_METADATA_KEY,
+          target,
+          propertyKey
+        ) || {}
+      : Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
     injectionTokens[parameterIndex] = data;
-    Reflect.defineMetadata(
-      INJECTION_TOKEN_METADATA_KEY,
-      injectionTokens,
-      target
-    );
+
+    if (propertyKey) {
+      Reflect.defineMetadata(
+        INJECTION_TOKEN_METADATA_KEY,
+        injectionTokens,
+        target,
+        propertyKey
+      );
+    } else {
+      Reflect.defineMetadata(
+        INJECTION_TOKEN_METADATA_KEY,
+        injectionTokens,
+        target
+      );
+    }
   };
 }
