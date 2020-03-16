@@ -1,5 +1,5 @@
 {
-  "name": "tsyringe",
+  "name": "@launchtray/tsyringe",
   "version": "4.1.0",
   "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/cjs/index.js",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Microsoft/tsyringe.git"
+    "url": "git+https://github.com/launchtray/tsyringe.git"
   },
   "keywords": [
     "dependency injection",
@@ -35,12 +35,11 @@
   "engines": {
     "node": ">= 6.0.0"
   },
-  "author": "Steven Hobson-Campbell",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Microsoft/tsyringe/issues"
+    "url": "https://github.com/launchtray/tsyringe/issues"
   },
-  "homepage": "https://github.com/Microsoft/tsyringe#readme",
+  "homepage": "https://github.com/launchtray/tsyringe#readme",
   "dependencies": {
     "tslib": "^1.9.3"
   },
