@@ -6,7 +6,7 @@ afterEach(() => {
   globalContainer.reset();
 });
 
-test("Error message composition", () => {
+test("Error message composition", async () => {
   class Ok {}
 
   @injectable()
@@ -24,9 +24,7 @@ test("Error message composition", () => {
     constructor(public d: Ok, public b: B) {}
   }
 
-  expect(() => {
-    globalContainer.resolve(A);
-  }).toThrow(
+  await expect(globalContainer.resolve(A)).rejects.toThrow(
     errorMatch([
       /Cannot inject the dependency "b" at position #1 of "A" constructor\. Reason:/,
       /Cannot inject the dependency "c" at position #0 of "B" constructor\. Reason:/,
@@ -36,15 +34,13 @@ test("Error message composition", () => {
   );
 });
 
-test("Param position", () => {
+test("Param position", async () => {
   @injectable()
   class A {
     constructor(@inject("missing") public j: any) {}
   }
 
-  expect(() => {
-    globalContainer.resolve(A);
-  }).toThrow(
+  await expect(globalContainer.resolve(A)).rejects.toThrow(
     errorMatch([
       /Cannot inject the dependency "j" at position #0 of "A" constructor\. Reason:/,
       /Attempted to resolve unregistered dependency token: "missing"/
@@ -52,10 +48,8 @@ test("Param position", () => {
   );
 });
 
-test("Detect circular dependency", () => {
-  expect(() => {
-    globalContainer.resolve(A01);
-  }).toThrow(
+test("Detect circular dependency", async () => {
+  await expect(globalContainer.resolve(A01)).rejects.toThrow(
     errorMatch([
       /Cannot inject the dependency "b" at position #0 of "A01" constructor\. Reason:/,
       /Cannot inject the dependency "a" at position #0 of "B01" constructor\. Reason:/,

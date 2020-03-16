@@ -172,10 +172,10 @@ class InternalDependencyContainer implements DependencyContainer {
     );
   }
 
-  public resolve<T>(
+  public async resolve<T>(
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
-  ): T {
+  ): Promise<T> {
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
@@ -185,17 +185,21 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return this.resolveRegistration(registration, context);
+      return await this.resolveRegistration(registration, context);
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return this.construct(token as constructor<T>, context);
+    const resolved = await this.construct(token as constructor<T>, context);
+
+    // TODO (KJM): wait for async initialization of `resolved`
+
+    return resolved;
   }
 
-  private resolveRegistration<T>(
+  private async resolveRegistration<T>(
     registration: Registration,
     context: ResolutionContext
-  ): T {
+  ): Promise<T> {
     // If we have already resolved this scoped dependency, return it
     if (
       registration.options.lifecycle === Lifecycle.ResolutionScoped &&
@@ -217,24 +221,26 @@ class InternalDependencyContainer implements DependencyContainer {
     } else if (isTokenProvider(registration.provider)) {
       resolved = returnInstance
         ? registration.instance ||
-          (registration.instance = this.resolve(
+          (registration.instance = await this.resolve(
             registration.provider.useToken,
             context
           ))
-        : this.resolve(registration.provider.useToken, context);
+        : await this.resolve(registration.provider.useToken, context);
     } else if (isClassProvider(registration.provider)) {
       resolved = returnInstance
         ? registration.instance ||
-          (registration.instance = this.construct(
+          (registration.instance = await this.construct(
             registration.provider.useClass,
             context
           ))
-        : this.construct(registration.provider.useClass, context);
+        : await this.construct(registration.provider.useClass, context);
     } else if (isFactoryProvider(registration.provider)) {
-      resolved = registration.provider.useFactory(this);
+      resolved = await registration.provider.useFactory(this);
     } else {
-      resolved = this.construct(registration.provider, context);
+      resolved = await this.construct(registration.provider, context);
     }
+
+    // TODO (KJM): wait for async initialization of `resolved`
 
     // If this is a scoped dependency, store resolved instance in context
     if (registration.options.lifecycle === Lifecycle.ResolutionScoped) {
@@ -244,10 +250,10 @@ class InternalDependencyContainer implements DependencyContainer {
     return resolved;
   }
 
-  public resolveAll<T>(
+  public async resolveAll<T>(
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
-  ): T[] {
+  ): Promise<T[]> {
     const registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
@@ -257,13 +263,19 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registrations) {
-      return registrations.map(item =>
-        this.resolveRegistration<T>(item, context)
-      );
+      const instances = [];
+      for (const item of registrations) {
+        instances.push(await this.resolveRegistration<T>(item, context));
+      }
+      return instances;
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return [this.construct(token as constructor<T>, context)];
+    const resolved = await this.construct(token as constructor<T>, context);
+
+    // TODO (KJM): wait for async initialization of `resolved`
+
+    return [resolved];
   }
 
   public isRegistered<T>(token: InjectionToken<T>, recursive = false): boolean {
@@ -336,7 +348,10 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private construct<T>(ctor: constructor<T>, context: ResolutionContext): T {
+  private async construct<T>(
+    ctor: constructor<T>,
+    context: ResolutionContext
+  ): Promise<T> {
     if (typeof ctor === "undefined") {
       throw new Error(
         "Attempted to construct an undefined constructor. Could mean a circular dependency problem."
@@ -353,20 +368,26 @@ class InternalDependencyContainer implements DependencyContainer {
       throw new Error(`TypeInfo not known for "${ctor.name}"`);
     }
 
-    const params = paramInfo.map(this.resolveParams(context, ctor));
+    let idx = 0;
+    const params = [];
+    for (const param of paramInfo) {
+      const resolver = this.resolveParams(context, ctor);
+      params.push(await resolver(param, idx));
+      idx++;
+    }
 
     return new ctor(...params);
   }
 
   private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
-    return (param: ParamInfo, idx: number) => {
+    return async (param: ParamInfo, idx: number) => {
       try {
         if (isTokenDescriptor(param)) {
           return param.multiple
-            ? this.resolveAll(param.token)
-            : this.resolve(param.token, context);
+            ? await this.resolveAll(param.token)
+            : await this.resolve(param.token, context);
         }
-        return this.resolve(param, context);
+        return await this.resolve(param, context);
       } catch (e) {
         throw new Error(formatErrorCtor(ctor, idx, e));
       }
