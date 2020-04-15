@@ -1,7 +1,7 @@
 {
-  "name": "@launchtray/tsyringe",
+  "name": "@launchtray/tsyringe-async",
   "version": "4.1.0",
-  "description": "Lightweight dependency injection container for JavaScript/TypeScript",
+  "description": "Lightweight dependency injection container for JavaScript/TypeScript, with asynchronous resolution",
   "main": "dist/cjs/index.js",
   "module": "./dist/esm5/index.js",
   "es2015": "./dist/esm2015/index.js",

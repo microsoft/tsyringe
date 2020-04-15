@@ -1,11 +1,15 @@
-[![Travis](https://img.shields.io/travis/Microsoft/tsyringe.svg)](https://travis-ci.org/Microsoft/tsyringe/)
-[![npm](https://img.shields.io/npm/v/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
-[![npm](https://img.shields.io/npm/dt/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
+[![Travis](https://travis-ci.com/launchtray/tsyringe.svg?branch=launchtray-dev)](https://travis-ci.org/github/launchtray/tsyringe/)
+[![npm](https://img.shields.io/npm/v/@launchtray/tsyringe-async.svg)](https://www.npmjs.com/package/@launchtray/tsyringe-async)
+[![npm](https://img.shields.io/npm/dt/@launchtray/tsyringe-async.svg)](https://www.npmjs.com/package/@launchtray/tsyringe-async)
 
-# TSyringe
+# tsyringe-async
 
 A lightweight dependency injection container for TypeScript/JavaScript for
-constructor injection.
+constructor injection. 
+
+This is a fork of [tsyringe](https://github.com/microsoft/tsyringe). The most notable difference
+is that resolution of dependencies is asynchronous (via async methods) to allow for asynchronous initialization of
+resolved objects after they are constructed.
 
 <!-- TOC depthFrom:1 depthTo:3 -->
 
@@ -474,21 +478,3 @@ container.register("SuperService", {
 const client = container.resolve(Client);
 // client's dependencies will have been resolved
 ```
-
-# Non goals
-The following is a list of features we explicitly plan on not adding:
-- Property Injection
-
-# Contributing
-
-This project welcomes contributions and suggestions. Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit [https://cla.microsoft.com](https://cla.microsoft.com).
-
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
