@@ -1,6 +1,11 @@
 import constructor from "../types/constructor";
+import {DelayedConstructor} from "../lazy-helpers";
 
-type InjectionToken<T = any> = constructor<T> | string | symbol;
+type InjectionToken<T = any> =
+  | constructor<T>
+  | string
+  | symbol
+  | DelayedConstructor<T>;
 
 export function isNormalToken(
   token?: InjectionToken<any>
@@ -16,6 +21,12 @@ export function isTokenDescriptor(
     "token" in descriptor &&
     "multiple" in descriptor
   );
+}
+
+export function isConstructorToken(
+  token?: InjectionToken<any>
+): token is constructor<any> | DelayedConstructor<any> {
+  return typeof token === "function" || token instanceof DelayedConstructor;
 }
 
 export interface TokenDescriptor {

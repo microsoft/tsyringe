@@ -9,6 +9,7 @@ import {
 import Provider, {isProvider} from "./providers/provider";
 import FactoryProvider from "./providers/factory-provider";
 import InjectionToken, {
+  isConstructorToken,
   isTokenDescriptor,
   TokenDescriptor
 } from "./providers/injection-token";
@@ -21,6 +22,7 @@ import Registry from "./registry";
 import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
+import {DelayedConstructor} from "./lazy-helpers";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -189,7 +191,12 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return this.construct(token as constructor<T>, context);
+    if (isConstructorToken(token)) {
+      return this.construct(token, context);
+    }
+    throw new Error(
+      "Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function."
+    );
   }
 
   private resolveRegistration<T>(
@@ -336,10 +343,13 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private construct<T>(ctor: constructor<T>, context: ResolutionContext): T {
-    if (typeof ctor === "undefined") {
-      throw new Error(
-        "Attempted to construct an undefined constructor. Could mean a circular dependency problem."
+  private construct<T>(
+    ctor: constructor<T> | DelayedConstructor<T>,
+    context: ResolutionContext
+  ): T {
+    if (ctor instanceof DelayedConstructor) {
+      return ctor.createProxy((target: constructor<T>) =>
+        this.resolve(target, context)
       );
     }
 

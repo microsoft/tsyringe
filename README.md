@@ -26,6 +26,9 @@ constructor injection.
     - [Registry](#registry)
     - [Resolution](#resolution)
     - [Child Containers](#child-containers)
+  - [Circular dependencies](#circular-dependencies)
+    - [The `delay` helper function](#the-delay-helper-function)
+    - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -225,10 +228,10 @@ form of a Token/Provider pair, so we need to take a brief diversion to discuss t
 
 ### Injection Token
 
-A token may be either a string, a symbol, or a class constructor.
+A token may be either a string, a symbol, a class constructor, or a instance of [`DelayedConstructor`](#circular-dependencies).
 
 ```typescript
-type InjectionToken<T = any> = constructor<T> | string | symbol;
+type InjectionToken<T = any> = constructor<T> | DelayedConstructor<T> | string | symbol;
 ```
 
 ### Providers
@@ -396,6 +399,95 @@ const childContainer2 = container.createChildContainer();
 const grandChildContainer = childContainer1.createChildContainer();
 ```
 Each of the child containers will have independent registrations, but if a registration is absent in the child container at resolution, the token will be resolved from the parent. This allows for a set of common services to be registered at the root, with specialized services registered on the child. This can be useful, for example, if you wish to create per-request containers that use common stateless services from the root container.
+
+# Circular dependencies
+
+Sometimes you need to inject services that have cyclic dependencies between them. As an example:
+
+```typescript
+@injectable()
+export class Foo {
+  constructor(public bar: Bar) {}
+}
+
+@injectable()
+export class Bar {
+  constructor(public foo: Foo) {}
+}
+
+```
+
+Trying to resolve one of the services will end in an error because always one of the constructor will not be fully defined to construct the other one.
+
+```typescript
+container.resolve(Foo)
+```
+```
+Error: Cannot inject the dependency at position #0 of "Foo" constructor. Reason:
+    Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function.
+``` 
+ 
+###  The `delay` helper function
+
+The best way to deal with this situation is to do some kind of refactor to avoid the cyclic dependencies. Usually this implies introducing additional services to cut the cycles. 
+
+But when refactor is not an option you can use the `delay` function helper. The `delay` function wraps the constructor in an instance of `DelayedConstructor`. 
+
+The *delayed constructor* is a kind of special `InjectionToken` that will eventually be evaluated to construct an intermediate proxy object wrapping a factory for the real object.
+ 
+When the proxy object is used for the first time it will construct a real object using this factory and any usage will be forwarded to the real object. 
+
+```typescript
+@injectable()
+export class Foo {
+  constructor(@inject(delay(Bar)) public bar: Bar) {}
+}
+
+@injectable()
+export class Bar {
+  constructor(@inject(delay(Foo)) public foo: Foo) {}
+}
+
+// construction of foo is possible
+const foo = container.resolve(Foo);
+
+// property bar will hold a proxy that looks and acts as a real Bar instance. 
+foo.bar instanceof Bar; // true
+
+```
+
+###  Interfaces and circular dependencies
+
+
+We can rest in the fact that a `DelayedConstructor` could be used in the same contexts that a constructor and will be handled transparently by tsyringe. Such idea is used in the next example involving interfaces:
+
+```typescript
+export interface IFoo {}
+
+@injectable()
+@registry([
+  {
+    token: "IBar",
+    // `DelayedConstructor` of Bar will be the token
+    useToken: delay(Bar)
+  }
+])
+export class Foo implements IFoo {
+  constructor(@inject("IBar") public bar: IBar) {}
+}
+export interface IBar {}
+
+@injectable()
+@registry([
+  {
+    token: "IFoo",
+    useToken: delay(Foo)
+  }
+])
+export class Bar implements IBar {
+  constructor(@inject("IFoo") public foo: IFoo) {}
+}
+```    
 
 # Full examples
 
