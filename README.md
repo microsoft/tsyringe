@@ -468,7 +468,7 @@ export interface IFoo {}
 @registry([
   {
     token: "IBar",
-    // `DelayeConstructor` of Bar will be the token
+    // `DelayedConstructor` of Bar will be the token
     useToken: delay(() => Bar)
   }
 ])
