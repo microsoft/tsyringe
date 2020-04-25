@@ -10,7 +10,7 @@ export interface Ib03 {
 @registry([
   {
     token: "Ia03",
-    useToken: delay(() => A03)
+    useToken: delay(A03)
   }
 ])
 export class B03 implements Ib03 {

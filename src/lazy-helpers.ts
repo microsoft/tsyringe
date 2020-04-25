@@ -14,7 +14,7 @@ export class DelayedConstructor<T> {
     "construct"
   ];
 
-  constructor(private delayedConstructor: () => constructor<T>) {}
+  constructor(private delayedConstructor: constructor<T>) {}
 
   public createProxy(createObject: (ctor: constructor<T>) => T): T {
     const target: object = {};
@@ -22,7 +22,7 @@ export class DelayedConstructor<T> {
     let value: T;
     const delayedObject: () => T = (): T => {
       if (!init) {
-        value = createObject(this.delayedConstructor());
+        value = createObject(this.delayedConstructor);
         init = true;
       }
       return value;
@@ -45,7 +45,7 @@ export class DelayedConstructor<T> {
 }
 
 export function delay<T>(
-  delayedConstructor: () => constructor<T>
+  delayedConstructor: constructor<T>
 ): DelayedConstructor<T> {
   return new DelayedConstructor<T>(delayedConstructor);
 }

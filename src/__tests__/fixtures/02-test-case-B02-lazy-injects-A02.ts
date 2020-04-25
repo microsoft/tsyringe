@@ -8,5 +8,5 @@ export class B02 {
   public prop = {
     defined: false
   };
-  constructor(@inject(delay(() => A02)) public a: A02) {}
+  constructor(@inject(delay(A02)) public a: A02) {}
 }
