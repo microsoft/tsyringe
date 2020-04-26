@@ -344,21 +344,22 @@ You can also mark up any class with the `@registry()` decorator to have the give
 upon importing the marked up class. `@registry()` takes an array of providers like so:
 
 ```TypeScript
-@injectable()
 @registry([
-  Foo,
-  Bar,
-  {
-    token: "IFoobar",
-    useClass: MockFoobar
+  { token: Foobar, useClass: Foobar },
+  { token: "theirClass", useFactory: (c) => {
+       return new TheirClass( "arg" )
+    },
   }
 ])
 class MyClass {}
 ```
 
-This is useful when you don't control the entry point for your code (e.g. being instantiated by a framework), and need
-an opportunity to do registration. Otherwise, it's preferable to use `.register()`. **Note** the `@injectable()` decorator
-must precede the `@registry()` decorator, since TypeScript executes decorators inside out.
+This is useful when you want to [register multiple classes for the same token](#register).
+You can also use it to register and declare objects that wouldn't be imported by anything else,
+such as more classes annotated with `@registry` or that are otherwise responsible for registering objects.
+Lastly you might choose to use this to register 3rd party instances instead of the `container.register(...)` method.
+note: if you want this class to be `@injectable` you must put the decorator before `@registry`, this annotation is not 
+required though.
 
 ### Resolution
 
