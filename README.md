@@ -26,6 +26,7 @@ constructor injection.
     - [Registry](#registry)
     - [Resolution](#resolution)
     - [Child Containers](#child-containers)
+    - [Clearing Instances](#clearing-instances)
   - [Circular dependencies](#circular-dependencies)
     - [The `delay` helper function](#the-delay-helper-function)
     - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
@@ -391,15 +392,54 @@ class MyRegistry {}
 
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
 ```
+
 ### Child Containers
-If you need to have multiple containers that have disparate sets of registrations, you can create child containers
+
+If you need to have multiple containers that have disparate sets of registrations, you can create child containers:
 
 ```typescript
 const childContainer1 = container.createChildContainer();
 const childContainer2 = container.createChildContainer();
 const grandChildContainer = childContainer1.createChildContainer();
 ```
+
 Each of the child containers will have independent registrations, but if a registration is absent in the child container at resolution, the token will be resolved from the parent. This allows for a set of common services to be registered at the root, with specialized services registered on the child. This can be useful, for example, if you wish to create per-request containers that use common stateless services from the root container.
+
+### Clearing Instances
+
+The `container.clearInstances()` method allows you to clear all previously created and registered instances:
+
+```typescript
+class Foo {}
+@singleton()
+class Bar {}
+
+const myFoo = new Foo();
+container.registerInstance("Test", myFoo);
+const myBar = container.resolve(Bar);
+
+container.clearInstances();
+
+container.resolve("Test"); // throws error
+const myBar2 = container.resolve(Bar); // myBar !== myBar2
+const myBar3 = container.resolve(Bar); // myBar2 === myBar3
+```
+
+Unlike with `container.reset()`, the registrations themselves are not cleared.
+This is especially useful for testing:
+
+```typescript
+@singleton()
+class Foo {}
+
+beforeEach(() => {
+  container.clearInstances();
+});
+
+test("something", () => {
+  container.resolve(Foo); // will be a new singleton instance in every test
+});
+```
 
 # Circular dependencies
 

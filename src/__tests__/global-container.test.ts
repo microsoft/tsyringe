@@ -308,6 +308,38 @@ test("returns true for a registered token provider", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
+// --- clearInstances() ---
+
+test("clears ValueProvider registrations", () => {
+  class Foo {}
+  const instance1 = new Foo();
+  globalContainer.registerInstance("Test", instance1);
+
+  expect(globalContainer.resolve("Test")).toBeInstanceOf(Foo);
+
+  globalContainer.clearInstances();
+
+  expect(() => {
+    globalContainer.resolve("Test");
+  }).toThrow();
+});
+
+test("clears cached instances from container.resolve() calls", () => {
+  @singleton()
+  class Foo {}
+  const instance1 = globalContainer.resolve(Foo);
+
+  globalContainer.clearInstances();
+
+  // Foo should still be registered as singleton
+  const instance2 = globalContainer.resolve(Foo);
+  const instance3 = globalContainer.resolve(Foo);
+
+  expect(instance1).not.toBe(instance2);
+  expect(instance2).toBe(instance3);
+  expect(instance3).toBeInstanceOf(Foo);
+});
+
 // --- @injectable ---
 
 test("@injectable resolves when not using DI", () => {

@@ -286,6 +286,22 @@ class InternalDependencyContainer implements DependencyContainer {
     this._registry.clear();
   }
 
+  public clearInstances(): void {
+    for (const [token, registrations] of this._registry.entries()) {
+      this._registry.setAll(
+        token,
+        registrations
+          // Clear ValueProvider registrations
+          .filter(registration => !isValueProvider(registration.provider))
+          // Clear instances
+          .map(registration => {
+            registration.instance = undefined;
+            return registration;
+          })
+      );
+    }
+  }
+
   public createChildContainer(): DependencyContainer {
     const childContainer = new InternalDependencyContainer(this);
 
