@@ -481,12 +481,12 @@ When the proxy object is used for the first time it will construct a real object
 ```typescript
 @injectable()
 export class Foo {
-  constructor(@inject(delay(Bar)) public bar: Bar) {}
+  constructor(@inject(delay(() => Bar)) public bar: Bar) {}
 }
 
 @injectable()
 export class Bar {
-  constructor(@inject(delay(Foo)) public foo: Foo) {}
+  constructor(@inject(delay(() => Foo)) public foo: Foo) {}
 }
 
 // construction of foo is possible
@@ -510,7 +510,7 @@ export interface IFoo {}
   {
     token: "IBar",
     // `DelayedConstructor` of Bar will be the token
-    useToken: delay(Bar)
+    useToken: delay(() => Bar)
   }
 ])
 export class Foo implements IFoo {
@@ -522,7 +522,7 @@ export interface IBar {}
 @registry([
   {
     token: "IFoo",
-    useToken: delay(Foo)
+    useToken: delay(() => Foo)
   }
 ])
 export class Bar implements IBar {

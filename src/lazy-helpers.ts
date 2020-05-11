@@ -14,7 +14,7 @@ export class DelayedConstructor<T> {
     "construct"
   ];
 
-  constructor(private delayedConstructor: constructor<T>) {}
+  constructor(private wrap: () => constructor<T>) {}
 
   public createProxy(createObject: (ctor: constructor<T>) => T): T {
     const target: object = {};
@@ -22,7 +22,7 @@ export class DelayedConstructor<T> {
     let value: T;
     const delayedObject: () => T = (): T => {
       if (!init) {
-        value = createObject(this.delayedConstructor);
+        value = createObject(this.wrap());
         init = true;
       }
       return value;
@@ -45,7 +45,12 @@ export class DelayedConstructor<T> {
 }
 
 export function delay<T>(
-  delayedConstructor: constructor<T>
+  wrappedConstructor: () => constructor<T>
 ): DelayedConstructor<T> {
-  return new DelayedConstructor<T>(delayedConstructor);
+  if (typeof wrappedConstructor === "undefined") {
+    throw new Error(
+      "Attempt to `delay` undefined. Constructor must be wrapped in a callback"
+    );
+  }
+  return new DelayedConstructor<T>(wrappedConstructor);
 }
