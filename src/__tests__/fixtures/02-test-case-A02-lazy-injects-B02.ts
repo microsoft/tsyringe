@@ -4,5 +4,5 @@ import {delay} from "../../lazy-helpers";
 
 @injectable()
 export class A02 {
-  constructor(@inject(delay(B02)) public b: B02) {}
+  constructor(@inject(delay(() => B02)) public b: B02) {}
 }

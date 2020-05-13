@@ -13,7 +13,7 @@ test("DelayedConstructor delays creation until first usage", () => {
       created = true;
     }
   }
-  const delayedConstructor = delay(Foo);
+  const delayedConstructor = delay(() => Foo);
   expect(delayedConstructor).toBeInstanceOf(DelayedConstructor);
   const foo: Foo = delayedConstructor.createProxy(Target => new Target());
   expect(created).toBe(false);
@@ -28,6 +28,7 @@ test("Lazy creation with proxies allow circular dependencies", () => {
   b.prop["defined"] = true;
   expect(a).toBeInstanceOf(A02);
   expect(a.b).toBeInstanceOf(B02);
+  expect(b.a).toBeInstanceOf(A02);
   expect(a.b.prop["defined"]).toBe(true);
   expect(a.b.name).toBe("B02");
 });
