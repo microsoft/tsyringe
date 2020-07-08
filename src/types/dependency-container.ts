@@ -69,5 +69,7 @@ export default interface DependencyContainer {
    * Clears all registered tokens
    */
   reset(): void;
+
+  clearInstances(): void;
   createChildContainer(): DependencyContainer;
 }

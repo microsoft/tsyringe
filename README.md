@@ -30,6 +30,8 @@ resolved objects after they are constructed.
     - [Registry](#registry)
     - [Resolution](#resolution)
     - [Child Containers](#child-containers)
+    - [Clearing Instances](#clearing-instances)
+  - [Circular dependencies](#circular-dependencies)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -345,21 +347,22 @@ You can also mark up any class with the `@registry()` decorator to have the give
 upon importing the marked up class. `@registry()` takes an array of providers like so:
 
 ```TypeScript
-@injectable()
 @registry([
-  Foo,
-  Bar,
-  {
-    token: "IFoobar",
-    useClass: MockFoobar
+  { token: Foobar, useClass: Foobar },
+  { token: "theirClass", useFactory: (c) => {
+       return new TheirClass( "arg" )
+    },
   }
 ])
 class MyClass {}
 ```
 
-This is useful when you don't control the entry point for your code (e.g. being instantiated by a framework), and need
-an opportunity to do registration. Otherwise, it's preferable to use `.register()`. **Note** the `@injectable()` decorator
-must precede the `@registry()` decorator, since TypeScript executes decorators inside out.
+This is useful when you want to [register multiple classes for the same token](#register).
+You can also use it to register and declare objects that wouldn't be imported by anything else,
+such as more classes annotated with `@registry` or that are otherwise responsible for registering objects.
+Lastly you might choose to use this to register 3rd party instances instead of the `container.register(...)` method.
+note: if you want this class to be `@injectable` you must put the decorator before `@registry`, this annotation is not 
+required though.
 
 ### Resolution
 
@@ -391,15 +394,59 @@ class MyRegistry {}
 
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
 ```
+
 ### Child Containers
-If you need to have multiple containers that have disparate sets of registrations, you can create child containers
+
+If you need to have multiple containers that have disparate sets of registrations, you can create child containers:
 
 ```typescript
 const childContainer1 = container.createChildContainer();
 const childContainer2 = container.createChildContainer();
 const grandChildContainer = childContainer1.createChildContainer();
 ```
+
 Each of the child containers will have independent registrations, but if a registration is absent in the child container at resolution, the token will be resolved from the parent. This allows for a set of common services to be registered at the root, with specialized services registered on the child. This can be useful, for example, if you wish to create per-request containers that use common stateless services from the root container.
+
+### Clearing Instances
+
+The `container.clearInstances()` method allows you to clear all previously created and registered instances:
+
+```typescript
+class Foo {}
+@singleton()
+class Bar {}
+
+const myFoo = new Foo();
+container.registerInstance("Test", myFoo);
+const myBar = container.resolve(Bar);
+
+container.clearInstances();
+
+container.resolve("Test"); // throws error
+const myBar2 = container.resolve(Bar); // myBar !== myBar2
+const myBar3 = container.resolve(Bar); // myBar2 === myBar3
+```
+
+Unlike with `container.reset()`, the registrations themselves are not cleared.
+This is especially useful for testing:
+
+```typescript
+@singleton()
+class Foo {}
+
+beforeEach(() => {
+  container.clearInstances();
+});
+
+test("something", () => {
+  container.resolve(Foo); // will be a new singleton instance in every test
+});
+```
+
+# Circular dependencies
+
+The `delay` function in tsyringe for circular dependencies is not currently supported by tsyringe-async.
+Thus circular dependencies should be avoided or managed via application-level workarounds.
 
 # Full examples
 
