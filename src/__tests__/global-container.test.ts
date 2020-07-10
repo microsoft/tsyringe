@@ -7,6 +7,7 @@ import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
 import Lifecycle from "../types/lifecycle";
 import {ValueProvider} from "../providers";
+import initializer from "../decorators/initializer";
 
 interface IBar {
   value: string;
@@ -425,6 +426,95 @@ test("@injectable handles optional params", async () => {
 
   const myOptional = await globalContainer.resolve(MyOptional);
   expect(myOptional.myFoo instanceof Foo).toBeTruthy();
+});
+
+test("@initializer is called during resolution", async () => {
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Bar);
+  expect(resolved.value).toBe("initialized");
+});
+
+test("@initializer is called prior to being injected as a dependency", async () => {
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+  }
+  @injectable()
+  class Foo {
+    public valueAtConstruction!: string;
+    constructor(public myBar: Bar) {
+      this.valueAtConstruction = myBar.value;
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Foo);
+  expect(resolved.valueAtConstruction).toBe("initialized");
+});
+
+test("@initializer injects dependencies into initializer method", async () => {
+  @injectable()
+  class Foo {
+    public value!: string;
+    public otherValue!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+    @initializer()
+    async otherInit(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.otherValue = "set";
+    }
+  }
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    public otherValue!: string;
+    @initializer()
+    async init(foo: Foo): Promise<void> {
+      this.value = foo.value;
+      this.otherValue = foo.otherValue;
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Bar);
+  expect(resolved.value).toBe("initialized");
+  expect(resolved.otherValue).toBe("set");
+});
+
+test("@initializer is called only once per object, regardless of how many times it's resolved", async () => {
+  let callCount = 0;
+
+  @singleton()
+  class Bar {
+    @initializer()
+    async init(): Promise<void> {
+      callCount++;
+    }
+  }
+
+  await globalContainer.resolve(Bar);
+  await globalContainer.resolve(Bar);
+  expect(callCount).toBe(1);
 });
 
 test("@singleton registers class as singleton with the global container", async () => {

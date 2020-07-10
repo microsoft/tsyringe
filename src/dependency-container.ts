@@ -21,6 +21,7 @@ import Registry from "./registry";
 import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
+import {callInitializers} from "./decorators/initializer";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -190,9 +191,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     // No registration for this token, but since it's a constructor, return an instance
     const resolved = await this.construct(token as constructor<T>, context);
-
-    // TODO (KJM): wait for async initialization of `resolved`
-
+    await callInitializers(this, resolved);
     return resolved;
   }
 
@@ -254,8 +253,7 @@ class InternalDependencyContainer implements DependencyContainer {
       resolved = await this.construct(registration.provider, context);
     }
 
-    // TODO (KJM): wait for async initialization of `resolved`
-
+    await callInitializers(this, resolved);
     return resolved;
   }
 
@@ -279,9 +277,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     // No registration for this token, but since it's a constructor, return an instance
     const resolved = await this.construct(token as constructor<T>, context);
-
-    // TODO (KJM): wait for async initialization of `resolved`
-
+    await callInitializers(this, resolved);
     return [resolved];
   }
 

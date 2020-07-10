@@ -23,6 +23,7 @@ resolved objects after they are constructed.
     - [inject()](#inject)
     - [injectAll()](#injectall)
     - [scoped()](#scoped)
+    - [initializer()](#initializer)
   - [Container](#container)
     - [Injection Token](#injection-token)
     - [Providers](#providers)
@@ -219,6 +220,42 @@ Class decorator factory that registers the class as a scoped dependency within t
 ```typescript
 @scoped(Lifecycle.ContainerScoped)
 class Foo {}
+```
+
+### initializer()
+Any methods that this decorator is applied to will be called (and awaited) following construction of 
+the object but prior to resolution. This allows for asynchronous initialization of an object that is
+guaranteed to run before it is injected as a dependency elsewhere.
+
+Initializer methods can also have dependencies injected as arguments, as they are with constructors. 
+
+#### Usage
+
+```typescript
+@injectable()
+class Foo {
+  public value!: string;
+
+  @initializer()
+  async init(): Promise<void> {
+    value = await API.fetchValue();
+  }
+}
+
+@injectable()
+class Bar {
+  constructor(public foo: Foo) {
+    // foo.value is safe to use here, since Foo.init has 
+    // already been called prior to injection
+  }
+
+  @initializer()
+  async init(foo: Foo): Promise<void> {
+    // This is an example of how parameters can be injected into initializer methods
+    // similar to how they can be with constructors
+    await db.save(foo.value);
+  }
+}
 ```
 
 ## Container
