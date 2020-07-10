@@ -13,7 +13,7 @@ resolved objects after they are constructed.
 
 <!-- TOC depthFrom:1 depthTo:3 -->
 
-- [TSyringe](#tsyringe)
+- [tsyringe-async](#tsyringe-async)
   - [Installation](#installation)
 - [API](#api)
   - [Decorators](#decorators)
@@ -45,13 +45,13 @@ resolved objects after they are constructed.
 Install by `npm`
 
 ```sh
-npm install --save tsyringe
+npm install --save @launchtray/tsyringe-async
 ```
 
 **or** install with `yarn` (this project is developed using `yarn`)
 
 ```sh
-yarn add tsyringe
+yarn add @launchtrary/tsyringe-async
 ```
 
 Modify your `tsconfig.json` to include the following settings
@@ -96,7 +96,7 @@ to be instantiated.
 #### Usage
 
 ```typescript
-import {injectable} from "tsyringe";
+import {injectable} from "@launchtray/tsyringe-async";
 
 @injectable()
 class Foo {
@@ -105,7 +105,7 @@ class Foo {
 
 // some other file
 import "reflect-metadata";
-import {container} from "tsyringe";
+import {container} from "@launchtray/tsyringe-async";
 import {Foo} from "./foo";
 
 const instance = container.resolve(Foo);
@@ -119,7 +119,7 @@ global container.
 #### Usage
 
 ```typescript
-import {singleton} from "tsyringe";
+import {singleton} from "@launchtray/tsyringe-async";
 
 @singleton()
 class Foo {
@@ -128,7 +128,7 @@ class Foo {
 
 // some other file
 import "reflect-metadata";
-import {container} from "tsyringe";
+import {container} from "@launchtray/tsyringe-async";
 import {Foo} from "./foo";
 
 const instance = container.resolve(Foo);
@@ -142,7 +142,7 @@ information to be stored in the constructor's metadata.
 #### Usage
 
 ```typescript
-import {injectable, inject} from "tsyringe";
+import {injectable, inject} from "@launchtray/tsyringe-async";
 
 interface Database {
   // ...
@@ -162,7 +162,7 @@ It will inject an array using the specified injection token to resolve the value
 #### Usage
 
 ```typescript
-import {injectable, injectAll} from "tsyringe";
+import {injectable, injectAll} from "@launchtray/tsyringe-async";
 
 @injectable
 class Foo {}
@@ -303,7 +303,7 @@ This factory is used to lazy construct an object and cache result, returning the
 resolution. This is very similar to `@singleton()`
 
 ```typescript
-import {instanceCachingFactory} from "tsyringe";
+import {instanceCachingFactory} from "@launchtray/tsyringe-async";
 
 {
   token: "SingletonFoo";
@@ -317,7 +317,7 @@ This factory is used to provide conditional behavior upon resolution. It caches 
 has an optional parameter to resolve fresh each time.
 
 ```typescript
-import {predicateAwareClassFactory} from "tsyringe";
+import {predicateAwareClassFactory} from "@launchtray/tsyringe-async";
 
 {
   token: 
@@ -473,7 +473,7 @@ export class Foo {}
 ```typescript
 // Bar.ts
 import {Foo} from "./Foo";
-import {injectable} from "tsyringe";
+import {injectable} from "@launchtray/tsyringe-async";
 
 @injectable()
 export class Bar {
@@ -484,7 +484,7 @@ export class Bar {
 ```typescript
 // main.ts
 import "reflect-metadata";
-import {container} from "tsyringe";
+import {container} from "@launchtray/tsyringe-async";
 import {Bar} from "./Bar";
 
 const myBar = container.resolve(Bar);
@@ -513,7 +513,7 @@ export class TestService implements SuperService {
 
 ```typescript
 // Client.ts
-import {injectable, inject} from "tsyringe";
+import {injectable, inject} from "@launchtray/tsyringe-async";
 
 @injectable()
 export class Client {
@@ -526,7 +526,7 @@ export class Client {
 import "reflect-metadata";
 import {Client} from "./Client";
 import {TestService} from "./TestService";
-import {container} from "tsyringe";
+import {container} from "@launchtray/tsyringe-async";
 
 container.register("SuperService", {
   useClass: TestService
