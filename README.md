@@ -19,7 +19,6 @@ resolved objects after they are constructed.
   - [Decorators](#decorators)
     - [injectable()](#injectable)
     - [singleton()](#singleton)
-    - [autoInjectable()](#autoinjectable)
     - [inject()](#inject)
     - [injectAll()](#injectall)
     - [scoped()](#scoped)
@@ -134,32 +133,6 @@ import {Foo} from "./foo";
 
 const instance = container.resolve(Foo);
 ```
-
-### autoInjectable()
-
-Class decorator factory that replaces the decorated class' constructor with
-a parameterless constructor that has dependencies auto-resolved.
-
-**Note** Resolution is performed using the global container.
-
-#### Usage
-
-```typescript
-import {autoInjectable} from "tsyringe";
-
-@autoInjectable()
-class Foo {
-  constructor(private database?: Database) {}
-}
-
-// some other file
-import {Foo} from "./foo";
-
-const instance = new Foo();
-```
-
-Notice how in order to allow the use of the empty constructor `new Foo()`, we
-need to make the parameters optional, e.g. `database?: Database`.
 
 ### inject()
 
