@@ -5,9 +5,9 @@ export default function instanceCachingFactory<T>(
   factoryFunc: FactoryFunction<T>
 ): FactoryFunction<T> {
   let instance: T;
-  return (dependencyContainer: DependencyContainer) => {
+  return async (dependencyContainer: DependencyContainer) => {
     if (instance == undefined) {
-      instance = factoryFunc(dependencyContainer);
+      instance = await factoryFunc(dependencyContainer);
     }
     return instance;
   };

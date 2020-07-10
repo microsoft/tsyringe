@@ -9,7 +9,6 @@ import {
 import Provider, {isProvider} from "./providers/provider";
 import FactoryProvider from "./providers/factory-provider";
 import InjectionToken, {
-  isConstructorToken,
   isTokenDescriptor,
   TokenDescriptor
 } from "./providers/injection-token";
@@ -22,7 +21,7 @@ import Registry from "./registry";
 import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
-import {DelayedConstructor} from "./lazy-helpers";
+import {callInitializers} from "./decorators/initializer";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -174,10 +173,10 @@ class InternalDependencyContainer implements DependencyContainer {
     );
   }
 
-  public resolve<T>(
+  public async resolve<T>(
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
-  ): T {
+  ): Promise<T> {
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
@@ -187,30 +186,41 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     if (registration) {
-      return this.resolveRegistration(registration, context);
+      return await this.resolveRegistration(registration, context);
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    if (isConstructorToken(token)) {
-      return this.construct(token, context);
-    }
-    throw new Error(
-      "Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function."
-    );
+    const resolved = await this.construct(token as constructor<T>, context);
+    await callInitializers(this, resolved);
+    return resolved;
   }
 
   private resolveRegistration<T>(
     registration: Registration,
     context: ResolutionContext
-  ): T {
-    // If we have already resolved this scoped dependency, return it
+  ): Promise<T> {
+    // If we have already resolved or are already resolving this scoped dependency, return its promise
     if (
       registration.options.lifecycle === Lifecycle.ResolutionScoped &&
       context.scopedResolutions.has(registration)
     ) {
       return context.scopedResolutions.get(registration);
     }
+    const resolutionPromise = this.resolveRegistrationHelper<T>(
+      registration,
+      context
+    );
+    // If this is a scoped dependency, store promise for the resolved instance in context
+    if (registration.options.lifecycle === Lifecycle.ResolutionScoped) {
+      context.scopedResolutions.set(registration, resolutionPromise);
+    }
+    return resolutionPromise;
+  }
 
+  private async resolveRegistrationHelper<T>(
+    registration: Registration,
+    context: ResolutionContext
+  ): Promise<T> {
     const isSingleton = registration.options.lifecycle === Lifecycle.Singleton;
     const isContainerScoped =
       registration.options.lifecycle === Lifecycle.ContainerScoped;
@@ -224,53 +234,51 @@ class InternalDependencyContainer implements DependencyContainer {
     } else if (isTokenProvider(registration.provider)) {
       resolved = returnInstance
         ? registration.instance ||
-          (registration.instance = this.resolve(
+          (registration.instance = await this.resolve(
             registration.provider.useToken,
             context
           ))
-        : this.resolve(registration.provider.useToken, context);
+        : await this.resolve(registration.provider.useToken, context);
     } else if (isClassProvider(registration.provider)) {
       resolved = returnInstance
         ? registration.instance ||
-          (registration.instance = this.construct(
+          (registration.instance = await this.construct(
             registration.provider.useClass,
             context
           ))
-        : this.construct(registration.provider.useClass, context);
+        : await this.construct(registration.provider.useClass, context);
     } else if (isFactoryProvider(registration.provider)) {
-      resolved = registration.provider.useFactory(this);
+      resolved = await registration.provider.useFactory(this);
     } else {
-      resolved = this.construct(registration.provider, context);
+      resolved = await this.construct(registration.provider, context);
     }
 
-    // If this is a scoped dependency, store resolved instance in context
-    if (registration.options.lifecycle === Lifecycle.ResolutionScoped) {
-      context.scopedResolutions.set(registration, resolved);
-    }
-
+    await callInitializers(this, resolved);
     return resolved;
   }
 
-  public resolveAll<T>(
+  public async resolveAll<T>(
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
-  ): T[] {
-    const registrations = this.getAllRegistrations(token);
+  ): Promise<T[]> {
+    let registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
-      throw new Error(
-        `Attempted to resolve unregistered dependency token: "${token.toString()}"`
-      );
+      registrations = [];
     }
 
     if (registrations) {
-      return registrations.map(item =>
-        this.resolveRegistration<T>(item, context)
-      );
+      const instances = [];
+      for (const item of registrations) {
+        instances.push(await this.resolveRegistration<T>(item, context));
+      }
+      return instances;
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return [this.construct(token as constructor<T>, context)];
+    const resolved = await this.construct(token as constructor<T>, context);
+    await callInitializers(this, resolved);
+    return [resolved];
   }
 
   public isRegistered<T>(token: InjectionToken<T>, recursive = false): boolean {
@@ -359,13 +367,13 @@ class InternalDependencyContainer implements DependencyContainer {
     return null;
   }
 
-  private construct<T>(
-    ctor: constructor<T> | DelayedConstructor<T>,
+  private async construct<T>(
+    ctor: constructor<T>,
     context: ResolutionContext
-  ): T {
-    if (ctor instanceof DelayedConstructor) {
-      return ctor.createProxy((target: constructor<T>) =>
-        this.resolve(target, context)
+  ): Promise<T> {
+    if (typeof ctor === "undefined") {
+      throw new Error(
+        "Attempted to construct an undefined constructor. Could mean a circular dependency problem."
       );
     }
 
@@ -379,20 +387,26 @@ class InternalDependencyContainer implements DependencyContainer {
       throw new Error(`TypeInfo not known for "${ctor.name}"`);
     }
 
-    const params = paramInfo.map(this.resolveParams(context, ctor));
+    let idx = 0;
+    const params = [];
+    for (const param of paramInfo) {
+      const resolver = this.resolveParams(context, ctor);
+      params.push(await resolver(param, idx));
+      idx++;
+    }
 
     return new ctor(...params);
   }
 
   private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
-    return (param: ParamInfo, idx: number) => {
+    return async (param: ParamInfo, idx: number) => {
       try {
         if (isTokenDescriptor(param)) {
           return param.multiple
-            ? this.resolveAll(param.token)
-            : this.resolve(param.token, context);
+            ? await this.resolveAll(param.token)
+            : await this.resolve(param.token, context);
         }
-        return this.resolve(param, context);
+        return await this.resolve(param, context);
       } catch (e) {
         throw new Error(formatErrorCtor(ctor, idx, e));
       }

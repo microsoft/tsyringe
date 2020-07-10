@@ -7,6 +7,7 @@ import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
 import Lifecycle from "../types/lifecycle";
 import {ValueProvider} from "../providers";
+import initializer from "../decorators/initializer";
 
 interface IBar {
   value: string;
@@ -18,7 +19,7 @@ afterEach(() => {
 
 // --- registerSingleton() ---
 
-test("a singleton registration can be redirected", () => {
+test("a singleton registration can be redirected", async () => {
   @singleton()
   class MyService {}
 
@@ -30,70 +31,68 @@ test("a singleton registration can be redirected", () => {
   }
 
   globalContainer.registerSingleton(MyService, MyServiceMock);
-  const myClass = globalContainer.resolve(MyClass);
+  const myClass = await globalContainer.resolve(MyClass);
 
   expect(myClass.myService).toBeInstanceOf(MyServiceMock);
 });
 
 // --- resolve() ---
 
-test("fails to resolve unregistered dependency by name", () => {
-  expect(() => {
-    globalContainer.resolve("NotRegistered");
-  }).toThrow();
+test("fails to resolve unregistered dependency by name", async () => {
+  await expect(globalContainer.resolve("NotRegistered")).rejects.toThrow();
 });
 
-test("allows arrays to be registered by value provider", () => {
+test("allows arrays to be registered by value provider", async () => {
   class Bar {}
 
   const value = [new Bar()];
   globalContainer.register<Bar[]>("BarArray", {useValue: value});
 
-  const barArray = globalContainer.resolve<Bar[]>("BarArray");
+  const barArray = await globalContainer.resolve<Bar[]>("BarArray");
   expect(Array.isArray(barArray)).toBeTruthy();
   expect(value === barArray).toBeTruthy();
 });
 
-test("allows arrays to be registered by factory provider", () => {
+test("allows arrays to be registered by factory provider", async () => {
   class Bar {}
 
   globalContainer.register<Bar>(Bar, {useClass: Bar});
   globalContainer.register<Bar[]>("BarArray", {
-    useFactory: (container): Bar[] => {
-      return [container.resolve(Bar)];
+    useFactory: async (container): Promise<Bar[]> => {
+      return [await container.resolve(Bar)];
     }
   });
 
-  const barArray = globalContainer.resolve<Bar[]>("BarArray");
+  const barArray = await globalContainer.resolve<Bar[]>("BarArray");
   expect(Array.isArray(barArray)).toBeTruthy();
   expect(barArray.length).toBe(1);
   expect(barArray[0]).toBeInstanceOf(Bar);
 });
 
-test("resolves transient instances when not registered", () => {
+test("resolves transient instances when not registered", async () => {
   class Bar {}
 
-  const myBar = globalContainer.resolve(Bar);
-  const myBar2 = globalContainer.resolve(Bar);
+  const myBar = await globalContainer.resolve(Bar);
+  const myBar2 = await globalContainer.resolve(Bar);
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar2 instanceof Bar).toBeTruthy();
   expect(myBar).not.toBe(myBar2);
 });
 
-test("resolves a transient instance when registered by class provider", () => {
+test("resolves a transient instance when registered by class provider", async () => {
   class Bar {}
   globalContainer.register("Bar", {useClass: Bar});
 
-  const myBar = globalContainer.resolve<Bar>("Bar");
-  const myBar2 = globalContainer.resolve<Bar>("Bar");
+  const myBar = await globalContainer.resolve<Bar>("Bar");
+  const myBar2 = await globalContainer.resolve<Bar>("Bar");
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar2 instanceof Bar).toBeTruthy();
   expect(myBar).not.toBe(myBar2);
 });
 
-test("resolves a singleton instance when class provider registered as singleton", () => {
+test("resolves a singleton instance when class provider registered as singleton", async () => {
   class Bar {}
   globalContainer.register(
     "Bar",
@@ -101,26 +100,26 @@ test("resolves a singleton instance when class provider registered as singleton"
     {lifecycle: Lifecycle.Singleton}
   );
 
-  const myBar = globalContainer.resolve<Bar>("Bar");
-  const myBar2 = globalContainer.resolve<Bar>("Bar");
+  const myBar = await globalContainer.resolve<Bar>("Bar");
+  const myBar2 = await globalContainer.resolve<Bar>("Bar");
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar).toBe(myBar2);
 });
 
-test("resolves a transient instance when using token alias", () => {
+test("resolves a transient instance when using token alias", async () => {
   class Bar {}
   globalContainer.register("Bar", {useClass: Bar});
   globalContainer.register("BarAlias", {useToken: "Bar"});
 
-  const myBar = globalContainer.resolve<Bar>("BarAlias");
-  const myBar2 = globalContainer.resolve<Bar>("BarAlias");
+  const myBar = await globalContainer.resolve<Bar>("BarAlias");
+  const myBar2 = await globalContainer.resolve<Bar>("BarAlias");
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar).not.toBe(myBar2);
 });
 
-test("resolves a singleton instance when token alias registered as singleton", () => {
+test("resolves a singleton instance when token alias registered as singleton", async () => {
   class Bar {}
   globalContainer.register("Bar", {useClass: Bar});
   globalContainer.register(
@@ -129,89 +128,90 @@ test("resolves a singleton instance when token alias registered as singleton", (
     {lifecycle: Lifecycle.Singleton}
   );
 
-  const myBar = globalContainer.resolve<Bar>("SingletonBar");
-  const myBar2 = globalContainer.resolve<Bar>("SingletonBar");
+  const myBar = await globalContainer.resolve<Bar>("SingletonBar");
+  const myBar2 = await globalContainer.resolve<Bar>("SingletonBar");
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar).toBe(myBar2);
 });
 
-test("resolves same instance when registerInstance() is used with a class", () => {
+test("resolves same instance when registerInstance() is used with a class", async () => {
   class Bar {}
   const instance = new Bar();
   globalContainer.registerInstance(Bar, instance);
 
-  expect(globalContainer.resolve(Bar)).toBe(instance);
+  expect(await globalContainer.resolve(Bar)).toBe(instance);
 });
 
-test("resolves same instance when registerInstance() is used with a name", () => {
+test("resolves same instance when registerInstance() is used with a name", async () => {
   class Bar {}
   const instance = new Bar();
   globalContainer.registerInstance("Test", instance);
 
-  expect(globalContainer.resolve("Test")).toBe(instance);
+  expect(await globalContainer.resolve("Test")).toBe(instance);
 });
 
-test("registerType() allows for classes to be swapped", () => {
+test("registerType() allows for classes to be swapped", async () => {
   class Bar {}
   class Foo {}
   globalContainer.registerType(Bar, Foo);
 
-  expect(globalContainer.resolve<Foo>(Bar) instanceof Foo).toBeTruthy();
+  expect((await globalContainer.resolve<Foo>(Bar)) instanceof Foo).toBeTruthy();
 });
 
-test("registerType() allows for names to be registered for a given type", () => {
+test("registerType() allows for names to be registered for a given type", async () => {
   class Bar {}
   globalContainer.registerType("CoolName", Bar);
 
-  expect(globalContainer.resolve<Bar>("CoolName") instanceof Bar).toBeTruthy();
+  expect(
+    (await globalContainer.resolve<Bar>("CoolName")) instanceof Bar
+  ).toBeTruthy();
 });
 
-test("executes a registered factory each time resolve is called", () => {
+test("executes a registered factory each time resolve is called", async () => {
   const factoryMock = jest.fn();
   globalContainer.register("Test", {useFactory: factoryMock});
 
-  globalContainer.resolve("Test");
-  globalContainer.resolve("Test");
+  await globalContainer.resolve("Test");
+  await globalContainer.resolve("Test");
 
   expect(factoryMock.mock.calls.length).toBe(2);
 });
 
-test("resolves to factory result each time resolve is called", () => {
+test("resolves to factory result each time resolve is called", async () => {
   const factoryMock = jest.fn();
   globalContainer.register("Test", {useFactory: factoryMock});
   const value1 = 1;
   const value2 = 2;
 
   factoryMock.mockReturnValue(value1);
-  const result1 = globalContainer.resolve("Test");
+  const result1 = await globalContainer.resolve("Test");
   factoryMock.mockReturnValue(value2);
-  const result2 = globalContainer.resolve("Test");
+  const result2 = await globalContainer.resolve("Test");
 
   expect(result1).toBe(value1);
   expect(result2).toBe(value2);
 });
 
-test("resolves anonymous classes separately", () => {
+test("resolves anonymous classes separately", async () => {
   const ctor1 = (() => class {})();
   const ctor2 = (() => class {})();
 
   globalContainer.registerInstance(ctor1, new ctor1());
   globalContainer.registerInstance(ctor2, new ctor2());
 
-  expect(globalContainer.resolve(ctor1) instanceof ctor1).toBeTruthy();
-  expect(globalContainer.resolve(ctor2) instanceof ctor2).toBeTruthy();
+  expect((await globalContainer.resolve(ctor1)) instanceof ctor1).toBeTruthy();
+  expect((await globalContainer.resolve(ctor2)) instanceof ctor2).toBeTruthy();
 });
 
 // --- resolveAll() ---
 
-test("fails to resolveAll unregistered dependency by name", () => {
-  expect(() => {
-    globalContainer.resolveAll("NotRegistered");
-  }).toThrow();
+test("resolveAll of unregistered dependency by name returns empty array", async () => {
+  const notRegisteredResult = await globalContainer.resolveAll("NotRegistered");
+  expect(notRegisteredResult).toEqual([]);
 });
 
-test("resolves an array of transient instances bound to a single interface", () => {
+test("resolves an array of transient instances bound to a single interface", async () => {
   interface FooInterface {
     bar: string;
   }
@@ -227,17 +227,19 @@ test("resolves an array of transient instances bound to a single interface", () 
   globalContainer.register<FooInterface>("FooInterface", {useClass: FooOne});
   globalContainer.register<FooInterface>("FooInterface", {useClass: FooTwo});
 
-  const fooArray = globalContainer.resolveAll<FooInterface>("FooInterface");
+  const fooArray = await globalContainer.resolveAll<FooInterface>(
+    "FooInterface"
+  );
   expect(Array.isArray(fooArray)).toBeTruthy();
   expect(fooArray[0]).toBeInstanceOf(FooOne);
   expect(fooArray[1]).toBeInstanceOf(FooTwo);
 });
 
-test("resolves all transient instances when not registered", () => {
+test("resolves all transient instances when not registered", async () => {
   class Foo {}
 
-  const foo1 = globalContainer.resolveAll<Foo>(Foo);
-  const foo2 = globalContainer.resolveAll<Foo>(Foo);
+  const foo1 = await globalContainer.resolveAll<Foo>(Foo);
+  const foo2 = await globalContainer.resolveAll<Foo>(Foo);
 
   expect(Array.isArray(foo1)).toBeTruthy();
   expect(Array.isArray(foo2)).toBeTruthy();
@@ -248,7 +250,7 @@ test("resolves all transient instances when not registered", () => {
 
 // --- isRegistered() ---
 
-test("returns true for a registered singleton class", () => {
+test("returns true for a registered singleton class", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -263,7 +265,7 @@ test("returns true for a registered singleton class", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
-test("returns true for a registered class provider", () => {
+test("returns true for a registered class provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -278,7 +280,7 @@ test("returns true for a registered class provider", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
-test("returns true for a registered value provider", () => {
+test("returns true for a registered value provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -293,7 +295,7 @@ test("returns true for a registered value provider", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
-test("returns true for a registered token provider", () => {
+test("returns true for a registered token provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -310,21 +312,19 @@ test("returns true for a registered token provider", () => {
 
 // --- clearInstances() ---
 
-test("clears ValueProvider registrations", () => {
+test("clears ValueProvider registrations", async () => {
   class Foo {}
   const instance1 = new Foo();
   globalContainer.registerInstance("Test", instance1);
 
-  expect(globalContainer.resolve("Test")).toBeInstanceOf(Foo);
+  expect(await globalContainer.resolve("Test")).toBeInstanceOf(Foo);
 
   globalContainer.clearInstances();
 
-  expect(() => {
-    globalContainer.resolve("Test");
-  }).toThrow();
+  await expect(globalContainer.resolve("Test")).rejects.toThrow();
 });
 
-test("clears cached instances from container.resolve() calls", () => {
+test("clears cached instances from container.resolve() calls", async () => {
   @singleton()
   class Foo {}
   const instance1 = globalContainer.resolve(Foo);
@@ -332,8 +332,8 @@ test("clears cached instances from container.resolve() calls", () => {
   globalContainer.clearInstances();
 
   // Foo should still be registered as singleton
-  const instance2 = globalContainer.resolve(Foo);
-  const instance3 = globalContainer.resolve(Foo);
+  const instance2 = await globalContainer.resolve(Foo);
+  const instance3 = await globalContainer.resolve(Foo);
 
   expect(instance1).not.toBe(instance2);
   expect(instance2).toBe(instance3);
@@ -342,7 +342,7 @@ test("clears cached instances from container.resolve() calls", () => {
 
 // --- @injectable ---
 
-test("@injectable resolves when not using DI", () => {
+test("@injectable resolves when not using DI", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -361,7 +361,7 @@ test("@injectable resolves when not using DI", () => {
   expect(myFoo.myBar.value).toBe(myValue);
 });
 
-test("@injectable resolves when using DI", () => {
+test("@injectable resolves when using DI", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -371,12 +371,12 @@ test("@injectable resolves when using DI", () => {
   class Foo {
     constructor(public myBar: Bar) {}
   }
-  const myFoo = globalContainer.resolve(Foo);
+  const myFoo = await globalContainer.resolve(Foo);
 
   expect(myFoo.myBar.value).toBe("");
 });
 
-test("@injectable resolves nested dependencies when using DI", () => {
+test("@injectable resolves nested dependencies when using DI", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -389,12 +389,12 @@ test("@injectable resolves nested dependencies when using DI", () => {
   class FooBar {
     constructor(public myFoo: Foo) {}
   }
-  const myFooBar = globalContainer.resolve(FooBar);
+  const myFooBar = await globalContainer.resolve(FooBar);
 
   expect(myFooBar.myFoo.myBar.value).toBe("");
 });
 
-test("@injectable preserves static members", () => {
+test("@injectable preserves static members", async () => {
   const value = "foobar";
 
   @injectable()
@@ -410,7 +410,7 @@ test("@injectable preserves static members", () => {
   expect(MyStatic.testVal).toBe(value);
 });
 
-test("@injectable handles optional params", () => {
+test("@injectable handles optional params", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -424,22 +424,111 @@ test("@injectable handles optional params", () => {
     constructor(public myFoo?: Foo) {}
   }
 
-  const myOptional = globalContainer.resolve(MyOptional);
+  const myOptional = await globalContainer.resolve(MyOptional);
   expect(myOptional.myFoo instanceof Foo).toBeTruthy();
 });
 
-test("@singleton registers class as singleton with the global container", () => {
+test("@initializer is called during resolution", async () => {
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Bar);
+  expect(resolved.value).toBe("initialized");
+});
+
+test("@initializer is called prior to being injected as a dependency", async () => {
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+  }
+  @injectable()
+  class Foo {
+    public valueAtConstruction!: string;
+    constructor(public myBar: Bar) {
+      this.valueAtConstruction = myBar.value;
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Foo);
+  expect(resolved.valueAtConstruction).toBe("initialized");
+});
+
+test("@initializer injects dependencies into initializer method", async () => {
+  @injectable()
+  class Foo {
+    public value!: string;
+    public otherValue!: string;
+    @initializer()
+    async init(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.value = "initialized";
+    }
+    @initializer()
+    async otherInit(): Promise<void> {
+      // Introduce delay to ensure this initializer is awaited
+      await new Promise(resolve => setTimeout(resolve, 100));
+      this.otherValue = "set";
+    }
+  }
+  @injectable()
+  class Bar implements IBar {
+    public value!: string;
+    public otherValue!: string;
+    @initializer()
+    async init(foo: Foo): Promise<void> {
+      this.value = foo.value;
+      this.otherValue = foo.otherValue;
+    }
+  }
+
+  const resolved = await globalContainer.resolve(Bar);
+  expect(resolved.value).toBe("initialized");
+  expect(resolved.otherValue).toBe("set");
+});
+
+test("@initializer is called only once per object, regardless of how many times it's resolved", async () => {
+  let callCount = 0;
+
+  @singleton()
+  class Bar {
+    @initializer()
+    async init(): Promise<void> {
+      callCount++;
+    }
+  }
+
+  await globalContainer.resolve(Bar);
+  await globalContainer.resolve(Bar);
+  expect(callCount).toBe(1);
+});
+
+test("@singleton registers class as singleton with the global container", async () => {
   @singleton()
   class Bar {}
 
-  const myBar = globalContainer.resolve(Bar);
-  const myBar2 = globalContainer.resolve(Bar);
+  const myBar = await globalContainer.resolve(Bar);
+  const myBar2 = await globalContainer.resolve(Bar);
 
   expect(myBar instanceof Bar).toBeTruthy();
   expect(myBar).toBe(myBar2);
 });
 
-test("dependencies of an @singleton can be resolved", () => {
+test("dependencies of an @singleton can be resolved", async () => {
   class Foo {}
 
   @singleton()
@@ -447,12 +536,12 @@ test("dependencies of an @singleton can be resolved", () => {
     constructor(public foo: Foo) {}
   }
 
-  const myBar = globalContainer.resolve(Bar);
+  const myBar = await globalContainer.resolve(Bar);
 
   expect(myBar.foo instanceof Foo).toBeTruthy();
 });
 
-test("passes through the given params", () => {
+test("passes through the given params", async () => {
   @injectable()
   class MyViewModel {
     constructor(public a: any, public b: any, public c: any) {}
@@ -470,14 +559,14 @@ test("passes through the given params", () => {
 
 // --- @registry ---
 
-test("doesn't blow up with empty args", () => {
+test("doesn't blow up with empty args", async () => {
   @registry()
   class RegisteringFoo {}
 
   expect(() => new RegisteringFoo()).not.toThrow();
 });
 
-test("registers by type provider", () => {
+test("registers by type provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -490,7 +579,7 @@ test("registers by type provider", () => {
   expect(globalContainer.isRegistered(Bar)).toBeTruthy();
 });
 
-test("registers by class provider", () => {
+test("registers by class provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -508,7 +597,7 @@ test("registers by class provider", () => {
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
 
-test("registers by value provider", () => {
+test("registers by value provider", async () => {
   const registration = {
     token: "IBar",
     useValue: {}
@@ -522,7 +611,7 @@ test("registers by value provider", () => {
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
 
-test("registers by token provider", () => {
+test("registers by token provider", async () => {
   const registration = {
     token: "IBar",
     useToken: "IFoo"
@@ -536,7 +625,7 @@ test("registers by token provider", () => {
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
 
-test("registers by factory provider", () => {
+test("registers by factory provider", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -544,8 +633,8 @@ test("registers by factory provider", () => {
 
   const registration = {
     token: "IBar",
-    useFactory: (globalContainer: DependencyContainer) =>
-      globalContainer.resolve(Bar)
+    useFactory: async (globalContainer: DependencyContainer) =>
+      await globalContainer.resolve(Bar)
   };
 
   @registry([registration])
@@ -556,7 +645,7 @@ test("registers by factory provider", () => {
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
 
-test("registers mixed types", () => {
+test("registers mixed types", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -579,7 +668,7 @@ test("registers mixed types", () => {
   expect(globalContainer.isRegistered(Foo)).toBeTruthy();
 });
 
-test("registers by symbol token provider", () => {
+test("registers by symbol token provider", async () => {
   const registration = {
     token: Symbol("obj1"),
     useValue: {}
@@ -591,14 +680,14 @@ test("registers by symbol token provider", () => {
   new RegisteringFoo();
 
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
-  expect(globalContainer.resolve(registration.token)).toEqual(
+  expect(await globalContainer.resolve(registration.token)).toEqual(
     registration.useValue
   );
 });
 
 // --- @inject ---
 
-test("allows interfaces to be resolved from the constructor with injection token", () => {
+test("allows interfaces to be resolved from the constructor with injection token", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -610,12 +699,12 @@ test("allows interfaces to be resolved from the constructor with injection token
     constructor(@inject(Bar) public myBar: IBar) {}
   }
 
-  const myFoo = globalContainer.resolve(FooWithInterface);
+  const myFoo = await globalContainer.resolve(FooWithInterface);
 
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
-test("allows interfaces to be resolved from the constructor with just a name", () => {
+test("allows interfaces to be resolved from the constructor with just a name", async () => {
   @injectable()
   class Bar implements IBar {
     public value = "";
@@ -632,12 +721,12 @@ test("allows interfaces to be resolved from the constructor with just a name", (
     constructor(@inject("IBar") public myBar: IBar) {}
   }
 
-  const myFoo = globalContainer.resolve(FooWithInterface);
+  const myFoo = await globalContainer.resolve(FooWithInterface);
 
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
 
-test("allows explicit array dependencies to be resolved by inject decorator", () => {
+test("allows explicit array dependencies to be resolved by inject decorator", async () => {
   @injectable()
   class Foo {}
 
@@ -650,13 +739,13 @@ test("allows explicit array dependencies to be resolved by inject decorator", ()
   globalContainer.register<Foo[]>("FooArray", {useValue: fooArray});
   globalContainer.register<Bar>(Bar, {useClass: Bar});
 
-  const bar = globalContainer.resolve<Bar>(Bar);
+  const bar = await globalContainer.resolve<Bar>(Bar);
   expect(bar.foo === fooArray).toBeTruthy();
 });
 
 // --- @injectAll ---
 
-test("injects all dependencies bound to a given interface", () => {
+test("injects all dependencies bound to a given interface", async () => {
   interface Foo {
     str: string;
   }
@@ -677,14 +766,14 @@ test("injects all dependencies bound to a given interface", () => {
   globalContainer.register<Foo>("Foo", {useClass: FooImpl1});
   globalContainer.register<Foo>("Foo", {useClass: FooImpl2});
 
-  const bar = globalContainer.resolve<Bar>(Bar);
+  const bar = await globalContainer.resolve<Bar>(Bar);
   expect(Array.isArray(bar.foo)).toBeTruthy();
   expect(bar.foo.length).toBe(2);
   expect(bar.foo[0]).toBeInstanceOf(FooImpl1);
   expect(bar.foo[1]).toBeInstanceOf(FooImpl2);
 });
 
-test("allows array dependencies to be resolved if a single instance is in the container", () => {
+test("allows array dependencies to be resolved if a single instance is in the container", async () => {
   @injectable()
   class Foo {}
 
@@ -695,64 +784,68 @@ test("allows array dependencies to be resolved if a single instance is in the co
   globalContainer.register<Foo>(Foo, {useClass: Foo});
   globalContainer.register<Bar>(Bar, {useClass: Bar});
 
-  const bar = globalContainer.resolve<Bar>(Bar);
+  const bar = await globalContainer.resolve<Bar>(Bar);
   expect(bar.foo.length).toBe(1);
 });
 
 // --- factories ---
 
-test("instanceCachingFactory caches the returned instance", () => {
-  const factory = instanceCachingFactory(() => {});
+test("instanceCachingFactory caches the returned instance", async () => {
+  const factory = instanceCachingFactory(async () => {});
 
-  expect(factory(globalContainer)).toBe(factory(globalContainer));
+  expect(await factory(globalContainer)).toBe(await factory(globalContainer));
 });
 
-test("instanceCachingFactory caches the returned instance even when there is branching logic in the factory", () => {
+test("instanceCachingFactory caches the returned instance even when there is branching logic in the factory", async () => {
   const instanceA = {};
   const instanceB = {};
   let useA = true;
 
-  const factory = instanceCachingFactory(() => (useA ? instanceA : instanceB));
+  const factory = instanceCachingFactory(async () =>
+    useA ? instanceA : instanceB
+  );
 
-  expect(factory(globalContainer)).toBe(instanceA);
+  expect(await factory(globalContainer)).toBe(instanceA);
   useA = false;
-  expect(factory(globalContainer)).toBe(instanceA);
+  expect(await factory(globalContainer)).toBe(instanceA);
 });
 
-test("predicateAwareClassFactory correctly switches the returned instance with caching on", () => {
+test("predicateAwareClassFactory correctly switches the returned instance with caching on", async () => {
   class A {}
   class B {}
   let useA = true;
   const factory = predicateAwareClassFactory(() => useA, A, B);
 
-  expect(factory(globalContainer) instanceof A).toBeTruthy();
+  expect((await factory(globalContainer)) instanceof A).toBeTruthy();
   useA = false;
-  expect(factory(globalContainer) instanceof B).toBeTruthy();
+  expect((await factory(globalContainer)) instanceof B).toBeTruthy();
 });
 
-test("predicateAwareClassFactory returns the same instance each call with caching on", () => {
+test("predicateAwareClassFactory returns the same instance each call with caching on", async () => {
   class A {}
   class B {}
   const factory = predicateAwareClassFactory(() => true, A, B);
 
-  expect(factory(globalContainer)).toBe(factory(globalContainer));
+  expect(await factory(globalContainer)).toBe(await factory(globalContainer));
 });
 
-test("predicateAwareClassFactory correctly switches the returned instance with caching off", () => {
+test("predicateAwareClassFactory correctly switches the returned instance with caching off", async () => {
   class A {}
   class B {}
   let useA = true;
   const factory = predicateAwareClassFactory(() => useA, A, B, false);
 
-  expect(factory(globalContainer) instanceof A).toBeTruthy();
+  expect((await factory(globalContainer)) instanceof A).toBeTruthy();
   useA = false;
-  expect(factory(globalContainer) instanceof B).toBeTruthy();
+  expect((await factory(globalContainer)) instanceof B).toBeTruthy();
 });
 
-test("predicateAwareClassFactory returns new instances each call with caching off", () => {
+test("predicateAwareClassFactory returns new instances each call with caching off", async () => {
   class A {}
   class B {}
   const factory = predicateAwareClassFactory(() => true, A, B, false);
 
-  expect(factory(globalContainer)).not.toBe(factory(globalContainer));
+  expect(await factory(globalContainer)).not.toBe(
+    await factory(globalContainer)
+  );
 });

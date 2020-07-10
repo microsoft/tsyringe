@@ -9,7 +9,7 @@ describe("Scoped registrations", () => {
       globalContainer.reset();
     });
 
-    it("uses the same instance during the same resolution chain", () => {
+    it("uses the same instance during the same resolution chain", async () => {
       class X {}
 
       @injectable()
@@ -32,12 +32,12 @@ describe("Scoped registrations", () => {
         {useClass: X},
         {lifecycle: Lifecycle.ResolutionScoped}
       );
-      const a = globalContainer.resolve(A);
+      const a = await globalContainer.resolve(A);
 
       expect(a.b.x).toBe(a.c.x);
     });
 
-    it("uses different instances for difference resolution chains", () => {
+    it("uses different instances for difference resolution chains", async () => {
       class X {}
 
       @injectable()
@@ -55,8 +55,8 @@ describe("Scoped registrations", () => {
         {useClass: X},
         {lifecycle: Lifecycle.ResolutionScoped}
       );
-      const a = globalContainer.resolve(A);
-      const b = globalContainer.resolve(A);
+      const a = await globalContainer.resolve(A);
+      const b = await globalContainer.resolve(A);
 
       expect(a.b.x).not.toBe(b.b.x);
     });
@@ -67,7 +67,7 @@ describe("Scoped registrations", () => {
       globalContainer.reset();
     });
 
-    it("creates a new instance of requested service within a scope using class provider", () => {
+    it("creates a new instance of requested service within a scope using class provider", async () => {
       class Foo {}
 
       debugger;
@@ -75,13 +75,13 @@ describe("Scoped registrations", () => {
         lifecycle: Lifecycle.ContainerScoped
       });
 
-      const foo1 = globalContainer.resolve(Foo);
+      const foo1 = await globalContainer.resolve(Foo);
 
       expect(foo1).toBeInstanceOf(Foo);
 
       const scope = globalContainer.createChildContainer();
-      const foo2 = scope.resolve(Foo);
-      const foo3 = scope.resolve(Foo);
+      const foo2 = await scope.resolve(Foo);
+      const foo3 = await scope.resolve(Foo);
 
       expect(foo2).toBeInstanceOf(Foo);
       expect(foo3).toBeInstanceOf(Foo);
@@ -89,7 +89,7 @@ describe("Scoped registrations", () => {
       expect(foo2 === foo3).toBeTruthy();
     });
 
-    it("creates a new instance of requested service within a scope using token provider", () => {
+    it("creates a new instance of requested service within a scope using token provider", async () => {
       interface IBar {
         void: string;
       }
@@ -108,13 +108,13 @@ describe("Scoped registrations", () => {
         }
       );
 
-      const foo1 = globalContainer.resolve(Foo);
+      const foo1 = await globalContainer.resolve(Foo);
 
       expect(foo1).toBeInstanceOf(Foo);
 
       const scope = globalContainer.createChildContainer();
-      const foo2 = scope.resolve(Foo);
-      const foo3 = scope.resolve(Foo);
+      const foo2 = await scope.resolve(Foo);
+      const foo3 = await scope.resolve(Foo);
 
       expect(foo2).toBeInstanceOf(Foo);
       expect(foo3).toBeInstanceOf(Foo);
@@ -122,56 +122,56 @@ describe("Scoped registrations", () => {
       expect(foo2 === foo3).toBeTruthy();
     });
 
-    it("should not create a new instance of requested singleton service", () => {
+    it("should not create a new instance of requested singleton service", async () => {
       class Bar {}
 
       globalContainer.registerSingleton(Bar, Bar);
 
-      const bar1 = globalContainer.resolve(Bar);
+      const bar1 = await globalContainer.resolve(Bar);
 
       expect(bar1).toBeInstanceOf(Bar);
 
       const scope = globalContainer.createChildContainer();
-      const bar2 = scope.resolve(Bar);
+      const bar2 = await scope.resolve(Bar);
 
       expect(bar2).toBeInstanceOf(Bar);
       expect(bar1 === bar2).toBeTruthy();
     });
 
-    it("allows multiple scope levels", () => {
+    it("allows multiple scope levels", async () => {
       class Bar {}
 
       globalContainer.register(Bar, Bar, {
         lifecycle: Lifecycle.ContainerScoped
       });
-      const bar = globalContainer.resolve(Bar);
+      const bar = await globalContainer.resolve(Bar);
 
       const scope1 = globalContainer.createChildContainer();
-      const bar1 = scope1.resolve(Bar);
+      const bar1 = await scope1.resolve(Bar);
 
       const scope2 = scope1.createChildContainer();
-      const bar2 = scope2.resolve(Bar);
+      const bar2 = await scope2.resolve(Bar);
 
       expect(bar === bar1).toBeFalsy();
       expect(bar === bar2).toBeFalsy();
       expect(bar1 === bar2).toBeFalsy();
 
-      expect(bar === globalContainer.resolve(Bar)).toBeTruthy();
-      expect(bar1 === scope1.resolve(Bar)).toBeTruthy();
-      expect(bar2 === scope2.resolve(Bar)).toBeTruthy();
+      expect(bar === (await globalContainer.resolve(Bar))).toBeTruthy();
+      expect(bar1 === (await scope1.resolve(Bar))).toBeTruthy();
+      expect(bar2 === (await scope2.resolve(Bar))).toBeTruthy();
     });
 
-    it("@scoped decorator registers class as scoped", () => {
+    it("@scoped decorator registers class as scoped", async () => {
       @scoped(Lifecycle.ContainerScoped)
       class Foo {}
 
-      const foo1 = globalContainer.resolve(Foo);
+      const foo1 = await globalContainer.resolve(Foo);
 
       expect(foo1).toBeInstanceOf(Foo);
 
       const scope = globalContainer.createChildContainer();
-      const foo2 = scope.resolve(Foo);
-      const foo3 = scope.resolve(Foo);
+      const foo2 = await scope.resolve(Foo);
+      const foo3 = await scope.resolve(Foo);
 
       expect(foo2).toBeInstanceOf(Foo);
       expect(foo3).toBeInstanceOf(Foo);
@@ -179,17 +179,17 @@ describe("Scoped registrations", () => {
       expect(foo2 === foo3).toBeTruthy();
     });
 
-    it("@scoped decorator registers class as scoped using custom token", () => {
+    it("@scoped decorator registers class as scoped using custom token", async () => {
       @scoped(Lifecycle.ContainerScoped, "Foo")
       class Foo {}
 
-      const foo1 = globalContainer.resolve("Foo");
+      const foo1 = await globalContainer.resolve("Foo");
 
       expect(foo1).toBeInstanceOf(Foo);
 
       const scope = globalContainer.createChildContainer();
-      const foo2 = scope.resolve("Foo");
-      const foo3 = scope.resolve("Foo");
+      const foo2 = await scope.resolve("Foo");
+      const foo3 = await scope.resolve("Foo");
 
       expect(foo2).toBeInstanceOf(Foo);
       expect(foo3).toBeInstanceOf(Foo);
@@ -197,7 +197,7 @@ describe("Scoped registrations", () => {
       expect(foo2 === foo3).toBeTruthy();
     });
 
-    it("resolve all resolves scoped dependencies properly", () => {
+    it("resolve all resolves scoped dependencies properly", async () => {
       interface Foo {
         test: string;
       }
@@ -214,15 +214,15 @@ describe("Scoped registrations", () => {
       globalContainer.register<Foo>("Foo", FooQux, {
         lifecycle: Lifecycle.ContainerScoped
       });
-      const foo1 = globalContainer.resolveAll<Foo>("Foo");
-      const foo2 = globalContainer.resolveAll<Foo>("Foo");
+      const foo1 = await globalContainer.resolveAll<Foo>("Foo");
+      const foo2 = await globalContainer.resolveAll<Foo>("Foo");
 
       expect(foo1[0] === foo2[0]).toBeTruthy();
       expect(foo1[1] === foo2[1]).toBeTruthy();
 
       const scope = globalContainer.createChildContainer();
-      const foo3 = scope.resolveAll<Foo>("Foo");
-      const foo4 = scope.resolveAll<Foo>("Foo");
+      const foo3 = await scope.resolveAll<Foo>("Foo");
+      const foo4 = await scope.resolveAll<Foo>("Foo");
 
       expect(foo3[0] === foo4[0]).toBeTruthy();
       expect(foo3[1] === foo4[1]).toBeTruthy();

@@ -1,11 +1,15 @@
-[![Travis](https://img.shields.io/travis/Microsoft/tsyringe.svg)](https://travis-ci.org/Microsoft/tsyringe/)
-[![npm](https://img.shields.io/npm/v/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
-[![npm](https://img.shields.io/npm/dt/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
+[![Travis](https://travis-ci.com/launchtray/tsyringe.svg?branch=launchtray-dev)](https://travis-ci.org/github/launchtray/tsyringe/)
+[![npm](https://img.shields.io/npm/v/@launchtray/tsyringe-async.svg)](https://www.npmjs.com/package/@launchtray/tsyringe-async)
+[![npm](https://img.shields.io/npm/dt/@launchtray/tsyringe-async.svg)](https://www.npmjs.com/package/@launchtray/tsyringe-async)
 
-# TSyringe
+# tsyringe-async
 
 A lightweight dependency injection container for TypeScript/JavaScript for
-constructor injection.
+constructor injection. 
+
+This is a fork of [tsyringe](https://github.com/microsoft/tsyringe). The most notable difference
+is that resolution of dependencies is asynchronous (via async methods) to allow for asynchronous initialization of
+resolved objects after they are constructed.
 
 <!-- TOC depthFrom:1 depthTo:3 -->
 
@@ -15,10 +19,10 @@ constructor injection.
   - [Decorators](#decorators)
     - [injectable()](#injectable)
     - [singleton()](#singleton)
-    - [autoInjectable()](#autoinjectable)
     - [inject()](#inject)
     - [injectAll()](#injectall)
     - [scoped()](#scoped)
+    - [initializer()](#initializer)
   - [Container](#container)
     - [Injection Token](#injection-token)
     - [Providers](#providers)
@@ -28,8 +32,6 @@ constructor injection.
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
   - [Circular dependencies](#circular-dependencies)
-    - [The `delay` helper function](#the-delay-helper-function)
-    - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -132,32 +134,6 @@ import {Foo} from "./foo";
 const instance = container.resolve(Foo);
 ```
 
-### autoInjectable()
-
-Class decorator factory that replaces the decorated class' constructor with
-a parameterless constructor that has dependencies auto-resolved.
-
-**Note** Resolution is performed using the global container.
-
-#### Usage
-
-```typescript
-import {autoInjectable} from "tsyringe";
-
-@autoInjectable()
-class Foo {
-  constructor(private database?: Database) {}
-}
-
-// some other file
-import {Foo} from "./foo";
-
-const instance = new Foo();
-```
-
-Notice how in order to allow the use of the empty constructor `new Foo()`, we
-need to make the parameters optional, e.g. `database?: Database`.
-
 ### inject()
 
 Parameter decorator factory that allows for interface and other non-class
@@ -219,6 +195,42 @@ Class decorator factory that registers the class as a scoped dependency within t
 class Foo {}
 ```
 
+### initializer()
+Any methods that this decorator is applied to will be called (and awaited) following construction of 
+the object but prior to resolution. This allows for asynchronous initialization of an object that is
+guaranteed to run before it is injected as a dependency elsewhere.
+
+Initializer methods can also have dependencies injected as arguments, as they are with constructors. 
+
+#### Usage
+
+```typescript
+@injectable()
+class Foo {
+  public value!: string;
+
+  @initializer()
+  async init(): Promise<void> {
+    value = await API.fetchValue();
+  }
+}
+
+@injectable()
+class Bar {
+  constructor(public foo: Foo) {
+    // foo.value is safe to use here, since Foo.init has 
+    // already been called prior to injection
+  }
+
+  @initializer()
+  async init(foo: Foo): Promise<void> {
+    // This is an example of how parameters can be injected into initializer methods
+    // similar to how they can be with constructors
+    await db.save(foo.value);
+  }
+}
+```
+
 ## Container
 
 The general principle behind [Inversion of Control](https://en.wikipedia.org/wiki/Inversion_of_control) (IoC) containers
@@ -229,10 +241,10 @@ form of a Token/Provider pair, so we need to take a brief diversion to discuss t
 
 ### Injection Token
 
-A token may be either a string, a symbol, a class constructor, or a instance of [`DelayedConstructor`](#circular-dependencies).
+A token may be either a string, a symbol, or a class constructor.
 
 ```typescript
-type InjectionToken<T = any> = constructor<T> | DelayedConstructor<T> | string | symbol;
+type InjectionToken<T = any> = constructor<T> | string | symbol;
 ```
 
 ### Providers
@@ -443,92 +455,8 @@ test("something", () => {
 
 # Circular dependencies
 
-Sometimes you need to inject services that have cyclic dependencies between them. As an example:
-
-```typescript
-@injectable()
-export class Foo {
-  constructor(public bar: Bar) {}
-}
-
-@injectable()
-export class Bar {
-  constructor(public foo: Foo) {}
-}
-
-```
-
-Trying to resolve one of the services will end in an error because always one of the constructor will not be fully defined to construct the other one.
-
-```typescript
-container.resolve(Foo)
-```
-```
-Error: Cannot inject the dependency at position #0 of "Foo" constructor. Reason:
-    Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function.
-``` 
- 
-###  The `delay` helper function
-
-The best way to deal with this situation is to do some kind of refactor to avoid the cyclic dependencies. Usually this implies introducing additional services to cut the cycles. 
-
-But when refactor is not an option you can use the `delay` function helper. The `delay` function wraps the constructor in an instance of `DelayedConstructor`. 
-
-The *delayed constructor* is a kind of special `InjectionToken` that will eventually be evaluated to construct an intermediate proxy object wrapping a factory for the real object.
- 
-When the proxy object is used for the first time it will construct a real object using this factory and any usage will be forwarded to the real object. 
-
-```typescript
-@injectable()
-export class Foo {
-  constructor(@inject(delay(() => Bar)) public bar: Bar) {}
-}
-
-@injectable()
-export class Bar {
-  constructor(@inject(delay(() => Foo)) public foo: Foo) {}
-}
-
-// construction of foo is possible
-const foo = container.resolve(Foo);
-
-// property bar will hold a proxy that looks and acts as a real Bar instance. 
-foo.bar instanceof Bar; // true
-
-```
-
-###  Interfaces and circular dependencies
-
-
-We can rest in the fact that a `DelayedConstructor` could be used in the same contexts that a constructor and will be handled transparently by tsyringe. Such idea is used in the next example involving interfaces:
-
-```typescript
-export interface IFoo {}
-
-@injectable()
-@registry([
-  {
-    token: "IBar",
-    // `DelayedConstructor` of Bar will be the token
-    useToken: delay(() => Bar)
-  }
-])
-export class Foo implements IFoo {
-  constructor(@inject("IBar") public bar: IBar) {}
-}
-export interface IBar {}
-
-@injectable()
-@registry([
-  {
-    token: "IFoo",
-    useToken: delay(() => Foo)
-  }
-])
-export class Bar implements IBar {
-  constructor(@inject("IFoo") public foo: IFoo) {}
-}
-```    
+The `delay` function in tsyringe for circular dependencies is not currently supported by tsyringe-async.
+Thus circular dependencies should be avoided or managed via application-level workarounds.
 
 # Full examples
 
@@ -607,21 +535,3 @@ container.register("SuperService", {
 const client = container.resolve(Client);
 // client's dependencies will have been resolved
 ```
-
-# Non goals
-The following is a list of features we explicitly plan on not adding:
-- Property Injection
-
-# Contributing
-
-This project welcomes contributions and suggestions. Most contributions require you to agree to a
-Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us
-the rights to use your contribution. For details, visit [https://cla.microsoft.com](https://cla.microsoft.com).
-
-When you submit a pull request, a CLA-bot will automatically determine whether you need to provide
-a CLA and decorate the PR appropriately (e.g., label, comment). Simply follow the instructions
-provided by the bot. You will only need to do this once across all repos using our CLA.
-
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
-For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
-contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
