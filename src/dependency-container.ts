@@ -81,6 +81,33 @@ class InternalDependencyContainer implements DependencyContainer {
       provider = providerOrConstructor;
     }
 
+    // Search the token graph for cycles
+    if (isTokenProvider(provider)) {
+      const path = [token];
+
+      let tokenProvider: TokenProvider<T> | null = provider;
+      while (tokenProvider != null) {
+        const currentToken = tokenProvider.useToken;
+        if (path.includes(currentToken)) {
+          throw new Error(
+            `Token registration cycle detected! ${[...path, currentToken].join(
+              " -> "
+            )}`
+          );
+        }
+
+        path.push(currentToken);
+
+        const registration = this._registry.get(currentToken);
+
+        if (registration && isTokenProvider(registration.provider)) {
+          tokenProvider = registration.provider;
+        } else {
+          tokenProvider = null;
+        }
+      }
+    }
+
     if (
       options.lifecycle === Lifecycle.Singleton ||
       options.lifecycle == Lifecycle.ContainerScoped ||

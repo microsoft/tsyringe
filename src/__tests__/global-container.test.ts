@@ -167,6 +167,21 @@ test("registerType() allows for names to be registered for a given type", () => 
   expect(globalContainer.resolve<Bar>("CoolName") instanceof Bar).toBeTruthy();
 });
 
+test("registerType() doesn't allow tokens to point to themselves", () => {
+  expect(() => globalContainer.registerType("Bar", "Bar")).toThrowError(
+    "Token registration cycle detected!"
+  );
+});
+
+test("registerType() doesn't allow registration cycles", () => {
+  globalContainer.registerType("Bar", "Foo");
+  globalContainer.registerType("Foo", "FooBar");
+
+  expect(() => globalContainer.registerType("FooBar", "Bar")).toThrowError(
+    "Token registration cycle detected!"
+  );
+});
+
 test("executes a registered factory each time resolve is called", () => {
   const factoryMock = jest.fn();
   globalContainer.register("Test", {useFactory: factoryMock});
