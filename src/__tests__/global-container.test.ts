@@ -217,7 +217,18 @@ test("resolves anonymous classes separately", () => {
   expect(globalContainer.resolve(ctor1) instanceof ctor1).toBeTruthy();
   expect(globalContainer.resolve(ctor2) instanceof ctor2).toBeTruthy();
 });
-
+test("resolves dependencies of superclass with no constructor", () => {
+  class Dependency {}
+  @injectable()
+  class SuperClass {
+    constructor(public dependency: Dependency) {}
+  }
+  @injectable()
+  class SubClass extends SuperClass {}
+  expect(globalContainer.resolve(SubClass).dependency).toBeInstanceOf(
+    Dependency
+  );
+});
 // --- resolveAll() ---
 
 test("fails to resolveAll unregistered dependency by name", () => {

@@ -395,15 +395,13 @@ class InternalDependencyContainer implements DependencyContainer {
         this.resolve(target, context)
       );
     }
-
-    if (ctor.length === 0) {
-      return new ctor();
-    }
-
     const paramInfo = typeInfo.get(ctor);
-
     if (!paramInfo || paramInfo.length === 0) {
-      throw new Error(`TypeInfo not known for "${ctor.name}"`);
+      if (ctor.length === 0) {
+        return new ctor();
+      } else {
+        throw new Error(`TypeInfo not known for "${ctor.name}"`);
+      }
     }
 
     const params = paramInfo.map(this.resolveParams(context, ctor));
