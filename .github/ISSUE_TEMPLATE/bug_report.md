@@ -10,11 +10,15 @@ assignees: Xapphire13
 <!-- A clear and concise description of what the bug is -->
 
 **To Reproduce**
-<!--
-  - Add clear steps to reproduce the behavior
-  - Fork a copy of https://repl.it/repls/TurboVacantEvaluations#index.ts and write a minimal
-    repo of the bug. Paste a link to the sandbox to this issue
-  -->
+<!-- Add clear steps to reproduce the behavior -->
+```typescript
+import "reflect-metadata";
+import {container} from "tsyringe";
+
+function main() {
+  // Put your sample code here...
+}
+```
 
 **Expected behavior**
 <!-- A clear and concise description of what you expected to happen -->
