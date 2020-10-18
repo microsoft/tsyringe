@@ -33,6 +33,7 @@ constructor injection.
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
+  - [Injecting primitive values (Named injection)](#injecting-primitive-values-named-injection)
 - [Non goals](#non-goals)
 - [Contributing](#contributing)
 
@@ -615,6 +616,30 @@ container.register("SuperService", {
 
 const client = container.resolve(Client);
 // client's dependencies will have been resolved
+```
+
+## Injecting primitive values (Named injection)
+Primitive values can also be injected by utilizing named injection
+```typescript
+import {singleton, inject} from "tsyringe";
+
+@singleton()
+class Foo {
+  private str: string;
+  constructor(@inject("SpecialString") value: string) {
+    this.str = value;
+  }
+}
+
+// some other file
+import "reflect-metadata";
+import {container} from "tsyringe";
+import {Foo} from "./foo";
+
+const str = "test";
+container.register("SpecialString", { useValue: str });
+
+const instance = container.resolve(Foo);
 ```
 
 # Non goals
