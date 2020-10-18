@@ -5,8 +5,9 @@ import ValueProvider from "../providers/value-provider";
 import ClassProvider from "../providers/class-provider";
 import constructor from "./constructor";
 import RegistrationOptions from "./registration-options";
+import Disposable from "./disposable";
 
-export default interface DependencyContainer {
+export default interface DependencyContainer extends Disposable {
   register<T>(
     token: InjectionToken<T>,
     provider: ValueProvider<T>
@@ -54,6 +55,7 @@ export default interface DependencyContainer {
    * @return An instance of the dependency
    */
   resolve<T>(token: InjectionToken<T>): T;
+
   resolveAll<T>(token: InjectionToken<T>): T[];
 
   /**
@@ -71,5 +73,12 @@ export default interface DependencyContainer {
   reset(): void;
 
   clearInstances(): void;
+
   createChildContainer(): DependencyContainer;
+
+  /**
+   * Calls `.dispose()` on all disposable instances created by the container.
+   * After calling this, the container may no longer be used.
+   */
+  dispose(): void;
 }
