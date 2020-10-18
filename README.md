@@ -27,13 +27,13 @@ constructor injection.
     - [Resolution](#resolution)
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
-  - [Circular dependencies](#circular-dependencies)
+- [Circular dependencies](#circular-dependencies)
     - [The `delay` helper function](#the-delay-helper-function)
     - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
-- [Non Goals](#non-goals)
+- [Non goals](#non-goals)
 - [Contributing](#contributing)
 
 <!-- /TOC -->
@@ -204,6 +204,10 @@ class Bar {
 Class decorator factory that registers the class as a scoped dependency within the global container.
 
 #### Available scopes
+- Transient
+  - The **default** registration scope, a new instance will be created with each resolve
+- Singleton
+  - Each resolve will return the same instance (including resolves from child containers)
 - ResolutionScoped
   - The same instance will be resolved for each resolution of this dependency during a single
   resolution chain
@@ -310,9 +314,9 @@ import {predicateAwareClassFactory} from "tsyringe";
 {
   token: 
   useFactory: predicateAwareClassFactory<Foo>(
-    c => c.resolve(Bar).useHttps,
-    FooHttps, // A FooHttps will be resolved from the container
-    FooHttp
+    c => c.resolve(Bar).useHttps, // Predicate for evaluation
+    FooHttps, // A FooHttps will be resolved from the container if predicate is true
+    FooHttp // A FooHttp will be resolved if predicate is false
   )
 }
 ```
@@ -338,6 +342,11 @@ container.register<Foo>(Foo, {useClass: Foo});
 container.register<Bar>(Bar, {useValue: new Bar()});
 container.register<Baz>("MyBaz", {useValue: new Baz()});
 ```
+
+#### Registration options
+As an optional parameter to `.register()` you may provide [`RegistrationOptions`](./src/types/registration-options.ts)
+which customize how the registration behaves. See the linked source code for up to date documentation
+on available options.
 
 ### Registry
 
