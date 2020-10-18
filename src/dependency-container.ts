@@ -28,6 +28,7 @@ import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
 import {DelayedConstructor} from "./lazy-helpers";
+import Disposable, {isDisposable} from "./types/disposable";
 import InterceptorOptions from "./types/interceptor-options";
 import Interceptors from "./interceptors";
 
@@ -45,6 +46,8 @@ export const typeInfo = new Map<constructor<any>, ParamInfo[]>();
 class InternalDependencyContainer implements DependencyContainer {
   private _registry = new Registry();
   private interceptors = new Interceptors();
+  private disposed = false;
+  private disposables = new Set<Disposable>();
 
   public constructor(private parent?: InternalDependencyContainer) {}
 
@@ -81,6 +84,8 @@ class InternalDependencyContainer implements DependencyContainer {
     providerOrConstructor: Provider<T> | constructor<T>,
     options: RegistrationOptions = {lifecycle: Lifecycle.Transient}
   ): InternalDependencyContainer {
+    this.ensureNotDisposed();
+
     let provider: Provider<T>;
 
     if (!isProvider(providerOrConstructor)) {
@@ -139,6 +144,8 @@ class InternalDependencyContainer implements DependencyContainer {
     from: InjectionToken<T>,
     to: InjectionToken<T>
   ): InternalDependencyContainer {
+    this.ensureNotDisposed();
+
     if (isNormalToken(to)) {
       return this.register(from, {
         useToken: to
@@ -154,6 +161,8 @@ class InternalDependencyContainer implements DependencyContainer {
     token: InjectionToken<T>,
     instance: T
   ): InternalDependencyContainer {
+    this.ensureNotDisposed();
+
     return this.register(token, {
       useValue: instance
     });
@@ -171,6 +180,8 @@ class InternalDependencyContainer implements DependencyContainer {
     from: InjectionToken<T>,
     to?: InjectionToken<T>
   ): InternalDependencyContainer {
+    this.ensureNotDisposed();
+
     if (isNormalToken(from)) {
       if (isNormalToken(to)) {
         return this.register(
@@ -213,6 +224,8 @@ class InternalDependencyContainer implements DependencyContainer {
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
   ): T {
+    this.ensureNotDisposed();
+
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
@@ -282,6 +295,8 @@ class InternalDependencyContainer implements DependencyContainer {
     registration: Registration,
     context: ResolutionContext
   ): T {
+    this.ensureNotDisposed();
+
     // If we have already resolved this scoped dependency, return it
     if (
       registration.options.lifecycle === Lifecycle.ResolutionScoped &&
@@ -334,6 +349,8 @@ class InternalDependencyContainer implements DependencyContainer {
     token: InjectionToken<T>,
     context: ResolutionContext = new ResolutionContext()
   ): T[] {
+    this.ensureNotDisposed();
+
     const registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
@@ -360,6 +377,8 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   public isRegistered<T>(token: InjectionToken<T>, recursive = false): boolean {
+    this.ensureNotDisposed();
+
     return (
       this._registry.has(token) ||
       (recursive &&
@@ -369,12 +388,15 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   public reset(): void {
+    this.ensureNotDisposed();
     this._registry.clear();
     this.interceptors.preResolution.clear();
     this.interceptors.postResolution.clear();
   }
 
   public clearInstances(): void {
+    this.ensureNotDisposed();
+
     for (const [token, registrations] of this._registry.entries()) {
       this._registry.setAll(
         token,
@@ -391,6 +413,8 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   public createChildContainer(): DependencyContainer {
+    this.ensureNotDisposed();
+
     const childContainer = new InternalDependencyContainer(this);
 
     for (const [token, registrations] of this._registry.entries()) {
@@ -443,6 +467,11 @@ class InternalDependencyContainer implements DependencyContainer {
     });
   }
 
+  public dispose(): void {
+    this.disposed = true;
+    this.disposables.forEach(disposable => disposable.dispose());
+  }
+
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
     if (this.isRegistered(token)) {
       return this._registry.get(token)!;
@@ -478,18 +507,27 @@ class InternalDependencyContainer implements DependencyContainer {
         this.resolve(target, context)
       );
     }
-    const paramInfo = typeInfo.get(ctor);
-    if (!paramInfo || paramInfo.length === 0) {
-      if (ctor.length === 0) {
-        return new ctor();
-      } else {
-        throw new Error(`TypeInfo not known for "${ctor.name}"`);
+
+    const instance: T = (() => {
+      const paramInfo = typeInfo.get(ctor);
+      if (!paramInfo || paramInfo.length === 0) {
+        if (ctor.length === 0) {
+          return new ctor();
+        } else {
+          throw new Error(`TypeInfo not known for "${ctor.name}"`);
+        }
       }
+
+      const params = paramInfo.map(this.resolveParams(context, ctor));
+
+      return new ctor(...params);
+    })();
+
+    if (isDisposable(instance)) {
+      this.disposables.add(instance);
     }
 
-    const params = paramInfo.map(this.resolveParams(context, ctor));
-
-    return new ctor(...params);
+    return instance;
   }
 
   private resolveParams<T>(context: ResolutionContext, ctor: constructor<T>) {
@@ -522,6 +560,14 @@ class InternalDependencyContainer implements DependencyContainer {
         throw new Error(formatErrorCtor(ctor, idx, e));
       }
     };
+  }
+
+  private ensureNotDisposed(): void {
+    if (this.disposed) {
+      throw new Error(
+        "This container has been disposed, you cannot interact with a disposed container"
+      );
+    }
   }
 }
 

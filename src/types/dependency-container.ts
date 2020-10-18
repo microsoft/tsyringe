@@ -5,6 +5,7 @@ import ValueProvider from "../providers/value-provider";
 import ClassProvider from "../providers/class-provider";
 import constructor from "./constructor";
 import RegistrationOptions from "./registration-options";
+import Disposable from "./disposable";
 import InterceptorOptions from "./interceptor-options";
 
 export type ResolutionType = "Single" | "All";
@@ -30,7 +31,7 @@ export interface PostResolutionInterceptorCallback<T = any> {
   ): void;
 }
 
-export default interface DependencyContainer {
+export default interface DependencyContainer extends Disposable {
   register<T>(
     token: InjectionToken<T>,
     provider: ValueProvider<T>
@@ -120,4 +121,10 @@ export default interface DependencyContainer {
     callback: PostResolutionInterceptorCallback<T>,
     options?: InterceptorOptions
   ): void;
+
+  /**
+   * Calls `.dispose()` on all disposable instances created by the container.
+   * After calling this, the container may no longer be used.
+   */
+  dispose(): void;
 }
