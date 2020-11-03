@@ -221,16 +221,16 @@ class InternalDependencyContainer implements DependencyContainer {
       );
     }
 
-    if (this.interceptors.has(token)) {
+    if (this.interceptors.preResolution.has(token)) {
       const remainingInterceptors = [];
-      for (const interceptor of this.interceptors.getAll(token)) {
+      for (const interceptor of this.interceptors.preResolution.getAll(token)) {
         if (interceptor.options.frequency != Frequency.Once) {
           remainingInterceptors.push(interceptor);
         }
         interceptor.callback(token);
       }
 
-      this.interceptors.setAll(token, remainingInterceptors);
+      this.interceptors.preResolution.setAll(token, remainingInterceptors);
     }
 
     if (registration) {
@@ -385,7 +385,7 @@ class InternalDependencyContainer implements DependencyContainer {
     callback: PreResolutionInterceptorCallback<T>,
     options: InterceptorOptions
   ): void {
-    this.interceptors.set(token, {callback: callback, options: options});
+    this.interceptors.preResolution.set(token, {callback: callback, options: options});
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {

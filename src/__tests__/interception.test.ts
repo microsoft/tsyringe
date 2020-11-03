@@ -47,3 +47,52 @@ test("beforeResolution always run interceptor only gets called on each resolutio
 
   expect(timesCalled).toEqual(2);
 });
+
+test("beforeResolution multiple interceptors get called correctly", () => {
+    class Bar {}
+    let interceptor1Called = false;
+    let interceptor2Called = false;
+    globalContainer.beforeResolution(
+      Bar,
+      () => {
+        interceptor1Called = true;
+      },
+      {frequency: Frequency.Once}
+    );
+    globalContainer.beforeResolution(
+        Bar,
+        () => {
+          interceptor2Called = true;
+        },
+        {frequency: Frequency.Once}
+      );
+    globalContainer.resolve(Bar);
+  
+    expect(interceptor1Called).toBeTruthy();
+    expect(interceptor2Called).toBeTruthy();
+  });
+
+test("beforeResolution multiple interceptors get per their options", () => {
+    class Bar {}
+    let interceptor1CalledTimes = 0;
+    let interceptor2CalledTimes = 0;
+    globalContainer.beforeResolution(
+      Bar,
+      () => {
+        interceptor1CalledTimes++;
+      },
+      {frequency: Frequency.Once}
+    );
+    globalContainer.beforeResolution(
+        Bar,
+        () => {
+          interceptor2CalledTimes++;
+        },
+        {frequency: Frequency.Always}
+      );
+    globalContainer.resolve(Bar);
+    globalContainer.resolve(Bar);
+  
+    expect(interceptor1CalledTimes).toEqual(1);
+    expect(interceptor2CalledTimes).toEqual(2);
+  });

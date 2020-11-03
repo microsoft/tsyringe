@@ -7,6 +7,10 @@ export type PreResolutionInterceptor = {
   options: InterceptionOptions;
 };
 
-export default class Interceptors extends RegistryBase<
+export class PreResolutionInterceptors extends RegistryBase<
   PreResolutionInterceptor
 > {}
+
+export default class Interceptors {
+    public preResolution: PreResolutionInterceptors = new PreResolutionInterceptors();
+}
