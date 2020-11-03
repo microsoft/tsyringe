@@ -5,7 +5,7 @@ import ValueProvider from "../providers/value-provider";
 import ClassProvider from "../providers/class-provider";
 import constructor from "./constructor";
 import RegistrationOptions from "./registration-options";
-import InterceptorOptions from './interceptor-options';
+import InterceptorOptions from "./interceptor-options";
 
 export default interface DependencyContainer {
   register<T>(
@@ -80,5 +80,9 @@ export default interface DependencyContainer {
    * @param callback The callback that is called before the token is resolved
    * @param options Options for under what circumstances the callback will be called
    */
-  beforeResolution<T>(token: InjectionToken<T>, callback: (t: InjectionToken<T>) => void, options: InterceptorOptions): void;
+  beforeResolution<T>(
+    token: InjectionToken<T>,
+    callback: (t: InjectionToken<T>) => void,
+    options: InterceptorOptions
+  ): void;
 }

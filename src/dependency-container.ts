@@ -24,7 +24,8 @@ import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
 import {DelayedConstructor} from "./lazy-helpers";
 import InterceptorOptions from "./types/interceptor-options";
-import Interceptors from './interceptors';
+import Interceptors from "./interceptors";
+import Frequency from './types/frequency';
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -32,7 +33,9 @@ export type Registration<T = any> = {
   instance?: T;
 };
 
-export type PreResolutionInterceptorCallback<T = any> = (token: InjectionToken<T>) => void;
+export type PreResolutionInterceptorCallback<T = any> = (
+  token: InjectionToken<T>
+) => void;
 
 export type ParamInfo = TokenDescriptor | InjectionToken<any>;
 
@@ -217,11 +220,17 @@ class InternalDependencyContainer implements DependencyContainer {
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
     }
-  
+
     if (this.interceptors.has(token)) {
-      for(let interceptor of this.interceptors.getAll(token)) {
+      const remainingInterceptors = [];
+      for (const interceptor of this.interceptors.getAll(token)) {
+        if (interceptor.options.frequency != Frequency.Once) {
+          remainingInterceptors.push(interceptor);
+        }
         interceptor.callback(token);
       }
+
+      this.interceptors.setAll(token, remainingInterceptors);
     }
 
     if (registration) {
@@ -371,8 +380,12 @@ class InternalDependencyContainer implements DependencyContainer {
     return childContainer;
   }
 
-  beforeResolution<T>(token: InjectionToken<T>, callback: PreResolutionInterceptorCallback<T>, options: InterceptorOptions): void {
-    this.interceptors.set(token, {callback: callback, options: options})
+  beforeResolution<T>(
+    token: InjectionToken<T>,
+    callback: PreResolutionInterceptorCallback<T>,
+    options: InterceptorOptions
+  ): void {
+    this.interceptors.set(token, {callback: callback, options: options});
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
