@@ -6,6 +6,7 @@ import ClassProvider from "../providers/class-provider";
 import constructor from "./constructor";
 import RegistrationOptions from "./registration-options";
 import InterceptorOptions from "./interceptor-options";
+import {ResolutionType} from "../dependency-container";
 
 export default interface DependencyContainer {
   register<T>(
@@ -82,7 +83,19 @@ export default interface DependencyContainer {
    */
   beforeResolution<T>(
     token: InjectionToken<T>,
-    callback: (t: InjectionToken<T>) => void,
-    options: InterceptorOptions
+    callback: (t: InjectionToken<T>, r: ResolutionType) => void,
+    options?: InterceptorOptions
+  ): void;
+
+  /**
+   * Registers a callback that is called after a successful resolution of the token
+   * @param token The token to intercept
+   * @param callback The callback that is called after the token is resolved
+   * @param options Options for under what circumstances the callback will be called
+   */
+  afterResolution<T>(
+    token: InjectionToken<T>,
+    callback: (token: InjectionToken<T>, t: T, r: ResolutionType) => void,
+    options?: InterceptorOptions
   ): void;
 }

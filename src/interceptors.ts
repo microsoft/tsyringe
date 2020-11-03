@@ -1,4 +1,7 @@
-import {PreResolutionInterceptorCallback} from "./dependency-container";
+import {
+  PreResolutionInterceptorCallback,
+  PostResolutionInterceptorCallback
+} from "./dependency-container";
 import RegistryBase from "./registry-base";
 import {InterceptionOptions} from "./types";
 
@@ -7,10 +10,20 @@ export type PreResolutionInterceptor = {
   options: InterceptionOptions;
 };
 
+export type PostResolutionInterceptor = {
+  callback: PostResolutionInterceptorCallback;
+  options: InterceptionOptions;
+};
+
 export class PreResolutionInterceptors extends RegistryBase<
   PreResolutionInterceptor
 > {}
 
+export class PostResolutionInterceptors extends RegistryBase<
+  PostResolutionInterceptor
+> {}
+
 export default class Interceptors {
-    public preResolution: PreResolutionInterceptors = new PreResolutionInterceptors();
+  public preResolution: PreResolutionInterceptors = new PreResolutionInterceptors();
+  public postResolution: PostResolutionInterceptors = new PostResolutionInterceptors();
 }

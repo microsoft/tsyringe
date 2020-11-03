@@ -25,7 +25,7 @@ import {formatErrorCtor} from "./error-helpers";
 import {DelayedConstructor} from "./lazy-helpers";
 import InterceptorOptions from "./types/interceptor-options";
 import Interceptors from "./interceptors";
-import Frequency from './types/frequency';
+import Frequency from "./types/frequency";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -34,8 +34,20 @@ export type Registration<T = any> = {
 };
 
 export type PreResolutionInterceptorCallback<T = any> = (
-  token: InjectionToken<T>
+  token: InjectionToken<T>,
+  resolutionType: ResolutionType
 ) => void;
+
+export type PostResolutionInterceptorCallback<T = any> = (
+  token: InjectionToken<T>,
+  result: T,
+  resolutionType: ResolutionType
+) => void;
+
+export enum ResolutionType {
+  Single = 0,
+  All = 1
+}
 
 export type ParamInfo = TokenDescriptor | InjectionToken<any>;
 
@@ -221,29 +233,69 @@ class InternalDependencyContainer implements DependencyContainer {
       );
     }
 
+    this.executePreResolutionInterceptor<T>(token, ResolutionType.Single);
+
+    if (registration) {
+      const result = this.resolveRegistration(registration, context) as T;
+      this.executePostResolutionInterceptor(
+        token,
+        result,
+        ResolutionType.Single
+      );
+      return result;
+    }
+
+    // No registration for this token, but since it's a constructor, return an instance
+    if (isConstructorToken(token)) {
+      const result = this.construct(token, context);
+      this.executePostResolutionInterceptor(
+        token,
+        result,
+        ResolutionType.Single
+      );
+      return result;
+    }
+
+    throw new Error(
+      "Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function."
+    );
+  }
+
+  private executePreResolutionInterceptor<T>(
+    token: InjectionToken<T>,
+    resolutionType: ResolutionType
+  ): void {
     if (this.interceptors.preResolution.has(token)) {
       const remainingInterceptors = [];
       for (const interceptor of this.interceptors.preResolution.getAll(token)) {
         if (interceptor.options.frequency != Frequency.Once) {
           remainingInterceptors.push(interceptor);
         }
-        interceptor.callback(token);
+        interceptor.callback(token, resolutionType);
       }
 
       this.interceptors.preResolution.setAll(token, remainingInterceptors);
     }
+  }
 
-    if (registration) {
-      return this.resolveRegistration(registration, context);
-    }
+  private executePostResolutionInterceptor<T>(
+    token: InjectionToken<T>,
+    result: T | T[],
+    resolutionType: ResolutionType
+  ): void {
+    if (this.interceptors.postResolution.has(token)) {
+      const remainingInterceptors = [];
+      for (const interceptor of this.interceptors.postResolution.getAll(
+        token
+      )) {
+        if (interceptor.options.frequency != Frequency.Once) {
+          remainingInterceptors.push(interceptor);
+        }
+        interceptor.callback(token, result, resolutionType);
+      }
 
-    // No registration for this token, but since it's a constructor, return an instance
-    if (isConstructorToken(token)) {
-      return this.construct(token, context);
+      this.interceptors.postResolution.setAll(token, remainingInterceptors);
     }
-    throw new Error(
-      "Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function."
-    );
   }
 
   private resolveRegistration<T>(
@@ -310,14 +362,21 @@ class InternalDependencyContainer implements DependencyContainer {
       );
     }
 
+    this.executePreResolutionInterceptor(token, ResolutionType.All);
+
     if (registrations) {
-      return registrations.map(item =>
+      const result = registrations.map(item =>
         this.resolveRegistration<T>(item, context)
       );
+
+      this.executePostResolutionInterceptor(token, result, ResolutionType.All);
+      return result;
     }
 
     // No registration for this token, but since it's a constructor, return an instance
-    return [this.construct(token as constructor<T>, context)];
+    const result = [this.construct(token as constructor<T>, context)];
+    this.executePostResolutionInterceptor(token, result, ResolutionType.All);
+    return result;
   }
 
   public isRegistered<T>(token: InjectionToken<T>, recursive = false): boolean {
@@ -331,6 +390,8 @@ class InternalDependencyContainer implements DependencyContainer {
 
   public reset(): void {
     this._registry.clear();
+    this.interceptors.preResolution.clear();
+    this.interceptors.postResolution.clear();
   }
 
   public clearInstances(): void {
@@ -383,9 +444,31 @@ class InternalDependencyContainer implements DependencyContainer {
   beforeResolution<T>(
     token: InjectionToken<T>,
     callback: PreResolutionInterceptorCallback<T>,
-    options: InterceptorOptions
+    options?: InterceptorOptions
   ): void {
-    this.interceptors.preResolution.set(token, {callback: callback, options: options});
+    if (options == null) {
+      options = {frequency: Frequency.Always};
+    }
+
+    this.interceptors.preResolution.set(token, {
+      callback: callback,
+      options: options
+    });
+  }
+
+  afterResolution<T>(
+    token: InjectionToken<T>,
+    callback: PostResolutionInterceptorCallback<T>,
+    options?: InterceptorOptions
+  ): void {
+    if (options == null) {
+      options = {frequency: Frequency.Always};
+    }
+
+    this.interceptors.postResolution.set(token, {
+      callback: callback,
+      options: options
+    });
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
