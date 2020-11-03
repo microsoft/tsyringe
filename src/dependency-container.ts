@@ -23,12 +23,16 @@ import Lifecycle from "./types/lifecycle";
 import ResolutionContext from "./resolution-context";
 import {formatErrorCtor} from "./error-helpers";
 import {DelayedConstructor} from "./lazy-helpers";
+import InterceptorOptions from "./types/interceptor-options";
+import Interceptors from './interceptors';
 
 export type Registration<T = any> = {
   provider: Provider<T>;
   options: RegistrationOptions;
   instance?: T;
 };
+
+export type PreResolutionInterceptorCallback<T = any> = (token: InjectionToken<T>) => void;
 
 export type ParamInfo = TokenDescriptor | InjectionToken<any>;
 
@@ -37,6 +41,7 @@ export const typeInfo = new Map<constructor<any>, ParamInfo[]>();
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
   private _registry = new Registry();
+  private interceptors = new Interceptors();
 
   public constructor(private parent?: InternalDependencyContainer) {}
 
@@ -212,6 +217,12 @@ class InternalDependencyContainer implements DependencyContainer {
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
     }
+  
+    if (this.interceptors.has(token)) {
+      for(let interceptor of this.interceptors.getAll(token)) {
+        interceptor.callback(token);
+      }
+    }
 
     if (registration) {
       return this.resolveRegistration(registration, context);
@@ -358,6 +369,10 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     return childContainer;
+  }
+
+  beforeResolution<T>(token: InjectionToken<T>, callback: PreResolutionInterceptorCallback<T>, options: InterceptorOptions): void {
+    this.interceptors.set(token, {callback: callback, options: options})
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {
