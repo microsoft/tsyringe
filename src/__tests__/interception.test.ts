@@ -273,13 +273,13 @@ test("beforeResolution multiple interceptors get per their options", () => {
 
 // afterResolution resolveAll() tests
 test("afterResolution interceptor gets called correctly on resolveAll()", () => {
-    class Bar {}
-    let interceptorCalled = false;
-    globalContainer.afterResolution(Bar, (_t, _r, resolutionType) => {
-      interceptorCalled = true;
-      expect(resolutionType).toEqual(ResolutionType.All);
-    });
-    globalContainer.resolveAll(Bar);
-  
-    expect(interceptorCalled).toBeTruthy();
+  class Bar {}
+  let interceptorCalled = false;
+  globalContainer.afterResolution(Bar, (_t, _r, resolutionType) => {
+    interceptorCalled = true;
+    expect(resolutionType).toEqual(ResolutionType.All);
   });
+  globalContainer.resolveAll(Bar);
+
+  expect(interceptorCalled).toBeTruthy();
+});
