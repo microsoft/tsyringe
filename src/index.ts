@@ -4,7 +4,7 @@ if (typeof Reflect === "undefined" || !Reflect.getMetadata) {
   );
 }
 
-export {DependencyContainer, Lifecycle, RegistrationOptions} from "./types";
+export {DependencyContainer, Lifecycle, RegistrationOptions, Frequency} from "./types";
 export * from "./decorators";
 export * from "./factories";
 export * from "./providers";
