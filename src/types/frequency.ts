@@ -1,6 +1,3 @@
-enum Frequency {
-  Always = 0,
-  Once = 1
-}
+type Frequency = "Always" | "Once";
 
 export default Frequency;

@@ -1,9 +1,9 @@
-import {
-  PreResolutionInterceptorCallback,
-  PostResolutionInterceptorCallback
-} from "./dependency-container";
 import RegistryBase from "./registry-base";
 import {InterceptionOptions} from "./types";
+import {
+  PostResolutionInterceptorCallback,
+  PreResolutionInterceptorCallback
+} from "./types/dependency-container";
 
 export type PreResolutionInterceptor = {
   callback: PreResolutionInterceptorCallback;

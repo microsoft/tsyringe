@@ -6,7 +6,25 @@ import ClassProvider from "../providers/class-provider";
 import constructor from "./constructor";
 import RegistrationOptions from "./registration-options";
 import InterceptorOptions from "./interceptor-options";
-import {ResolutionType} from "../dependency-container";
+
+export type ResolutionType = "Single" | "All";
+
+export interface PreResolutionInterceptorCallback<T = any> {
+  /**
+   * @param token The InjectionToken that was intercepted
+   * @param resolutionType The type of resolve that was called (i.e. All or Single)
+   */
+  (token: InjectionToken<T>, resolutionType: ResolutionType): void;
+}
+
+export interface PostResolutionInterceptorCallback<T = any> {
+  /**
+   * @param token The InjectionToken that was intercepted
+   * @param result The object that was resolved from the container
+   * @param resolutionType The type of resolve that was called (i.e. All or Single)
+   */
+  (token: InjectionToken<T>, result: T, resolutionType: ResolutionType): void;
+}
 
 export default interface DependencyContainer {
   register<T>(
@@ -83,7 +101,7 @@ export default interface DependencyContainer {
    */
   beforeResolution<T>(
     token: InjectionToken<T>,
-    callback: (t: InjectionToken<T>, r: ResolutionType) => void,
+    callback: PreResolutionInterceptorCallback<T>,
     options?: InterceptorOptions
   ): void;
 
@@ -95,7 +113,7 @@ export default interface DependencyContainer {
    */
   afterResolution<T>(
     token: InjectionToken<T>,
-    callback: (token: InjectionToken<T>, t: T, r: ResolutionType) => void,
+    callback: PostResolutionInterceptorCallback<T>,
     options?: InterceptorOptions
   ): void;
 }

@@ -1,285 +1,217 @@
-import {
-  instance as globalContainer,
-  ResolutionType
-} from "../dependency-container";
-import Frequency from "../types/frequency";
+import {instance as globalContainer} from "../dependency-container";
 
 // beforeResolution .resolve() tests
 test("beforeResolution interceptor gets called correctly", () => {
   class Bar {}
-  let interceptorCalled = false;
-  globalContainer.beforeResolution(Bar, (_, resolutionType) => {
-    interceptorCalled = true;
-    expect(resolutionType).toEqual(ResolutionType.Single);
-  });
+  const interceptorFn = jest.fn();
+
+  globalContainer.beforeResolution(Bar, interceptorFn);
   globalContainer.resolve(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toBeCalled();
 });
-test("beforeResolution interceptor gets called correctly", () => {
+
+test("beforeResolution interceptor using default options gets called correctly", () => {
   class Bar {}
-  let interceptorCalled = false;
-  globalContainer.beforeResolution(Bar, () => {
-    interceptorCalled = true;
-  });
+  const interceptorFn = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn);
   globalContainer.resolve(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toBeCalled();
 });
 
 test("beforeResolution interceptor does not get called when resolving other types", () => {
   class Bar {}
   class Foo {}
-  let interceptorCalled = false;
-  globalContainer.beforeResolution(Bar, () => {
-    interceptorCalled = true;
-  });
+  const interceptorFn = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn);
   globalContainer.resolve(Foo);
 
-  expect(interceptorCalled).toBeFalsy();
+  expect(interceptorFn).not.toHaveBeenCalled();
 });
 
 test("beforeResolution one-time interceptor only gets called once", () => {
   class Bar {}
-  let timesCalled = 0;
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      timesCalled++;
-    },
-    {frequency: Frequency.Once}
-  );
+  const interceptorFn = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn, {
+    frequency: "Once"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(timesCalled).toEqual(1);
+  expect(interceptorFn).toBeCalledTimes(1);
 });
 
 test("beforeResolution always run interceptor gets called on each resolution", () => {
   class Bar {}
-  let timesCalled = 0;
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      timesCalled++;
-    },
-    {frequency: Frequency.Always}
-  );
+  const interceptorFn = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn, {
+    frequency: "Always"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(timesCalled).toEqual(2);
+  expect(interceptorFn).toBeCalledTimes(2);
 });
 
 test("beforeResolution multiple interceptors get called correctly", () => {
   class Bar {}
-  let interceptor1Called = false;
-  let interceptor2Called = false;
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      interceptor1Called = true;
-    },
-    {frequency: Frequency.Once}
-  );
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      interceptor2Called = true;
-    },
-    {frequency: Frequency.Once}
-  );
+  const interceptorFn1 = jest.fn();
+  const interceptorFn2 = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn1, {
+    frequency: "Once"
+  });
+  globalContainer.beforeResolution(Bar, interceptorFn2, {
+    frequency: "Once"
+  });
   globalContainer.resolve(Bar);
 
-  expect(interceptor1Called).toBeTruthy();
-  expect(interceptor2Called).toBeTruthy();
+  expect(interceptorFn1).toBeCalled();
+  expect(interceptorFn2).toBeCalled();
 });
 
 test("beforeResolution multiple interceptors get per their options", () => {
   class Bar {}
-  let interceptor1CalledTimes = 0;
-  let interceptor2CalledTimes = 0;
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      interceptor1CalledTimes++;
-    },
-    {frequency: Frequency.Once}
-  );
-  globalContainer.beforeResolution(
-    Bar,
-    () => {
-      interceptor2CalledTimes++;
-    },
-    {frequency: Frequency.Always}
-  );
+  const interceptorFn1 = jest.fn();
+  const interceptorFn2 = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn1, {
+    frequency: "Once"
+  });
+  globalContainer.beforeResolution(Bar, interceptorFn2, {
+    frequency: "Always"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(interceptor1CalledTimes).toEqual(1);
-  expect(interceptor2CalledTimes).toEqual(2);
+  expect(interceptorFn1).toBeCalledTimes(1);
+  expect(interceptorFn2).toBeCalledTimes(2);
 });
 
 // beforeResolution .resolveAll() tests
 test("beforeResolution interceptor gets called correctly on resolveAll()", () => {
   class Bar {}
-  let interceptorCalled = false;
-  globalContainer.beforeResolution(Bar, (_, resolutionType) => {
-    interceptorCalled = true;
-    expect(resolutionType).toEqual(ResolutionType.All);
-  });
+  const interceptorFn = jest.fn();
+  globalContainer.beforeResolution(Bar, interceptorFn);
   globalContainer.resolveAll(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toBeCalledWith(expect.any(Function), "All");
 });
 
 // afterResolution .resolve() tests
 test("afterResolution interceptor gets called correctly", () => {
   class Bar {}
-  let interceptorCalled = false;
+  const interceptorFn = jest.fn();
 
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      interceptorCalled = true;
-    },
-    {frequency: Frequency.Always}
-  );
+  globalContainer.afterResolution(Bar, interceptorFn, {
+    frequency: "Always"
+  });
   globalContainer.resolve(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toHaveBeenCalled();
 });
 
 test("afterResolution interceptor passes object of correct type", () => {
   class Bar {}
-  let interceptorCalled = false;
+  const interceptorFn = jest.fn();
 
-  globalContainer.afterResolution(
-    Bar,
-    (_, result) => {
-      interceptorCalled = true;
-      expect(result).toBeInstanceOf(Bar);
-    },
-    {frequency: Frequency.Always}
-  );
-  globalContainer.resolve(Bar);
-
-  expect(interceptorCalled).toBeTruthy();
-});
-
-test("afterResolution interceptor gets called correctly", () => {
-  class Bar {}
-  let interceptorCalled = false;
-  globalContainer.afterResolution(Bar, () => {
-    interceptorCalled = true;
+  globalContainer.afterResolution(Bar, interceptorFn, {
+    frequency: "Always"
   });
   globalContainer.resolve(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toBeCalledWith(
+    expect.any(Function),
+    expect.any(Object),
+    "Single"
+  );
+});
+
+test("afterResolution interceptor gets called correctly with default options", () => {
+  class Bar {}
+  const interceptorFn = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn);
+  globalContainer.resolve(Bar);
+
+  expect(interceptorFn).toBeCalled();
 });
 
 test("afterResolution interceptor does not get called when resolving other types", () => {
   class Bar {}
   class Foo {}
-  let interceptorCalled = false;
-  globalContainer.afterResolution(Bar, () => {
-    interceptorCalled = true;
-  });
+  const interceptorFn = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn);
   globalContainer.resolve(Foo);
 
-  expect(interceptorCalled).toBeFalsy();
+  expect(interceptorFn).not.toHaveBeenCalled();
 });
 
 test("afterResolution one-time interceptor only gets called once", () => {
   class Bar {}
-  let timesCalled = 0;
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      timesCalled++;
-    },
-    {frequency: Frequency.Once}
-  );
+  const interceptorFn = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn, {
+    frequency: "Once"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(timesCalled).toEqual(1);
+  expect(interceptorFn).toBeCalledTimes(1);
 });
 
 test("afterResolution always run interceptor gets called on each resolution", () => {
   class Bar {}
-  let timesCalled = 0;
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      timesCalled++;
-    },
-    {frequency: Frequency.Always}
-  );
+  const interceptorFn = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn, {
+    frequency: "Always"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(timesCalled).toEqual(2);
+  expect(interceptorFn).toBeCalledTimes(2);
 });
 
 test("afterResolution multiple interceptors get called correctly", () => {
   class Bar {}
-  let interceptor1Called = false;
-  let interceptor2Called = false;
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      interceptor1Called = true;
-    },
-    {frequency: Frequency.Once}
-  );
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      interceptor2Called = true;
-    },
-    {frequency: Frequency.Once}
-  );
+  const interceptorFn1 = jest.fn();
+  const interceptorFn2 = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn1, {
+    frequency: "Once"
+  });
+  globalContainer.afterResolution(Bar, interceptorFn2, {
+    frequency: "Once"
+  });
   globalContainer.resolve(Bar);
 
-  expect(interceptor1Called).toBeTruthy();
-  expect(interceptor2Called).toBeTruthy();
+  expect(interceptorFn1).toBeCalled();
+  expect(interceptorFn2).toBeCalled();
 });
 
 test("beforeResolution multiple interceptors get per their options", () => {
   class Bar {}
-  let interceptor1CalledTimes = 0;
-  let interceptor2CalledTimes = 0;
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      interceptor1CalledTimes++;
-    },
-    {frequency: Frequency.Once}
-  );
-  globalContainer.afterResolution(
-    Bar,
-    () => {
-      interceptor2CalledTimes++;
-    },
-    {frequency: Frequency.Always}
-  );
+  const interceptorFn1 = jest.fn();
+  const interceptorFn2 = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn1, {
+    frequency: "Once"
+  });
+  globalContainer.afterResolution(Bar, interceptorFn2, {
+    frequency: "Always"
+  });
   globalContainer.resolve(Bar);
   globalContainer.resolve(Bar);
 
-  expect(interceptor1CalledTimes).toEqual(1);
-  expect(interceptor2CalledTimes).toEqual(2);
+  expect(interceptorFn1).toBeCalledTimes(1);
+  expect(interceptorFn2).toBeCalledTimes(2);
 });
 
 // afterResolution resolveAll() tests
 test("afterResolution interceptor gets called correctly on resolveAll()", () => {
   class Bar {}
-  let interceptorCalled = false;
-  globalContainer.afterResolution(Bar, (_t, _r, resolutionType) => {
-    interceptorCalled = true;
-    expect(resolutionType).toEqual(ResolutionType.All);
-  });
+  const interceptorFn = jest.fn();
+  globalContainer.afterResolution(Bar, interceptorFn);
   globalContainer.resolveAll(Bar);
 
-  expect(interceptorCalled).toBeTruthy();
+  expect(interceptorFn).toBeCalledWith(
+    expect.any(Function),
+    expect.any(Object),
+    "All"
+  );
 });
