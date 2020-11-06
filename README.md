@@ -18,6 +18,8 @@ constructor injection.
     - [autoInjectable()](#autoinjectable)
     - [inject()](#inject)
     - [injectAll()](#injectall)
+    - [injectWithTransform()](#injectWithTransform)
+    - [injectAllWithTransform()](#injectAllWithTransform)
     - [scoped()](#scoped)
   - [Container](#container)
     - [Injection Token](#injection-token)
@@ -25,11 +27,12 @@ constructor injection.
     - [Register](#register)
     - [Registry](#registry)
     - [Resolution](#resolution)
+    - [Interception](#interception)
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
 - [Circular dependencies](#circular-dependencies)
-    - [The `delay` helper function](#the-delay-helper-function)
-    - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
+  - [The `delay` helper function](#the-delay-helper-function)
+  - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -200,22 +203,73 @@ class Bar {
 }
 ```
 
+### injectWithTransform
+
+Parameter decorator which allows for a transformer object to take an action on the resolved object
+before returning the result.
+
+```typescript
+class FeatureFlags {
+  public getFlagValue(flagName: string): boolean {
+    // ...
+}
+
+class Foo() {}
+
+class FeatureFlagsTransformer implements Transform<FeatureFlags, bool> {
+  public transform(flags: FeatureFlags, flag: string) {
+    return flags.getFlagValue(flag);
+  }
+}
+
+@injectable()
+class MyComponent(foo: Foo, @injectWithTransform(FeatureFlags, FeatureFlagsTransformer, "IsBlahEnabled") blahEnabled: boolean){
+  // ...
+}
+```
+
+### injectAllWithTransform
+
+This parameter decorator allows for array contents to be passed through a transformer. The transformer can return any type, so this
+can be used to map or fold an array.
+
+```typescript
+@injectable
+class Foo {
+  public value;
+}
+
+class FooTransform implements Transform<Foo[], string[]>{
+  public transform(foos: Foo[]): string[]{
+    return foos.map(f => f.value));
+  }
+}
+
+@injectable
+class Bar {
+  constructor(@injectAllWithTransform(Foo, FooTransform) stringArray: string[]) {
+    // ...
+  }
+}
+```
+
 ### scoped()
 
 Class decorator factory that registers the class as a scoped dependency within the global container.
 
 #### Available scopes
+
 - Transient
   - The **default** registration scope, a new instance will be created with each resolve
 - Singleton
   - Each resolve will return the same instance (including resolves from child containers)
 - ResolutionScoped
   - The same instance will be resolved for each resolution of this dependency during a single
-  resolution chain
+    resolution chain
 - ContainerScoped
   - The dependency container will return the same instance each time a resolution for this dependency
-  is requested. This is similar to being a singleton, however if a child container is made, that child
-  container will resolve an instance unique to it.
+    is requested. This is similar to being a singleton, however if a child container is made, that child
+    container will resolve an instance unique to it.
 
 #### Usage
 
@@ -237,7 +291,11 @@ form of a Token/Provider pair, so we need to take a brief diversion to discuss t
 A token may be either a string, a symbol, a class constructor, or a instance of [`DelayedConstructor`](#circular-dependencies).
 
 ```typescript
-type InjectionToken<T = any> = constructor<T> | DelayedConstructor<T> | string | symbol;
+type InjectionToken<T = any> =
+  | constructor<T>
+  | DelayedConstructor<T>
+  | string
+  | symbol;
 ```
 
 ### Providers
@@ -286,6 +344,7 @@ to the dependency container.
 
 We have provided 2 factories for you to use, though any function that matches the `FactoryFunction<T>` signature
 can be used as a factory:
+
 ```typescript
 type FactoryFunction<T> = (dependencyContainer: DependencyContainer) => T;
 ```
@@ -300,27 +359,27 @@ import {instanceCachingFactory} from "tsyringe";
 
 {
   token: "SingletonFoo";
-  useFactory: instanceCachingFactory<Foo>(c => c.resolve(Foo))
+  useFactory: instanceCachingFactory<Foo>(c => c.resolve(Foo));
 }
 ```
 
 ##### predicateAwareClassFactory
 
-This factory is used to provide conditional behavior upon resolution. It caches the result by default, but 
+This factory is used to provide conditional behavior upon resolution. It caches the result by default, but
 has an optional parameter to resolve fresh each time.
 
 ```typescript
 import {predicateAwareClassFactory} from "tsyringe";
 
 {
-  token: 
-  useFactory: predicateAwareClassFactory<Foo>(
+  token: useFactory: predicateAwareClassFactory<Foo>(
     c => c.resolve(Bar).useHttps, // Predicate for evaluation
     FooHttps, // A FooHttps will be resolved from the container if predicate is true
     FooHttp // A FooHttp will be resolved if predicate is false
-  )
+  );
 }
 ```
+
 #### Token Provider
 
 ```TypeScript
@@ -345,6 +404,7 @@ container.register<Baz>("MyBaz", {useValue: new Baz()});
 ```
 
 #### Registration options
+
 As an optional parameter to `.register()` you may provide [`RegistrationOptions`](./src/types/registration-options.ts)
 which customize how the registration behaves. See the linked source code for up to date documentation
 on available options.
@@ -369,7 +429,7 @@ This is useful when you want to [register multiple classes for the same token](#
 You can also use it to register and declare objects that wouldn't be imported by anything else,
 such as more classes annotated with `@registry` or that are otherwise responsible for registering objects.
 Lastly you might choose to use this to register 3rd party instances instead of the `container.register(...)` method.
-note: if you want this class to be `@injectable` you must put the decorator before `@registry`, this annotation is not 
+note: if you want this class to be `@injectable` you must put the decorator before `@registry`, this annotation is not
 required though.
 
 ### Resolution
@@ -394,13 +454,54 @@ class Foo implements Bar {}
 @injectable()
 class Baz implements Bar {}
 
-@registry([ // registry is optional, all you need is to use the same token when registering
-  { token: 'Bar', useToken: Foo }, // can be any provider
-  { token: 'Bar', useToken: Baz },
+@registry([
+  // registry is optional, all you need is to use the same token when registering
+  {token: "Bar", useToken: Foo}, // can be any provider
+  {token: "Bar", useToken: Baz}
 ])
 class MyRegistry {}
 
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
+```
+
+### Interception
+
+Interception allows you to register a callback that will be called before or after the resolution of a specific token.
+This callback can be registered to execute only once (to perform initialization, for example),
+on each resolution to do logging, for example.
+
+`beforeResolution` is used to take an action before an object is resolved.
+
+```typescript
+class Bar {}
+
+container.beforeResolution(
+  Bar,
+  // Callback signature is (token: InjectionToken<T>, resolutionType: ResolutionType) => void
+  () => {
+    console.log("Bar is about to be resolved!");
+  },
+  {frequency: "Always"}
+);
+```
+
+`afterResolution` is used to take an action after the object has been resolved.
+
+```typescript
+class Bar {
+  public init(): void {
+    // ...
+  }
+}
+
+container.afterResolution(
+  Bar,
+  // Callback signature is (token: InjectionToken<T>, result: T | T[], resolutionType: ResolutionType)
+  (_t, result) => {
+    result.init();
+  },
+  {frequency: "Once"}
+);
 ```
 
 ### Child Containers
@@ -465,28 +566,28 @@ export class Foo {
 export class Bar {
   constructor(public foo: Foo) {}
 }
-
 ```
 
 Trying to resolve one of the services will end in an error because always one of the constructor will not be fully defined to construct the other one.
 
 ```typescript
-container.resolve(Foo)
+container.resolve(Foo);
 ```
+
 ```
 Error: Cannot inject the dependency at position #0 of "Foo" constructor. Reason:
     Attempted to construct an undefined constructor. Could mean a circular dependency problem. Try using `delay` function.
-``` 
- 
-###  The `delay` helper function
+```
 
-The best way to deal with this situation is to do some kind of refactor to avoid the cyclic dependencies. Usually this implies introducing additional services to cut the cycles. 
+### The `delay` helper function
 
-But when refactor is not an option you can use the `delay` function helper. The `delay` function wraps the constructor in an instance of `DelayedConstructor`. 
+The best way to deal with this situation is to do some kind of refactor to avoid the cyclic dependencies. Usually this implies introducing additional services to cut the cycles.
 
-The *delayed constructor* is a kind of special `InjectionToken` that will eventually be evaluated to construct an intermediate proxy object wrapping a factory for the real object.
- 
-When the proxy object is used for the first time it will construct a real object using this factory and any usage will be forwarded to the real object. 
+But when refactor is not an option you can use the `delay` function helper. The `delay` function wraps the constructor in an instance of `DelayedConstructor`.
+
+The _delayed constructor_ is a kind of special `InjectionToken` that will eventually be evaluated to construct an intermediate proxy object wrapping a factory for the real object.
+
+When the proxy object is used for the first time it will construct a real object using this factory and any usage will be forwarded to the real object.
 
 ```typescript
 @injectable()
@@ -502,13 +603,11 @@ export class Bar {
 // construction of foo is possible
 const foo = container.resolve(Foo);
 
-// property bar will hold a proxy that looks and acts as a real Bar instance. 
+// property bar will hold a proxy that looks and acts as a real Bar instance.
 foo.bar instanceof Bar; // true
-
 ```
 
-###  Interfaces and circular dependencies
-
+### Interfaces and circular dependencies
 
 We can rest in the fact that a `DelayedConstructor` could be used in the same contexts that a constructor and will be handled transparently by tsyringe. Such idea is used in the next example involving interfaces:
 
@@ -538,7 +637,7 @@ export interface IBar {}
 export class Bar implements IBar {
   constructor(@inject("IFoo") public foo: IFoo) {}
 }
-```    
+```
 
 # Full examples
 
@@ -619,7 +718,9 @@ const client = container.resolve(Client);
 ```
 
 ## Injecting primitive values (Named injection)
+
 Primitive values can also be injected by utilizing named injection
+
 ```typescript
 import {singleton, inject} from "tsyringe";
 
@@ -637,13 +738,15 @@ import {container} from "tsyringe";
 import {Foo} from "./foo";
 
 const str = "test";
-container.register("SpecialString", { useValue: str });
+container.register("SpecialString", {useValue: str});
 
 const instance = container.resolve(Foo);
 ```
 
 # Non goals
+
 The following is a list of features we explicitly plan on not adding:
+
 - Property Injection
 
 # Contributing
