@@ -29,7 +29,7 @@ test("Injecting with transform should work", () => {
 
 test("Injecting with transform should work passing a parameter from the decorator", () => {
   class Bar {
-    public repeat(str: string) {
+    public repeat(str: string): string {
       return str + str;
     }
   }
@@ -54,7 +54,7 @@ test("Injecting with transform should work passing a parameter from the decorato
 
 test("Injecting with transform should work passing parameters from the decorator", () => {
   class Bar {
-    public concat(str1: string, str2: string) {
+    public concat(str1: string, str2: string): string {
       return str1 + str2;
     }
   }
