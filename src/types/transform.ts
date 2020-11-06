@@ -1,4 +1,3 @@
-import { DependencyContainer } from '.';
-import { InjectionToken } from "..";
-
-type Transform<T> = { transform: (incoming: InjectionToken<T>, container: DependencyContainer) => any }
+export interface Transform<In, Out> {
+  transform: (incoming: In, ...args: any[]) => Out;
+}
