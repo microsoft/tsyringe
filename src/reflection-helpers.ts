@@ -1,7 +1,8 @@
 import Dictionary from "./types/dictionary";
 import constructor from "./types/constructor";
-import InjectionToken from "./providers/injection-token";
+import InjectionToken, {TokenDescriptor} from "./providers/injection-token";
 import {ParamInfo} from "./dependency-container";
+import Transform from "./types/transform";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 
@@ -17,20 +18,23 @@ export function getParamInfo(target: constructor<any>): ParamInfo[] {
 }
 
 export function defineInjectionTokenMetadata(
-  data: any
+  data: any,
+  transform?: {transformToken: InjectionToken<Transform<any, any>>; args: any[]}
 ): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
   return function(
     target: any,
     _propertyKey: string | symbol,
     parameterIndex: number
   ): any {
-    const injectionTokens =
+    const descriptors: Dictionary<InjectionToken<any> | TokenDescriptor> =
       Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-    injectionTokens[parameterIndex] = data;
-    Reflect.defineMetadata(
-      INJECTION_TOKEN_METADATA_KEY,
-      injectionTokens,
-      target
-    );
+    descriptors[parameterIndex] = transform
+      ? {
+          token: data,
+          transform: transform.transformToken,
+          transformArgs: transform.args || []
+        }
+      : data;
+    Reflect.defineMetadata(INJECTION_TOKEN_METADATA_KEY, descriptors, target);
   };
 }

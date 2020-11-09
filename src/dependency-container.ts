@@ -15,6 +15,7 @@ import FactoryProvider from "./providers/factory-provider";
 import InjectionToken, {
   isConstructorToken,
   isTokenDescriptor,
+  isTransformDescriptor,
   TokenDescriptor
 } from "./providers/injection-token";
 import TokenProvider from "./providers/token-provider";
@@ -495,9 +496,26 @@ class InternalDependencyContainer implements DependencyContainer {
     return (param: ParamInfo, idx: number) => {
       try {
         if (isTokenDescriptor(param)) {
-          return param.multiple
-            ? this.resolveAll(param.token)
-            : this.resolve(param.token, context);
+          if (isTransformDescriptor(param)) {
+            return param.multiple
+              ? this.resolve(param.transform).transform(
+                  this.resolveAll(param.token),
+                  ...param.transformArgs
+                )
+              : this.resolve(param.transform).transform(
+                  this.resolve(param.token, context),
+                  ...param.transformArgs
+                );
+          } else {
+            return param.multiple
+              ? this.resolveAll(param.token)
+              : this.resolve(param.token, context);
+          }
+        } else if (isTransformDescriptor(param)) {
+          return this.resolve(param.transform, context).transform(
+            this.resolve(param.token, context),
+            ...param.transformArgs
+          );
         }
         return this.resolve(param, context);
       } catch (e) {

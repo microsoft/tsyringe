@@ -23,7 +23,11 @@ export interface PostResolutionInterceptorCallback<T = any> {
    * @param result The object that was resolved from the container
    * @param resolutionType The type of resolve that was called (i.e. All or Single)
    */
-  (token: InjectionToken<T>, result: T, resolutionType: ResolutionType): void;
+  (
+    token: InjectionToken<T>,
+    result: T | T[],
+    resolutionType: ResolutionType
+  ): void;
 }
 
 export default interface DependencyContainer {
