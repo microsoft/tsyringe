@@ -1,6 +1,6 @@
 import constructor from "../types/constructor";
 import {DelayedConstructor} from "../lazy-helpers";
-import {Transform} from "../types/transform";
+import Transform from "../types/transform";
 
 type InjectionToken<T = any> =
   | constructor<T>

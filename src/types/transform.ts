@@ -1,3 +1,5 @@
-export interface Transform<In, Out> {
-  transform: (incoming: In, ...args: any[]) => Out;
+interface Transform<TIn, TOut> {
+  transform: (incoming: TIn, ...args: any[]) => TOut;
 }
+
+export default Transform;

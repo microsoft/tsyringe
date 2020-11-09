@@ -2,7 +2,7 @@ import Dictionary from "./types/dictionary";
 import constructor from "./types/constructor";
 import InjectionToken, {TokenDescriptor} from "./providers/injection-token";
 import {ParamInfo} from "./dependency-container";
-import {Transform} from "./types/transform";
+import Transform from "./types/transform";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 

@@ -2,7 +2,7 @@ import {autoInjectable, container} from "..";
 import {injectable} from "../decorators";
 import injectAllWithTransform from "../decorators/inject-all-with-transform";
 import injectWithTransform from "../decorators/inject-with-transform";
-import {Transform} from "../types/transform";
+import Transform from "../types/transform";
 
 afterEach(() => {
   container.reset();
