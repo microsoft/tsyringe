@@ -3,7 +3,7 @@ import InjectionToken, {
   TokenDescriptor,
   TransformDescriptor
 } from "../providers/injection-token";
-import {Transform} from "../types/transform";
+import Transform from "../types/transform";
 
 /**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata
