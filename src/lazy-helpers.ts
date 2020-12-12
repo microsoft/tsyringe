@@ -11,7 +11,8 @@ export class DelayedConstructor<T> {
     "set",
     "deleteProperty",
     "apply",
-    "construct"
+    "construct",
+    "ownKeys"
   ];
 
   constructor(private wrap: () => constructor<T>) {}
