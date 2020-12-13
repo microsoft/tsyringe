@@ -32,3 +32,14 @@ test("Lazy creation with proxies allow circular dependencies", () => {
   expect(a.b.prop["defined"]).toBe(true);
   expect(a.b.name).toBe("B02");
 });
+
+test("Lazily created proxy allows iterating over keys of the original service", () => {
+  const a = globalContainer.resolve(A02);
+  const b = globalContainer.resolve(B02);
+  expect(a).toBeInstanceOf(A02);
+  expect(b).toBeInstanceOf(B02);
+  expect(Object.keys(a)).toStrictEqual(["b"]);
+  expect(Object.keys(b)).toStrictEqual(["a", "name", "prop"]);
+  expect(Object.getOwnPropertyNames(a)).toStrictEqual(["b"]);
+  expect(Object.getOwnPropertyNames(b)).toStrictEqual(["a", "name", "prop"]);
+});
