@@ -82,6 +82,33 @@ import "reflect-metadata";
 // Your code here...
 ```
 
+### Babel
+
+If you're using Babel (e.g. using React Native), you will need to configure it to emit TypeScript metadata.
+
+First get the Babel plugin
+
+#### Yarn
+
+```
+yarn add --dev babel-plugin-transform-typescript-metadata
+```
+
+#### npm
+
+```
+npm install --save-dev babel-plugin-transform-typescript-metadata
+```
+
+Then add it to your Babel config
+
+```
+plugins: [
+            'babel-plugin-transform-typescript-metadata',
+            /* ...the rest of your config... */
+         ]
+```
+
 # API
 
 TSyringe performs [Constructor Injection](https://en.wikipedia.org/wiki/Dependency_injection#Constructor_injection)
