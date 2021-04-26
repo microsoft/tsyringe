@@ -6,7 +6,7 @@ import {defineInjectionTokenMetadata} from "../reflection-helpers";
 /**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata.
  *
- * If a defaultValue is given it will be registered into the global container.
+ * If a defaultProvider is given it will be registered into the global container.
  *
  * @return {Function} The parameter decorator
  */
