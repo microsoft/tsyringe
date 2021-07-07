@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/interface-name-prefix */
 
 import {inject, injectable, registry, singleton} from "../decorators";
-import {instanceCachingFactory, predicateAwareClassFactory} from "../factories";
+import {
+  instanceCachingFactory,
+  instancePerContainerCachingFactory,
+  predicateAwareClassFactory
+} from "../factories";
 import {DependencyContainer} from "../types";
 import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
@@ -743,6 +747,40 @@ test("instanceCachingFactory caches the returned instance even when there is bra
   expect(factory(globalContainer)).toBe(instanceA);
   useA = false;
   expect(factory(globalContainer)).toBe(instanceA);
+});
+
+test("instancePerContainerCachingFactory caches the returned instance", () => {
+  const factory = instancePerContainerCachingFactory(() => {});
+
+  expect(factory(globalContainer)).toBe(factory(globalContainer));
+});
+
+test("instancePerContainerCachingFactory caches the returned instance even when there is branching logic in the factory", () => {
+  const instanceA = {};
+  const instanceB = {};
+  let useA = true;
+
+  const factory = instancePerContainerCachingFactory(() =>
+    useA ? instanceA : instanceB
+  );
+
+  expect(factory(globalContainer)).toBe(instanceA);
+  useA = false;
+  expect(factory(globalContainer)).toBe(instanceA);
+});
+
+test("instancePerContainerCachingFactory returns the correct instance per container", () => {
+  const instanceA = {};
+  const instanceB = {};
+  let useA = true;
+
+  const factory = instancePerContainerCachingFactory(() =>
+    useA ? instanceA : instanceB
+  );
+
+  expect(factory(globalContainer)).toBe(instanceA);
+  useA = false;
+  expect(factory(globalContainer.createChildContainer())).toBe(instanceB);
 });
 
 test("predicateAwareClassFactory correctly switches the returned instance with caching on", () => {
