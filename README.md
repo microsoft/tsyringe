@@ -390,6 +390,20 @@ import {instanceCachingFactory} from "tsyringe";
 }
 ```
 
+##### instancePerContainerCachingFactory
+
+This factory is used to lazy construct an object and cache result per `DependencyContainer`, returning the single instance for each subsequent
+resolution from a single container. This is very similar to `@scoped(Lifecycle.ContainerScoped)`
+
+```typescript
+import {instancePerContainerCachingFactory} from "tsyringe";
+
+{
+  token: "ContainerScopedFoo";
+  useFactory: instancePerContainerCachingFactory<Foo>(c => c.resolve(Foo));
+}
+```
+
 ##### predicateAwareClassFactory
 
 This factory is used to provide conditional behavior upon resolution. It caches the result by default, but
