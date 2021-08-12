@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import constructor from "../types/constructor";
 import {DelayedConstructor} from "../lazy-helpers";
 import Transform from "../types/transform";

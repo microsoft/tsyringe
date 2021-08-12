@@ -15,7 +15,7 @@ test("DelayedConstructor delays creation until first usage", () => {
   }
   const delayedConstructor = delay(() => Foo);
   expect(delayedConstructor).toBeInstanceOf(DelayedConstructor);
-  const foo: Foo = delayedConstructor.createProxy(Target => new Target());
+  const foo: Foo = delayedConstructor.createProxy((Target) => new Target());
   expect(created).toBe(false);
   expect(foo).toBeInstanceOf(Foo);
   expect(created).toBe(true);

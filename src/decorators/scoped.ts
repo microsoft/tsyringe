@@ -14,7 +14,7 @@ export default function scoped<T>(
   lifecycle: Lifecycle.ContainerScoped | Lifecycle.ResolutionScoped,
   token?: InjectionToken<T>
 ): (target: constructor<T>) => void {
-  return function(target: constructor<T>): void {
+  return function (target: constructor<T>): void {
     injectable()(target);
     globalContainer.register(token || target, target, {
       lifecycle

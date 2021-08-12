@@ -1,3 +1,4 @@
 trailingComma: none
 tabWidth: 2
 bracketSpacing: false
+endOfLine: auto

@@ -9,7 +9,7 @@ function formatDependency(params: string | null, idx: number): string {
 }
 
 function composeErrorMessage(msg: string, e: Error, indent = "    "): string {
-  return [msg, ...e.message.split("\n").map(l => indent + l)].join("\n");
+  return [msg, ...e.message.split("\n").map((l) => indent + l)].join("\n");
 }
 
 export function formatErrorCtor(

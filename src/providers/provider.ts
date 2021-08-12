@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import ClassProvider, {isClassProvider} from "./class-provider";
 import ValueProvider, {isValueProvider} from "./value-provider";
 import TokenProvider, {isTokenProvider} from "./token-provider";

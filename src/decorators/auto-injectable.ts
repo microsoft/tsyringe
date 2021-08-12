@@ -16,7 +16,7 @@ import {formatErrorCtor} from "../error-helpers";
  * @return {Function} The class decorator
  */
 function autoInjectable(): (target: constructor<any>) => any {
-  return function(target: constructor<any>): constructor<any> {
+  return function (target: constructor<any>): constructor<any> {
     const paramInfo = getParamInfo(target);
 
     return class extends target {

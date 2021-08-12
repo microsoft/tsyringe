@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import Dictionary from "./types/dictionary";
 import constructor from "./types/constructor";
 import InjectionToken, {TokenDescriptor} from "./providers/injection-token";
@@ -10,7 +11,7 @@ export function getParamInfo(target: constructor<any>): ParamInfo[] {
   const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
   const injectionTokens: Dictionary<InjectionToken<any>> =
     Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-  Object.keys(injectionTokens).forEach(key => {
+  Object.keys(injectionTokens).forEach((key) => {
     params[+key] = injectionTokens[key];
   });
 
@@ -21,7 +22,7 @@ export function defineInjectionTokenMetadata(
   data: any,
   transform?: {transformToken: InjectionToken<Transform<any, any>>; args: any[]}
 ): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
-  return function(
+  return function (
     target: any,
     _propertyKey: string | symbol,
     parameterIndex: number

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
-
 import {inject, injectable, registry, singleton} from "../decorators";
 import {
   instanceCachingFactory,
