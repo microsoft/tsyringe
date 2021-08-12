@@ -42,11 +42,11 @@
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
   "dependencies": {
-    "tslib": "^1.9.3"
+    "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.21",
-    "@types/node": "^8.10.16",
+    "@types/jest": "^27.0.0",
+    "@types/node": "^16.6.0",
     "@typescript-eslint/eslint-plugin": "^4.29.1",
     "@typescript-eslint/parser": "^4.29.1",
     "eslint": "^7.32.0",
