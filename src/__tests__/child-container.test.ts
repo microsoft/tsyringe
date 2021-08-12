@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix, @typescript-eslint/no-empty-interface */
+/* eslint-disable @typescript-eslint/no-empty-interface */
 
 import {instance as globalContainer} from "../dependency-container";
 

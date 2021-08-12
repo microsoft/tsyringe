@@ -15,15 +15,13 @@ export type PostResolutionInterceptor = {
   options: InterceptionOptions;
 };
 
-export class PreResolutionInterceptors extends RegistryBase<
-  PreResolutionInterceptor
-> {}
+export class PreResolutionInterceptors extends RegistryBase<PreResolutionInterceptor> {}
 
-export class PostResolutionInterceptors extends RegistryBase<
-  PostResolutionInterceptor
-> {}
+export class PostResolutionInterceptors extends RegistryBase<PostResolutionInterceptor> {}
 
 export default class Interceptors {
-  public preResolution: PreResolutionInterceptors = new PreResolutionInterceptors();
-  public postResolution: PostResolutionInterceptors = new PostResolutionInterceptors();
+  public preResolution: PreResolutionInterceptors =
+    new PreResolutionInterceptors();
+  public postResolution: PostResolutionInterceptors =
+    new PostResolutionInterceptors();
 }
