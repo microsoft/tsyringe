@@ -126,5 +126,5 @@ export default interface DependencyContainer extends Disposable {
    * Calls `.dispose()` on all disposable instances created by the container.
    * After calling this, the container may no longer be used.
    */
-  dispose(): void;
+  dispose(): Promise<void> | void;
 }

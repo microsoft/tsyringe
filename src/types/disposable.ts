@@ -1,5 +1,5 @@
 export default interface Disposable {
-  dispose(): void;
+  dispose(): Promise<void> | void;
 }
 
 export function isDisposable(value: any): value is Disposable {

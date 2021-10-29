@@ -467,9 +467,19 @@ class InternalDependencyContainer implements DependencyContainer {
     });
   }
 
-  public dispose(): void {
+  public async dispose(): Promise<void> {
     this.disposed = true;
-    this.disposables.forEach(disposable => disposable.dispose());
+
+    const promises: Promise<unknown>[] = [];
+    this.disposables.forEach(disposable => {
+      const maybePromise = disposable.dispose();
+
+      if (maybePromise) {
+        promises.push(maybePromise);
+      }
+    });
+
+    await Promise.all(promises);
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {

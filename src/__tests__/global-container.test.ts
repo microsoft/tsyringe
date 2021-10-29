@@ -835,6 +835,17 @@ describe("dispose", () => {
       this.disposed = true;
     }
   }
+  class Baz implements Disposable {
+    disposed = false;
+    async dispose(): Promise<void> {
+      return new Promise(resolve => {
+        process.nextTick(() => {
+          this.disposed = true;
+          resolve();
+        });
+      });
+    }
+  }
 
   it("renders the container useless", () => {
     const container = globalContainer.createChildContainer();
@@ -857,6 +868,18 @@ describe("dispose", () => {
 
     expect(foo.disposed).toBeTruthy();
     expect(bar.disposed).toBeTruthy();
+  });
+
+  it("disposes asynchronous disposables", async () => {
+    const container = globalContainer.createChildContainer();
+
+    const foo = container.resolve(Foo);
+    const baz = container.resolve(Baz);
+
+    await container.dispose();
+
+    expect(foo.disposed).toBeTruthy();
+    expect(baz.disposed).toBeTruthy();
   });
 
   it("disposes all instances of the same type", () => {

@@ -689,6 +689,12 @@ interface will automatically be disposed of when the container is disposed.
 container.dispose();
 ```
 
+or to await all asynchronous disposals:
+
+```typescript
+await container.dispose();
+```
+
 # Full examples
 
 ## Example without interfaces
