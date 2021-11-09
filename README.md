@@ -413,7 +413,8 @@ has an optional parameter to resolve fresh each time.
 import {predicateAwareClassFactory} from "tsyringe";
 
 {
-  token: useFactory: predicateAwareClassFactory<Foo>(
+  token: "FooHttp",
+  useFactory: predicateAwareClassFactory<Foo>(
     c => c.resolve(Bar).useHttps, // Predicate for evaluation
     FooHttps, // A FooHttps will be resolved from the container if predicate is true
     FooHttp // A FooHttp will be resolved if predicate is false
