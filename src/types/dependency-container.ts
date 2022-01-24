@@ -94,6 +94,9 @@ export default interface DependencyContainer {
    */
   reset(): void;
 
+  unregisterAll(): void;
+  unregister<T>(token: InjectionToken<T>): void;
+
   clearInstances(): void;
   createChildContainer(): DependencyContainer;
 
