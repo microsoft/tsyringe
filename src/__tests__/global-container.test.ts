@@ -370,6 +370,43 @@ test("clears cached instances from container.resolve() calls", () => {
   expect(instance3).toBeInstanceOf(Foo);
 });
 
+// --- unregister() ---
+
+test("unregister all instances", () => {
+  class Foo {}
+  const instance1 = new Foo();
+  globalContainer.registerInstance("Test", instance1);
+
+  expect(globalContainer.resolve("Test")).toBeInstanceOf(Foo);
+
+  globalContainer.unregisterAll();
+
+  expect(() => {
+    globalContainer.resolve("Test");
+  }).toThrow();
+});
+
+test("unregister a single instance", () => {
+  class Foo {}
+
+  const instance1 = new Foo();
+  const instance2 = new Foo();
+
+  globalContainer.registerInstance("Test1", instance1);
+  globalContainer.registerInstance("Test2", instance2);
+
+  expect(globalContainer.resolve("Test1")).toBeInstanceOf(Foo);
+  expect(globalContainer.resolve("Test2")).toBeInstanceOf(Foo);
+
+  globalContainer.unregister("Test1");
+
+  expect(globalContainer.resolve("Test2")).toBeInstanceOf(Foo);
+
+  expect(() => {
+    globalContainer.resolve("Test1");
+  }).toThrow();
+});
+
 // --- @injectable ---
 
 test("@injectable resolves when not using DI", () => {
