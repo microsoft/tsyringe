@@ -407,6 +407,12 @@ test("unregister a single instance", () => {
   }).toThrow();
 });
 
+test("fails to delete unregistered dependency by name", () => {
+  expect(() => {
+    globalContainer.unregister("NotRegistered");
+  }).toThrow();
+});
+
 // --- @injectable ---
 
 test("@injectable resolves when not using DI", () => {
