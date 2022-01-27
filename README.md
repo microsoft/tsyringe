@@ -219,10 +219,10 @@ It will inject an array using the specified injection token to resolve the value
 ```typescript
 import {injectable, injectAll} from "tsyringe";
 
-@injectable
+@injectable()
 class Foo {}
 
-@injectable
+@injectable()
 class Bar {
   constructor(@injectAll(Foo) fooArray: Foo[]) {
     // ...
@@ -230,7 +230,7 @@ class Bar {
 }
 ```
 
-### injectWithTransform
+### injectWithTransform()
 
 Parameter decorator which allows for a transformer object to take an action on the resolved object
 before returning the result.
@@ -255,13 +255,13 @@ class MyComponent(foo: Foo, @injectWithTransform(FeatureFlags, FeatureFlagsTrans
 }
 ```
 
-### injectAllWithTransform
+### injectAllWithTransform()
 
 This parameter decorator allows for array contents to be passed through a transformer. The transformer can return any type, so this
 can be used to map or fold an array.
 
 ```typescript
-@injectable
+@injectable()
 class Foo {
   public value;
 }
@@ -272,7 +272,7 @@ class FooTransform implements Transform<Foo[], string[]>{
   }
 }
 
-@injectable
+@injectable()
 class Bar {
   constructor(@injectAllWithTransform(Foo, FooTransform) stringArray: string[]) {
     // ...
@@ -413,7 +413,8 @@ has an optional parameter to resolve fresh each time.
 import {predicateAwareClassFactory} from "tsyringe";
 
 {
-  token: useFactory: predicateAwareClassFactory<Foo>(
+  token: "FooHttp",
+  useFactory: predicateAwareClassFactory<Foo>(
     c => c.resolve(Bar).useHttps, // Predicate for evaluation
     FooHttps, // A FooHttps will be resolved from the container if predicate is true
     FooHttp // A FooHttp will be resolved if predicate is false
