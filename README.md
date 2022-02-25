@@ -33,6 +33,7 @@ constructor injection.
 - [Circular dependencies](#circular-dependencies)
   - [The `delay` helper function](#the-delay-helper-function)
   - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
+- [Disposable instances](#disposable-instances)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
   - [Example with interfaces](#example-with-interfaces)
@@ -679,6 +680,20 @@ export interface IBar {}
 export class Bar implements IBar {
   constructor(@inject("IFoo") public foo: IFoo) {}
 }
+```
+
+# Disposable instances
+All instances created by the container that implement the [`Disposable`](./src/types/disposable.ts)
+interface will automatically be disposed of when the container is disposed.
+
+```typescript
+container.dispose();
+```
+
+or to await all asynchronous disposals:
+
+```typescript
+await container.dispose();
 ```
 
 # Full examples
