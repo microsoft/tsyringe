@@ -11,6 +11,7 @@ constructor injection.
 
 - [TSyringe](#tsyringe)
   - [Installation](#installation)
+    - [Babel](#babel)
 - [API](#api)
   - [Decorators](#decorators)
     - [injectable()](#injectable)
@@ -18,8 +19,8 @@ constructor injection.
     - [autoInjectable()](#autoinjectable)
     - [inject()](#inject)
     - [injectAll()](#injectall)
-    - [injectWithTransform()](#injectWithTransform)
-    - [injectAllWithTransform()](#injectAllWithTransform)
+    - [injectWithTransform()](#injectwithtransform)
+    - [injectAllWithTransform()](#injectallwithtransform)
     - [scoped()](#scoped)
   - [Container](#container)
     - [Injection Token](#injection-token)
@@ -31,8 +32,8 @@ constructor injection.
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
 - [Circular dependencies](#circular-dependencies)
-  - [The `delay` helper function](#the-delay-helper-function)
-  - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
+    - [The `delay` helper function](#the-delay-helper-function)
+    - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Disposable instances](#disposable-instances)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
@@ -193,7 +194,7 @@ need to make the parameters optional, e.g. `database?: Database`.
 ### inject()
 
 Parameter decorator factory that allows for interface and other non-class
-information to be stored in the constructor's metadata.
+information to be stored in the constructor's metadata. It also accepts a [provider](#providers) as a second parameter, which will be registered within the global container and can act as a fallback value in case no other registrations are done.
 
 #### Usage
 
