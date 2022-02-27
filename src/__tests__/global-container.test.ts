@@ -11,6 +11,7 @@ import {instance as globalContainer} from "../dependency-container";
 import injectAll from "../decorators/inject-all";
 import Lifecycle from "../types/lifecycle";
 import {ValueProvider} from "../providers";
+import Disposable from "../types/disposable";
 
 interface IBar {
   value: string;
@@ -868,4 +869,88 @@ test("predicateAwareClassFactory returns new instances each call with caching of
   const factory = predicateAwareClassFactory(() => true, A, B, false);
 
   expect(factory(globalContainer)).not.toBe(factory(globalContainer));
+});
+
+describe("dispose", () => {
+  class Foo implements Disposable {
+    disposed = false;
+    dispose(): void {
+      this.disposed = true;
+    }
+  }
+  class Bar implements Disposable {
+    disposed = false;
+    dispose(): void {
+      this.disposed = true;
+    }
+  }
+  class Baz implements Disposable {
+    disposed = false;
+    async dispose(): Promise<void> {
+      return new Promise(resolve => {
+        process.nextTick(() => {
+          this.disposed = true;
+          resolve();
+        });
+      });
+    }
+  }
+
+  it("renders the container useless", () => {
+    const container = globalContainer.createChildContainer();
+    container.dispose();
+
+    expect(() => container.register("Bar", {useClass: Bar})).toThrow(
+      /disposed/
+    );
+    expect(() => container.reset()).toThrow(/disposed/);
+    expect(() => container.resolve("indisposed")).toThrow(/disposed/);
+  });
+
+  it("disposes all child disposables", () => {
+    const container = globalContainer.createChildContainer();
+
+    const foo = container.resolve(Foo);
+    const bar = container.resolve(Bar);
+
+    container.dispose();
+
+    expect(foo.disposed).toBeTruthy();
+    expect(bar.disposed).toBeTruthy();
+  });
+
+  it("disposes asynchronous disposables", async () => {
+    const container = globalContainer.createChildContainer();
+
+    const foo = container.resolve(Foo);
+    const baz = container.resolve(Baz);
+
+    await container.dispose();
+
+    expect(foo.disposed).toBeTruthy();
+    expect(baz.disposed).toBeTruthy();
+  });
+
+  it("disposes all instances of the same type", () => {
+    const container = globalContainer.createChildContainer();
+
+    const foo1 = container.resolve(Foo);
+    const foo2 = container.resolve(Foo);
+
+    container.dispose();
+
+    expect(foo1.disposed).toBeTruthy();
+    expect(foo2.disposed).toBeTruthy();
+  });
+
+  it("doesn't dispose of instances created external to the container", () => {
+    const foo = new Foo();
+    const container = globalContainer.createChildContainer();
+
+    container.registerInstance(Foo, foo);
+    container.resolve(Foo);
+    container.dispose();
+
+    expect(foo.disposed).toBeFalsy();
+  });
 });

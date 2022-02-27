@@ -6,6 +6,7 @@ if (typeof Reflect === "undefined" || !Reflect.getMetadata) {
 
 export {
   DependencyContainer,
+  Disposable,
   Lifecycle,
   RegistrationOptions,
   Frequency
