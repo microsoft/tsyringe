@@ -1,6 +1,6 @@
 {
   "name": "tsyringe",
-  "version": "4.6.0",
+  "version": "4.7.0",
   "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/cjs/index.js",
   "module": "./dist/esm5/index.js",
