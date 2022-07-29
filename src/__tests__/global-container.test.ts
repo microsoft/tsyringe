@@ -553,6 +553,13 @@ test("registers by value provider", () => {
   expect(globalContainer.isRegistered(registration.token)).toBeTruthy();
 });
 
+test("value provider with 'undefined' value should work fine", () => {
+  globalContainer.register("Foo", {
+    useValue: undefined
+  });
+  expect(globalContainer.resolve("Foo")).toBe(undefined);
+});
+
 test("registers by token provider", () => {
   const registration = {
     token: "IBar",
