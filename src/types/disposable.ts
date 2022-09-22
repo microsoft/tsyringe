@@ -3,7 +3,9 @@ export default interface Disposable {
 }
 
 export function isDisposable(value: any): value is Disposable {
-  if (typeof value.dispose !== "function") return false;
+  if (typeof value !== "object" || typeof value.dispose !== "function") {
+    return false;
+  }
 
   const disposeFun: Function = value.dispose;
 

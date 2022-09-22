@@ -311,11 +311,13 @@ class InternalDependencyContainer implements DependencyContainer {
 
     const returnInstance = isSingleton || isContainerScoped;
 
+    let newResolution = true;
     let resolved: T;
 
     if (isValueProvider(registration.provider)) {
       resolved = registration.provider.useValue;
     } else if (isTokenProvider(registration.provider)) {
+      newResolution = returnInstance;
       resolved = returnInstance
         ? registration.instance ||
           (registration.instance = this.resolve(
@@ -324,6 +326,7 @@ class InternalDependencyContainer implements DependencyContainer {
           ))
         : this.resolve(registration.provider.useToken, context);
     } else if (isClassProvider(registration.provider)) {
+      newResolution = returnInstance;
       resolved = returnInstance
         ? registration.instance ||
           (registration.instance = this.construct(
@@ -334,12 +337,18 @@ class InternalDependencyContainer implements DependencyContainer {
     } else if (isFactoryProvider(registration.provider)) {
       resolved = registration.provider.useFactory(this);
     } else {
+      newResolution = false;
       resolved = this.construct(registration.provider, context);
     }
 
     // If this is a scoped dependency, store resolved instance in context
     if (registration.options.lifecycle === Lifecycle.ResolutionScoped) {
       context.scopedResolutions.set(registration, resolved);
+    }
+
+    // If this is a new resolution and the instance is disposable, add it to our set of disposables
+    if (newResolution && isDisposable(resolved)) {
+      this.disposables.add(resolved);
     }
 
     return resolved;
