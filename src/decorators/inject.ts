@@ -8,7 +8,11 @@ import InjectionToken from "../providers/injection-token";
  */
 function inject(
   token: InjectionToken<any>
-): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+): (
+  target: any,
+  propertyKey: string | symbol | undefined,
+  parameterIndex: number
+) => any {
   return defineInjectionTokenMetadata(token);
 }
 

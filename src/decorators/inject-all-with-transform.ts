@@ -14,7 +14,11 @@ function injectAllWithTransform(
   token: InjectionToken<any>,
   transformer: InjectionToken<Transform<[any], any>>,
   ...args: any[]
-): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+): (
+  target: any,
+  propertyKey: string | symbol | undefined,
+  parameterIndex: number
+) => any {
   const data: TokenDescriptor | TransformDescriptor = {
     token,
     multiple: true,
