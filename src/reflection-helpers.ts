@@ -20,10 +20,14 @@ export function getParamInfo(target: constructor<any>): ParamInfo[] {
 export function defineInjectionTokenMetadata(
   data: any,
   transform?: {transformToken: InjectionToken<Transform<any, any>>; args: any[]}
-): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+): (
+  target: any,
+  propertyKey: string | symbol | undefined,
+  parameterIndex: number
+) => any {
   return function(
     target: any,
-    _propertyKey: string | symbol,
+    _propertyKey: string | symbol | undefined,
     parameterIndex: number
   ): any {
     const descriptors: Dictionary<InjectionToken<any> | TokenDescriptor> =
