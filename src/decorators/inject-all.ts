@@ -8,7 +8,11 @@ import InjectionToken, {TokenDescriptor} from "../providers/injection-token";
  */
 function injectAll(
   token: InjectionToken<any>
-): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+): (
+  target: any,
+  propertyKey: string | symbol | undefined,
+  parameterIndex: number
+) => any {
   const data: TokenDescriptor = {token, multiple: true};
   return defineInjectionTokenMetadata(data);
 }
