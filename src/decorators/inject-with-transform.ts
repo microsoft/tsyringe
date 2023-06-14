@@ -13,7 +13,11 @@ function injectWithTransform(
   token: InjectionToken<any>,
   transformer: InjectionToken<Transform<any, any>>,
   ...args: any[]
-): (target: any, propertyKey: string | symbol, parameterIndex: number) => any {
+): (
+  target: any,
+  propertyKey: string | symbol | undefined,
+  parameterIndex: number
+) => any {
   return defineInjectionTokenMetadata(token, {
     transformToken: transformer,
     args: args
