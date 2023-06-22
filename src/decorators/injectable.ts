@@ -1,6 +1,5 @@
 import constructor from "../types/constructor";
-import {getParamInfo} from "../reflection-helpers";
-import {typeInfo} from "../dependency-container";
+import {getParamInfo, PARAM_INFOS_METADATA_KEY} from "../reflection-helpers";
 
 /**
  * Class decorator factory that allows the class' dependencies to be injected
@@ -10,7 +9,9 @@ import {typeInfo} from "../dependency-container";
  */
 function injectable<T>(): (target: constructor<T>) => void {
   return function(target: constructor<T>): void {
-    typeInfo.set(target, getParamInfo(target));
+    const paramInfo = getParamInfo(target);
+
+    Reflect.defineMetadata(PARAM_INFOS_METADATA_KEY, paramInfo, target);
   };
 }
 

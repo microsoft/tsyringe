@@ -31,6 +31,7 @@ import {DelayedConstructor} from "./lazy-helpers";
 import Disposable, {isDisposable} from "./types/disposable";
 import InterceptorOptions from "./types/interceptor-options";
 import Interceptors from "./interceptors";
+import {PARAM_INFOS_METADATA_KEY} from "./reflection-helpers";
 
 export type Registration<T = any> = {
   provider: Provider<T>;
@@ -39,8 +40,6 @@ export type Registration<T = any> = {
 };
 
 export type ParamInfo = TokenDescriptor | InjectionToken<any>;
-
-export const typeInfo = new Map<constructor<any>, ParamInfo[]>();
 
 /** Dependency Container */
 class InternalDependencyContainer implements DependencyContainer {
@@ -519,7 +518,7 @@ class InternalDependencyContainer implements DependencyContainer {
     }
 
     const instance: T = (() => {
-      const paramInfo = typeInfo.get(ctor);
+      const paramInfo = Reflect.getMetadata(PARAM_INFOS_METADATA_KEY, ctor);
       if (!paramInfo || paramInfo.length === 0) {
         if (ctor.length === 0) {
           return new ctor();
