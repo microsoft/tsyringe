@@ -1,4 +1,4 @@
-import { Reflect } from "./deps.ts";
+import { Reflect } from "../deps.ts";
 import Dictionary from "./types/dictionary.ts";
 import constructor from "./types/constructor.ts";
 import InjectionToken, {TokenDescriptor} from "./providers/injection-token.ts";
