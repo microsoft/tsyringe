@@ -1,4 +1,4 @@
-import {Registration} from "./dependency-container";
-import RegistryBase from "./registry-base";
+import {Registration} from "./dependency-container.ts";
+import RegistryBase from "./registry-base.ts";
 
 export default class Registry extends RegistryBase<Registration> {}
