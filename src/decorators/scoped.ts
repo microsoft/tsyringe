@@ -1,8 +1,8 @@
-import constructor from "../types/constructor";
-import injectable from "./injectable";
-import {instance as globalContainer} from "../dependency-container";
-import {InjectionToken} from "../providers";
-import Lifecycle from "../types/lifecycle";
+import constructor from "../types/constructor.ts";
+import injectable from "./injectable.ts";
+import {instance as globalContainer} from "../dependency-container.ts";
+import {InjectionToken} from "../providers/index.ts";
+import Lifecycle from "../types/lifecycle.ts";
 
 /**
  * Class decorator factory that registers the class as a scoped dependency within

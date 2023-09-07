@@ -1,8 +1,9 @@
-import Dictionary from "./types/dictionary";
-import constructor from "./types/constructor";
-import InjectionToken, {TokenDescriptor} from "./providers/injection-token";
-import {ParamInfo} from "./dependency-container";
-import Transform from "./types/transform";
+import { Reflect } from "./deps.ts";
+import Dictionary from "./types/dictionary.ts";
+import constructor from "./types/constructor.ts";
+import InjectionToken, {TokenDescriptor} from "./providers/injection-token.ts";
+import {ParamInfo} from "./dependency-container.ts";
+import Transform from "./types/transform.ts";
 
 export const INJECTION_TOKEN_METADATA_KEY = "injectionTokens";
 

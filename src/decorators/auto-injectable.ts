@@ -1,11 +1,11 @@
-import constructor from "../types/constructor";
-import {getParamInfo} from "../reflection-helpers";
-import {instance as globalContainer} from "../dependency-container";
+import constructor from "../types/constructor.ts";
+import {getParamInfo} from "../reflection-helpers.ts";
+import {instance as globalContainer} from "../dependency-container.ts";
 import {
   isTokenDescriptor,
   isTransformDescriptor
-} from "../providers/injection-token";
-import {formatErrorCtor} from "../error-helpers";
+} from "../providers/injection-token.ts";
+import {formatErrorCtor} from "../error-helpers.ts";
 
 /**
  * Class decorator factory that replaces the decorated class' constructor with

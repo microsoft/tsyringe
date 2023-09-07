@@ -1,5 +1,5 @@
-import DependencyContainer from "../types/dependency-container";
-import Provider from "./provider";
+import DependencyContainer from "../types/dependency-container.ts";
+import Provider from "./provider.ts";
 
 /**
  * Provide a dependency using a factory.

@@ -1,6 +1,6 @@
-import DependencyContainer from "../types/dependency-container";
-import constructor from "../types/constructor";
-import FactoryFunction from "./factory-function";
+import DependencyContainer from "../types/dependency-container.ts";
+import constructor from "../types/constructor.ts";
+import FactoryFunction from "./factory-function.ts";
 
 export default function predicateAwareClassFactory<T>(
   predicate: (dependencyContainer: DependencyContainer) => boolean,

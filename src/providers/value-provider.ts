@@ -1,4 +1,4 @@
-import Provider from "./provider";
+import Provider from "./provider.ts";
 
 export default interface ValueProvider<T> {
   useValue: T;

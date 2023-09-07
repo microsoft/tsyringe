@@ -2,35 +2,35 @@ import DependencyContainer, {
   PostResolutionInterceptorCallback,
   PreResolutionInterceptorCallback,
   ResolutionType
-} from "./types/dependency-container";
+} from "./types/dependency-container.ts";
 import {
   isClassProvider,
   isFactoryProvider,
   isNormalToken,
   isTokenProvider,
   isValueProvider
-} from "./providers";
-import Provider, {isProvider} from "./providers/provider";
-import FactoryProvider from "./providers/factory-provider";
+} from "./providers/index.ts";
+import Provider, {isProvider} from "./providers/provider.ts";
+import FactoryProvider from "./providers/factory-provider.ts";
 import InjectionToken, {
   isConstructorToken,
   isTokenDescriptor,
   isTransformDescriptor,
   TokenDescriptor
-} from "./providers/injection-token";
-import TokenProvider from "./providers/token-provider";
-import ValueProvider from "./providers/value-provider";
-import ClassProvider from "./providers/class-provider";
-import RegistrationOptions from "./types/registration-options";
-import constructor from "./types/constructor";
-import Registry from "./registry";
-import Lifecycle from "./types/lifecycle";
-import ResolutionContext from "./resolution-context";
-import {formatErrorCtor} from "./error-helpers";
-import {DelayedConstructor} from "./lazy-helpers";
-import Disposable, {isDisposable} from "./types/disposable";
-import InterceptorOptions from "./types/interceptor-options";
-import Interceptors from "./interceptors";
+} from "./providers/injection-token.ts";
+import TokenProvider from "./providers/token-provider.ts";
+import ValueProvider from "./providers/value-provider.ts";
+import ClassProvider from "./providers/class-provider.ts";
+import RegistrationOptions from "./types/registration-options.ts";
+import constructor from "./types/constructor.ts";
+import Registry from "./registry.ts";
+import Lifecycle from "./types/lifecycle.ts";
+import ResolutionContext from "./resolution-context.ts";
+import {formatErrorCtor} from "./error-helpers.ts";
+import {DelayedConstructor} from "./lazy-helpers.ts";
+import Disposable, {isDisposable} from "./types/disposable.ts";
+import InterceptorOptions from "./types/interceptor-options.ts";
+import Interceptors from "./interceptors.ts";
 
 export type Registration<T = any> = {
   provider: Provider<T>;

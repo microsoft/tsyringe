@@ -1,5 +1,5 @@
-import DependencyContainer from "../types/dependency-container";
-import FactoryFunction from "./factory-function";
+import DependencyContainer from "../types/dependency-container.ts";
+import FactoryFunction from "./factory-function.ts";
 
 export default function instancePerContainerCachingFactory<T>(
   factoryFunc: FactoryFunction<T>

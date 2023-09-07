@@ -1,6 +1,6 @@
-import constructor from "../types/constructor";
-import {DelayedConstructor} from "../lazy-helpers";
-import Transform from "../types/transform";
+import constructor from "../types/constructor.ts";
+import {DelayedConstructor} from "../lazy-helpers.ts";
+import Transform from "../types/transform.ts";
 
 type InjectionToken<T = any> =
   | constructor<T>

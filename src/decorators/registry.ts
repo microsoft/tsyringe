@@ -1,7 +1,7 @@
-import Provider from "../providers/provider";
-import InjectionToken from "../providers/injection-token";
-import RegistrationOptions from "../types/registration-options";
-import {instance as globalContainer} from "../dependency-container";
+import Provider from "../providers/provider.ts";
+import InjectionToken from "../providers/injection-token.ts";
+import RegistrationOptions from "../types/registration-options.ts";
+import {instance as globalContainer} from "../dependency-container.ts";
 
 /**
  * Class decorator factory that allows constructor dependencies to be registered at runtime.

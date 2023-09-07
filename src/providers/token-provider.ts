@@ -1,5 +1,5 @@
-import InjectionToken from "./injection-token";
-import Provider from "./provider";
+import InjectionToken from "./injection-token.ts";
+import Provider from "./provider.ts";
 
 export default interface TokenProvider<T> {
   useToken: InjectionToken<T>;

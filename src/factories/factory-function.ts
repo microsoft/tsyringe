@@ -1,4 +1,4 @@
-import DependencyContainer from "../types/dependency-container";
+import DependencyContainer from "../types/dependency-container.ts";
 
 type FactoryFunction<T> = (dependencyContainer: DependencyContainer) => T;
 

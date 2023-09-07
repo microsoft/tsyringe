@@ -1,12 +1,12 @@
-import FactoryProvider from "../providers/factory-provider";
-import InjectionToken from "../providers/injection-token";
-import TokenProvider from "../providers/token-provider";
-import ValueProvider from "../providers/value-provider";
-import ClassProvider from "../providers/class-provider";
-import constructor from "./constructor";
-import RegistrationOptions from "./registration-options";
-import Disposable from "./disposable";
-import InterceptorOptions from "./interceptor-options";
+import FactoryProvider from "../providers/factory-provider.ts";
+import InjectionToken from "../providers/injection-token.ts";
+import TokenProvider from "../providers/token-provider.ts";
+import ValueProvider from "../providers/value-provider.ts";
+import ClassProvider from "../providers/class-provider.ts";
+import constructor from "./constructor.ts";
+import RegistrationOptions from "./registration-options.ts";
+import Disposable from "./disposable.ts";
+import InterceptorOptions from "./interceptor-options.ts";
 
 export type ResolutionType = "Single" | "All";
 

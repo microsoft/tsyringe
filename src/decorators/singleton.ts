@@ -1,6 +1,6 @@
-import constructor from "../types/constructor";
-import injectable from "./injectable";
-import {instance as globalContainer} from "../dependency-container";
+import constructor from "../types/constructor.ts";
+import injectable from "./injectable.ts";
+import {instance as globalContainer} from "../dependency-container.ts";
 
 /**
  * Class decorator factory that registers the class as a singleton within

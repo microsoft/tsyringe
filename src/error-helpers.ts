@@ -1,4 +1,4 @@
-import constructor from "./types/constructor";
+import constructor from "./types/constructor.ts";
 
 function formatDependency(params: string | null, idx: number): string {
   if (params === null) {

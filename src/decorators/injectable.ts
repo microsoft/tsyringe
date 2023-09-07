@@ -1,6 +1,6 @@
-import constructor from "../types/constructor";
-import {getParamInfo} from "../reflection-helpers";
-import {typeInfo} from "../dependency-container";
+import constructor from "../types/constructor.ts";
+import {getParamInfo} from "../reflection-helpers.ts";
+import {typeInfo} from "../dependency-container.ts";
 
 /**
  * Class decorator factory that allows the class' dependencies to be injected

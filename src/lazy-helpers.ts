@@ -1,4 +1,4 @@
-import constructor from "./types/constructor";
+import constructor from "./types/constructor.ts";
 
 export class DelayedConstructor<T> {
   private reflectMethods: ReadonlyArray<keyof ProxyHandler<any>> = [

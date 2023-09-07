@@ -1,6 +1,6 @@
-import {InjectionToken} from "../providers";
-import {defineInjectionTokenMetadata} from "../reflection-helpers";
-import Transform from "../types/transform";
+import {InjectionToken} from "../providers/index.ts";
+import {defineInjectionTokenMetadata} from "../reflection-helpers.ts";
+import Transform from "../types/transform.ts";
 
 /**
  * Parameter decorator factory that allows for interface information to be stored in the constructor's metadata with a transform token

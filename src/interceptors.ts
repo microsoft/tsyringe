@@ -1,9 +1,9 @@
-import RegistryBase from "./registry-base";
-import {InterceptionOptions} from "./types";
+import RegistryBase from "./registry-base.ts";
+import {InterceptionOptions} from "./types/index.ts";
 import {
   PostResolutionInterceptorCallback,
   PreResolutionInterceptorCallback
-} from "./types/dependency-container";
+} from "./types/dependency-container.ts";
 
 export type PreResolutionInterceptor = {
   callback: PreResolutionInterceptorCallback;

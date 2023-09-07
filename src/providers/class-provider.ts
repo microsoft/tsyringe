@@ -1,6 +1,6 @@
-import constructor from "../types/constructor";
-import Provider from "./provider";
-import {DelayedConstructor} from "../lazy-helpers";
+import constructor from "../types/constructor.ts";
+import Provider from "./provider.ts";
+import {DelayedConstructor} from "../lazy-helpers.ts";
 
 export default interface ClassProvider<T> {
   useClass: constructor<T> | DelayedConstructor<T>;

@@ -1,7 +1,7 @@
-import ClassProvider, {isClassProvider} from "./class-provider";
-import ValueProvider, {isValueProvider} from "./value-provider";
-import TokenProvider, {isTokenProvider} from "./token-provider";
-import FactoryProvider, {isFactoryProvider} from "./factory-provider";
+import ClassProvider, {isClassProvider} from "./class-provider.ts";
+import ValueProvider, {isValueProvider} from "./value-provider.ts";
+import TokenProvider, {isTokenProvider} from "./token-provider.ts";
+import FactoryProvider, {isFactoryProvider} from "./factory-provider.ts";
 
 type Provider<T = any> =
   | ClassProvider<T>

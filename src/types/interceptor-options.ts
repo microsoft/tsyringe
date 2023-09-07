@@ -1,4 +1,4 @@
-import Frequency from "./frequency";
+import Frequency from "./frequency.ts";
 
 type InterceptorOptions = {
   frequency: Frequency;

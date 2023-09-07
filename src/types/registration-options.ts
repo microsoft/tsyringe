@@ -1,4 +1,4 @@
-import Lifecycle from "./lifecycle";
+import Lifecycle from "./lifecycle.ts";
 
 type RegistrationOptions = {
   /**
