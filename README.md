@@ -5,12 +5,13 @@
 # TSyringe
 
 A lightweight dependency injection container for TypeScript/JavaScript for
-constructor injection.
+constructor injection. This fork is to convert TSyringe to deno module such that I can use it in my own project.
 
 <!-- TOC depthFrom:1 depthTo:3 -->
 
 - [TSyringe](#tsyringe)
   - [Installation](#installation)
+    - [Babel](#babel)
 - [API](#api)
   - [Decorators](#decorators)
     - [injectable()](#injectable)
@@ -18,8 +19,8 @@ constructor injection.
     - [autoInjectable()](#autoinjectable)
     - [inject()](#inject)
     - [injectAll()](#injectall)
-    - [injectWithTransform()](#injectWithTransform)
-    - [injectAllWithTransform()](#injectAllWithTransform)
+    - [injectWithTransform()](#injectwithtransform)
+    - [injectAllWithTransform()](#injectallwithtransform)
     - [scoped()](#scoped)
   - [Container](#container)
     - [Injection Token](#injection-token)
@@ -31,8 +32,8 @@ constructor injection.
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
 - [Circular dependencies](#circular-dependencies)
-  - [The `delay` helper function](#the-delay-helper-function)
-  - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
+    - [The `delay` helper function](#the-delay-helper-function)
+    - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
 - [Disposable instances](#disposable-instances)
 - [Full examples](#full-examples)
   - [Example without interfaces](#example-without-interfaces)
