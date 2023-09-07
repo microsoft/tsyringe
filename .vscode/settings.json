@@ -31,5 +31,8 @@
     "source.fixAll.eslint": true
   },
   "typescript.tsdk": "./node_modules/typescript/lib",
-  "jest.pathToJest": "npm run test --"
+  "jest.pathToJest": "npm run test --",
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true
 }
