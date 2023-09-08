@@ -1,17 +1,21 @@
-[![Travis](https://img.shields.io/travis/Microsoft/tsyringe.svg)](https://travis-ci.org/Microsoft/tsyringe/)
-[![npm](https://img.shields.io/npm/v/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
-[![npm](https://img.shields.io/npm/dt/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
-
 # TSyringe
 
 A lightweight dependency injection container for TypeScript/JavaScript for
 constructor injection. This fork is to convert TSyringe to deno module such that I can use it in my own project.
 
+I don't take any credit for it. All credit go to [microsoft/tsyringe](https://github.com/microsoft/tsyringe)
+
+## Won't do
+
+- deno fmt (to reduce the diff to TSyringe such that I can get update from TSyringe)
+- code changes for non broken features
+- add new features
+
 <!-- TOC depthFrom:1 depthTo:3 -->
 
 - [TSyringe](#tsyringe)
+  - [Won't do](#wont-do)
   - [Installation](#installation)
-    - [Babel](#babel)
 - [API](#api)
   - [Decorators](#decorators)
     - [injectable()](#injectable)
@@ -46,69 +50,15 @@ constructor injection. This fork is to convert TSyringe to deno module such that
 
 ## Installation
 
-Install by `npm`
-
-```sh
-npm install --save tsyringe
-```
-
-**or** install with `yarn` (this project is developed using `yarn`)
-
-```sh
-yarn add tsyringe
-```
-
-Modify your `tsconfig.json` to include the following settings
+Modify your `deno.json` to include the following settings
 
 ```json
-{
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+"import": {
+  "tsyringe/": "https://raw.githubusercontent.com/SYip/tsyringe/convert_to_deno_package/",
+},
+"compilerOptions": {
+  "emitDecoratorMetadata": true
 }
-```
-
-Add a polyfill for the Reflect API (examples below use reflect-metadata). You can use:
-
-- [reflect-metadata](https://www.npmjs.com/package/reflect-metadata)
-- [core-js (core-js/es7/reflect)](https://www.npmjs.com/package/core-js)
-- [reflection](https://www.npmjs.com/package/@abraham/reflection)
-
-The Reflect polyfill import should only be added once, and before DI is used:
-
-```typescript
-// main.ts
-import "reflect-metadata";
-
-// Your code here...
-```
-
-### Babel
-
-If you're using Babel (e.g. using React Native), you will need to configure it to emit TypeScript metadata.
-
-First get the Babel plugin
-
-#### Yarn
-
-```
-yarn add --dev babel-plugin-transform-typescript-metadata
-```
-
-#### npm
-
-```
-npm install --save-dev babel-plugin-transform-typescript-metadata
-```
-
-Then add it to your Babel config
-
-```
-plugins: [
-            'babel-plugin-transform-typescript-metadata',
-            /* ...the rest of your config... */
-         ]
 ```
 
 # API
@@ -127,7 +77,7 @@ to be instantiated.
 #### Usage
 
 ```typescript
-import {injectable} from "tsyringe";
+import {injectable} from "tsyringe/mod.ts";
 
 @injectable()
 class Foo {
@@ -135,9 +85,8 @@ class Foo {
 }
 
 // some other file
-import "reflect-metadata";
-import {container} from "tsyringe";
-import {Foo} from "./foo";
+import {container} from "tsyringe/mod.ts";
+import {Foo} from "./foo.ts";
 
 const instance = container.resolve(Foo);
 ```
@@ -150,7 +99,7 @@ global container.
 #### Usage
 
 ```typescript
-import {singleton} from "tsyringe";
+import {singleton} from "tsyringe/mod.ts";
 
 @singleton()
 class Foo {
@@ -158,9 +107,8 @@ class Foo {
 }
 
 // some other file
-import "reflect-metadata";
-import {container} from "tsyringe";
-import {Foo} from "./foo";
+import {container} from "tsyringe/mod.ts";
+import {Foo} from "./foo.ts";
 
 const instance = container.resolve(Foo);
 ```
@@ -175,7 +123,7 @@ a parameterless constructor that has dependencies auto-resolved.
 #### Usage
 
 ```typescript
-import {autoInjectable} from "tsyringe";
+import {autoInjectable} from "tsyringe/mod.ts";
 
 @autoInjectable()
 class Foo {
@@ -183,7 +131,7 @@ class Foo {
 }
 
 // some other file
-import {Foo} from "./foo";
+import {Foo} from "./foo.ts";
 
 const instance = new Foo();
 ```
@@ -199,7 +147,7 @@ information to be stored in the constructor's metadata.
 #### Usage
 
 ```typescript
-import {injectable, inject} from "tsyringe";
+import {injectable, inject} from "tsyringe/mod.ts";
 
 interface Database {
   // ...
@@ -219,7 +167,7 @@ It will inject an array using the specified injection token to resolve the value
 #### Usage
 
 ```typescript
-import {injectable, injectAll} from "tsyringe";
+import {injectable, injectAll} from "tsyringe/mod.ts";
 
 @injectable()
 class Foo {}
@@ -384,7 +332,7 @@ This factory is used to lazy construct an object and cache result, returning the
 resolution. This is very similar to `@singleton()`
 
 ```typescript
-import {instanceCachingFactory} from "tsyringe";
+import {instanceCachingFactory} from "tsyringe/mod.ts";
 
 {
   token: "SingletonFoo";
@@ -398,7 +346,7 @@ This factory is used to lazy construct an object and cache result per `Dependenc
 resolution from a single container. This is very similar to `@scoped(Lifecycle.ContainerScoped)`
 
 ```typescript
-import {instancePerContainerCachingFactory} from "tsyringe";
+import {instancePerContainerCachingFactory} from "tsyringe/mod.ts";
 
 {
   token: "ContainerScopedFoo";
@@ -412,7 +360,7 @@ This factory is used to provide conditional behavior upon resolution. It caches 
 has an optional parameter to resolve fresh each time.
 
 ```typescript
-import {predicateAwareClassFactory} from "tsyringe";
+import {predicateAwareClassFactory} from "tsyringe/mod.ts";
 
 {
   token: "FooHttp",
@@ -711,8 +659,8 @@ export class Foo {}
 
 ```typescript
 // Bar.ts
-import {Foo} from "./Foo";
-import {injectable} from "tsyringe";
+import {Foo} from "./Foo.ts";
+import {injectable} from "tsyringe/mod.ts";
 
 @injectable()
 export class Bar {
@@ -722,9 +670,8 @@ export class Bar {
 
 ```typescript
 // main.ts
-import "reflect-metadata";
-import {container} from "tsyringe";
-import {Bar} from "./Bar";
+import {container} from "tsyringe/mod.ts";
+import {Bar} from "./Bar.ts";
 
 const myBar = container.resolve(Bar);
 // myBar.myFoo => An instance of Foo
@@ -744,7 +691,7 @@ export interface SuperService {
 
 ```typescript
 // TestService.ts
-import {SuperService} from "./SuperService";
+import {SuperService} from "./SuperService.ts";
 export class TestService implements SuperService {
   //...
 }
@@ -752,7 +699,7 @@ export class TestService implements SuperService {
 
 ```typescript
 // Client.ts
-import {injectable, inject} from "tsyringe";
+import {injectable, inject} from "tsyringe/mod.ts";
 
 @injectable()
 export class Client {
@@ -762,10 +709,9 @@ export class Client {
 
 ```typescript
 // main.ts
-import "reflect-metadata";
-import {Client} from "./Client";
-import {TestService} from "./TestService";
-import {container} from "tsyringe";
+import {Client} from "./Client.ts";
+import {TestService} from "./TestService.ts";
+import {container} from "tsyringe/mod.ts";
 
 container.register("SuperService", {
   useClass: TestService
@@ -780,7 +726,7 @@ const client = container.resolve(Client);
 Primitive values can also be injected by utilizing named injection
 
 ```typescript
-import {singleton, inject} from "tsyringe";
+import {singleton, inject} from "tsyringe/mod.ts";
 
 @singleton()
 class Foo {
@@ -791,9 +737,8 @@ class Foo {
 }
 
 // some other file
-import "reflect-metadata";
-import {container} from "tsyringe";
-import {Foo} from "./foo";
+import {container} from "tsyringe/mod.ts";
+import {Foo} from "./foo.ts";
 
 const str = "test";
 container.register("SpecialString", {useValue: str});
