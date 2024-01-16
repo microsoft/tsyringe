@@ -6,6 +6,7 @@ import {
   isTransformDescriptor
 } from "../providers/injection-token";
 import {formatErrorCtor} from "../error-helpers";
+import {__extends} from "tslib";
 
 /**
  * Class decorator factory that replaces the decorated class' constructor with
@@ -18,10 +19,16 @@ import {formatErrorCtor} from "../error-helpers";
 function autoInjectable(): (target: constructor<any>) => any {
   return function(target: constructor<any>): constructor<any> {
     const paramInfo = getParamInfo(target);
-
-    return class extends target {
-      constructor(...args: any[]) {
-        super(
+    return (function(_super): any {
+      function extendedClazz(...args: any[]) {
+        const SuperProxy = new Proxy(_super, {
+          // target = Foo
+          apply(target, _, argumentsList) {
+            return new target(...argumentsList);
+          }
+        });
+        return SuperProxy.call(
+          null,
           ...args.concat(
             paramInfo.slice(args.length).map((type, index) => {
               try {
@@ -62,7 +69,9 @@ function autoInjectable(): (target: constructor<any>) => any {
           )
         );
       }
-    };
+      __extends(extendedClazz, _super);
+      return extendedClazz;
+    })(target);
   };
 }
 
