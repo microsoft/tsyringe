@@ -7,9 +7,10 @@
   "es2015": "./dist/esm2015/index.js",
   "typings": "./dist/typings/index.d.ts",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:es5 && yarn build:es2015 && yarn build:types",
+    "build": "yarn clean && yarn build:cjs && yarn build:es5 && yarn build:esnext && yarn build:es2015 && yarn build:types",
     "build:cjs": "tsc",
     "build:es5": "tsc -p ./typescript/tsconfig.esm5.json",
+    "build:esnext": "tsc -p ./typescript/tsconfig.esnext.json",
     "build:es2015": "tsc -p ./typescript/tsconfig.esm2015.json",
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
@@ -42,7 +43,7 @@
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
   "dependencies": {
-    "tslib": "^1.9.3"
+    "tslib": "^2.6.2"
   },
   "devDependencies": {
     "@types/jest": "^24.0.21",
@@ -58,6 +59,6 @@
     "reflect-metadata": "^0.1.12",
     "rimraf": "^3.0.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.1.6"
+    "typescript": "^5.4.5"
   }
 }
