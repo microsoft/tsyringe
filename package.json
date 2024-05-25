@@ -5,6 +5,7 @@
   "main": "dist/cjs/index.js",
   "module": "./dist/esm5/index.js",
   "es2015": "./dist/esm2015/index.js",
+  "esnext": "./dist/esnext/index.js",
   "typings": "./dist/typings/index.d.ts",
   "scripts": {
     "build": "yarn clean && yarn build:cjs && yarn build:es5 && yarn build:esnext && yarn build:es2015 && yarn build:types",
