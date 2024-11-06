@@ -567,7 +567,7 @@ class InternalDependencyContainer implements DependencyContainer {
         }
         return this.resolve(param, context);
       } catch (e) {
-        throw new Error(formatErrorCtor(ctor, idx, e));
+        throw new Error(formatErrorCtor(ctor, idx, e as Error));
       }
     };
   }
