@@ -715,6 +715,21 @@ test("injects all dependencies bound to a given interface", () => {
   expect(bar.foo[1]).toBeInstanceOf(FooImpl2);
 });
 
+test("does not throw when injecting all dependencies bound to a given interface if the isOptional property is set to true", () => {
+  interface Foo {
+    str: string;
+  }
+
+  @injectable()
+  class Bar {
+    constructor(@injectAll("Foo", true) public foo: Foo[]) {}
+  }
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(Array.isArray(bar.foo)).toBeTruthy();
+  expect(bar.foo.length).toBe(0);
+});
+
 test("allows array dependencies to be resolved if a single instance is in the container", () => {
   @injectable()
   class Foo {}

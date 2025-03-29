@@ -231,6 +231,19 @@ class Bar {
 }
 ```
 
+By default, `@injectAll()` throws an exception if no registrations were found. If you want to return an empty array, you can pass `true` as the second parameter:
+
+```typescript
+import {injectable, injectAll} from "tsyringe";
+
+@injectable()
+class Bar {
+  constructor(@injectAll(Foo, true) fooArray: Foo[]) {
+    // ...
+  }
+}
+```
+
 ### injectWithTransform()
 
 Parameter decorator which allows for a transformer object to take an action on the resolved object

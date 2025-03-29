@@ -7,13 +7,14 @@ import InjectionToken, {TokenDescriptor} from "../providers/injection-token";
  * @return {Function} The parameter decorator
  */
 function injectAll(
-  token: InjectionToken<any>
+  token: InjectionToken<any>,
+  isOptional?: boolean
 ): (
   target: any,
   propertyKey: string | symbol | undefined,
   parameterIndex: number
 ) => any {
-  const data: TokenDescriptor = {token, multiple: true};
+  const data: TokenDescriptor = {token, multiple: true, isOptional};
   return defineInjectionTokenMetadata(data);
 }
 
