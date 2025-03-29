@@ -43,6 +43,7 @@ export function isConstructorToken(
 export interface TokenDescriptor {
   token: InjectionToken<any>;
   multiple: boolean;
+  isOptional?: boolean;
 }
 
 export interface TransformDescriptor {
