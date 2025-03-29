@@ -253,6 +253,7 @@ before returning the result.
 class FeatureFlags {
   public getFlagValue(flagName: string): boolean {
     // ...
+  }
 }
 
 class Foo() {}
