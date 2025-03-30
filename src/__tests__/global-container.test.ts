@@ -667,6 +667,17 @@ test("allows interfaces to be resolved from the constructor with just a name", (
 
   expect(myFoo.myBar instanceof Bar).toBeTruthy();
 });
+test("allows for optional injection", () => {
+  @injectable()
+  class FooWithInterface {
+    constructor(@inject("IBar", {isOptional: true}) public myBar?: IBar) {}
+  }
+
+  const myFoo = globalContainer.resolve(FooWithInterface);
+
+  expect(myFoo).toBeDefined();
+  expect(myFoo.myBar).toBeUndefined();
+});
 
 test("allows explicit array dependencies to be resolved by inject decorator", () => {
   @injectable()
@@ -722,7 +733,7 @@ test("does not throw when injecting all dependencies bound to a given interface 
 
   @injectable()
   class Bar {
-    constructor(@injectAll("Foo", true) public foo: Foo[]) {}
+    constructor(@injectAll("Foo", {isOptional: true}) public foo: Foo[]) {}
   }
 
   const bar = globalContainer.resolve<Bar>(Bar);

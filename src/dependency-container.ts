@@ -222,13 +222,17 @@ class InternalDependencyContainer implements DependencyContainer {
 
   public resolve<T>(
     token: InjectionToken<T>,
-    context: ResolutionContext = new ResolutionContext()
+    context: ResolutionContext = new ResolutionContext(),
+    isOptional = false
   ): T {
     this.ensureNotDisposed();
 
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
+      if (isOptional) {
+        return (undefined as unknown) as T;
+      }
       throw new Error(
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
@@ -559,7 +563,7 @@ class InternalDependencyContainer implements DependencyContainer {
                   ...param.transformArgs
                 )
               : this.resolve(param.transform).transform(
-                  this.resolve(param.token, context),
+                  this.resolve(param.token, context, param.isOptional),
                   ...param.transformArgs
                 );
           } else {
@@ -569,7 +573,7 @@ class InternalDependencyContainer implements DependencyContainer {
                   new ResolutionContext(),
                   param.isOptional
                 )
-              : this.resolve(param.token, context);
+              : this.resolve(param.token, context, param.isOptional);
           }
         } else if (isTransformDescriptor(param)) {
           return this.resolve(param.transform, context).transform(

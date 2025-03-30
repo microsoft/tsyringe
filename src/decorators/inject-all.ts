@@ -8,13 +8,17 @@ import InjectionToken, {TokenDescriptor} from "../providers/injection-token";
  */
 function injectAll(
   token: InjectionToken<any>,
-  isOptional?: boolean
+  options?: {isOptional?: boolean}
 ): (
   target: any,
   propertyKey: string | symbol | undefined,
   parameterIndex: number
 ) => any {
-  const data: TokenDescriptor = {token, multiple: true, isOptional};
+  const data: TokenDescriptor = {
+    token,
+    multiple: true,
+    isOptional: options && options.isOptional
+  };
   return defineInjectionTokenMetadata(data);
 }
 
