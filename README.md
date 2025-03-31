@@ -210,6 +210,18 @@ class Foo {
 }
 ```
 
+#### Optional
+By default, `@inject()` throws an exception if no registration is found. If you want to have `undefined` injected when the registration isn't found, you can pass this options `{ isOptional: true }` as the second parameter:
+
+```typescript
+import {injectable, injectAll} from "tsyringe";
+
+@injectable()
+class Foo {
+  constructor(@inject("Database", { isOptional: true }) private database?: Database) {}
+}
+```
+
 ### injectAll()
 
 Parameter decorator for array parameters where the array contents will come from the container.
@@ -231,14 +243,15 @@ class Bar {
 }
 ```
 
-By default, `@injectAll()` throws an exception if no registrations were found. If you want to return an empty array, you can pass `true` as the second parameter:
+#### Optional
+By default, `@injectAll()` throws an exception if no registrations were found. If you want to return an empty array, you can pass this options `{ isOptional: true }` as the second parameter:
 
 ```typescript
 import {injectable, injectAll} from "tsyringe";
 
 @injectable()
 class Bar {
-  constructor(@injectAll(Foo, true) fooArray: Foo[]) {
+  constructor(@injectAll(Foo, { isOptional: true }) fooArray: Foo[]) {
     // ...
   }
 }
