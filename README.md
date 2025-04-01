@@ -27,6 +27,7 @@ constructor injection.
     - [Register](#register)
     - [Registry](#registry)
     - [Resolution](#resolution)
+    - [IsRegistered](#isregistered)
     - [Interception](#interception)
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
@@ -532,6 +533,25 @@ class Baz implements Bar {}
 class MyRegistry {}
 
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
+```
+
+### IsRegistered
+You can check if a token is registered in the container using `isRegistered()`.
+
+```typescript
+const isRegistered = container.isRegistered("Bar"); // true
+```
+
+If you have a childContainer and want to recursively check if a token is registered in the parent container, you can pass `true` as a second parameter of `isRegistered()`.
+
+```typescript
+class Bar {}
+
+container.register(Bar, {useClass: Bar});
+
+const childContainer = container.createChildContainer();
+childContainer.isRegistered(Bar); // false
+childContainer.isRegistered(Bar, true); // true
 ```
 
 ### Interception
