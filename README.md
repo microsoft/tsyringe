@@ -853,6 +853,12 @@ The following is a list of features we explicitly plan on not adding:
 
 - Property Injection
 
+# How to release
+The library uses the step action `EndBug/version-check` which requires these two conditions to be met to execute:
+
+1. Have a commit named: `Release X.Y.Z`
+2. In the commit, have a version change in the `package.json` file.
+
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a
