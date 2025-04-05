@@ -272,7 +272,7 @@ class FeatureFlags {
 
 class Foo() {}
 
-class FeatureFlagsTransformer implements Transform<FeatureFlags, bool> {
+class FeatureFlagsTransformer implements Transform<FeatureFlags, boolean> {
   public transform(flags: FeatureFlags, flag: string) {
     return flags.getFlagValue(flag);
   }
