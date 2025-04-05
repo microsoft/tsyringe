@@ -768,6 +768,80 @@ test("allows explicit array dependencies to be resolved by inject decorator", ()
   expect(bar.foo === fooArray).toBeTruthy();
 });
 
+test("allows inject to provide a default value, which will be used if not registered in other ways", () => {
+  @injectable()
+  class Foo {}
+
+  const fooArray = [new Foo()];
+
+  @injectable()
+  class Bar {
+    constructor(
+      @inject("FooArray", {defaultProvider: {useValue: fooArray}})
+      public foo: Foo[]
+    ) {}
+  }
+
+  globalContainer.register<Bar>(Bar, {useClass: Bar});
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(bar.foo).toEqual(fooArray);
+});
+
+test("allows inject to provide a default value, if injected afterwards it will be overwritten", () => {
+  @injectable()
+  class Bar {
+    constructor(
+      @inject("MyString", {defaultProvider: {useValue: "MyDefaultString"}})
+      public foo: string
+    ) {}
+  }
+  const str = "NewString";
+  globalContainer.register("MyString", {useValue: str});
+
+  globalContainer.register<Bar>(Bar, {useClass: Bar});
+
+  const bar = globalContainer.resolve<Bar>(Bar);
+  expect(bar.foo).toEqual(str);
+});
+
+test("allows inject to have other kinds of provider", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value = "";
+  }
+
+  @injectable()
+  class FooWithInterface {
+    constructor(
+      @inject("IBar", {defaultProvider: {useClass: Bar}}) public myBar: IBar
+    ) {}
+  }
+
+  const myFoo = globalContainer.resolve(FooWithInterface);
+
+  expect(myFoo.myBar).toBeInstanceOf(Bar);
+});
+
+test("passing both isOptional and defaultProvider will default to use the defaultProvider", () => {
+  @injectable()
+  class Bar implements IBar {
+    public value = "";
+  }
+
+  @injectable()
+  class FooWithInterface {
+    constructor(
+      @inject("IBar", {defaultProvider: {useClass: Bar}, isOptional: true})
+      public myBar?: IBar
+    ) {}
+  }
+
+  const myFoo = globalContainer.resolve(FooWithInterface);
+
+  expect(myFoo.myBar).toBeInstanceOf(Bar);
+});
+
 // --- @injectAll ---
 
 test("injects all dependencies bound to a given interface", () => {
