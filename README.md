@@ -535,6 +535,22 @@ class MyRegistry {}
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
 ```
 
+You can also add one or more `InjectionToken` to the registration of your class directly in the `@injectable()` decorator:
+
+```typescript
+interface Bar {}
+
+@injectable({token: "Bar"})
+class Foo implements Bar {}
+@injectable({token: ["Bar", "Bar2"]})
+class Baz implements Bar {}
+
+class MyRegistry {}
+
+const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[], contains 2 instances
+const myBars2 = container.resolveAll<Bar>("Bar2"); // myBars2 type is Bar[], contains 1 instance
+```
+
 ### IsRegistered
 You can check if a token is registered in the container using `isRegistered()`.
 

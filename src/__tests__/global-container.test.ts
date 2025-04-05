@@ -277,6 +277,78 @@ test("resolves all transient instances when not registered", () => {
   expect(foo1[0]).not.toBe(foo2[0]);
 });
 
+test("resolves all dependencies that provided an additional token in the @injectable() decorator", () => {
+  interface Bar {
+    value(): string;
+  }
+
+  @injectable({token: "Bar"})
+  class Foo implements Bar {
+    value(): string {
+      return "foo";
+    }
+  }
+
+  const foo = globalContainer.resolveAll<Bar>("Bar");
+  expect(Array.isArray(foo)).toBeTruthy();
+  expect(foo[0] instanceof Foo).toBeTruthy();
+});
+
+test("resolves all dependencies that provided additional tokens in the @injectable() decorator", () => {
+  interface Bar {
+    value(): string;
+  }
+
+  interface TestInterface {
+    test(): string;
+  }
+
+  @injectable({token: ["Bar", "TestInterface"]})
+  class Foo implements Bar, TestInterface {
+    value(): string {
+      return "foo";
+    }
+
+    test(): string {
+      return "test";
+    }
+  }
+
+  const foo = globalContainer.resolveAll<Bar>("Bar");
+  expect(Array.isArray(foo)).toBeTruthy();
+  expect(foo[0] instanceof Foo).toBeTruthy();
+
+  const foo2 = globalContainer.resolveAll<TestInterface>("TestInterface");
+  expect(Array.isArray(foo2)).toBeTruthy();
+  expect(foo2[0] instanceof Foo).toBeTruthy();
+});
+
+test("resolves all dependencies that provided additional tokens in the @injectable() decorator", () => {
+  interface Bar {
+    value(): string;
+  }
+
+  @injectable({token: "Bar"})
+  class Foo implements Bar {
+    value(): string {
+      return "foo";
+    }
+  }
+
+  @injectable({token: "Bar"})
+  class Baz implements Bar {
+    value(): string {
+      return "baz";
+    }
+  }
+
+  const bars = globalContainer.resolveAll<Bar>("Bar");
+  expect(Array.isArray(bars)).toBeTruthy();
+  expect(bars.length).toBe(2);
+  expect(bars[0] instanceof Foo).toBeTruthy();
+  expect(bars[1] instanceof Baz).toBeTruthy();
+});
+
 // --- isRegistered() ---
 
 test("returns true for a registered singleton class", () => {
