@@ -47,7 +47,8 @@
     "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.21",
+    "@types/istanbul-lib-report": "^3.0.3",
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
