@@ -21,7 +21,10 @@ test("Error message composition", () => {
 
   @injectable()
   class A {
-    constructor(public d: Ok, public b: B) {}
+    constructor(
+      public d: Ok,
+      public b: B
+    ) {}
   }
 
   expect(() => {

@@ -10,7 +10,7 @@ export function getParamInfo(target: constructor<any>): ParamInfo[] {
   const params: any[] = Reflect.getMetadata("design:paramtypes", target) || [];
   const injectionTokens: Dictionary<InjectionToken<any>> =
     Reflect.getOwnMetadata(INJECTION_TOKEN_METADATA_KEY, target) || {};
-  Object.keys(injectionTokens).forEach(key => {
+  Object.keys(injectionTokens).forEach((key) => {
     params[+key] = injectionTokens[key];
   });
 
@@ -25,7 +25,7 @@ export function defineInjectionTokenMetadata(
   propertyKey: string | symbol | undefined,
   parameterIndex: number
 ) => any {
-  return function(
+  return function (
     target: any,
     _propertyKey: string | symbol | undefined,
     parameterIndex: number

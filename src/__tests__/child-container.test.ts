@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix, @typescript-eslint/no-empty-interface */
-
 import {instance as globalContainer} from "../dependency-container";
 
 afterEach(() => {
@@ -7,6 +5,7 @@ afterEach(() => {
 });
 
 test("child container resolves even when parent doesn't have registration", () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface IFoo {}
   class Foo implements IFoo {}
 
@@ -19,6 +18,7 @@ test("child container resolves even when parent doesn't have registration", () =
 });
 
 test("child container resolves using parent's registration when child container doesn't have registration", () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface IFoo {}
   class Foo implements IFoo {}
 
@@ -31,6 +31,7 @@ test("child container resolves using parent's registration when child container 
 });
 
 test("child container resolves all even when parent doesn't have registration", () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface IFoo {}
   class Foo implements IFoo {}
 
@@ -45,6 +46,7 @@ test("child container resolves all even when parent doesn't have registration", 
 });
 
 test("child container resolves all using parent's registration when child container doesn't have registration", () => {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface IFoo {}
   class Foo implements IFoo {}
 

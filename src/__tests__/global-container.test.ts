@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/interface-name-prefix */
-
 import {inject, injectable, registry, singleton} from "../decorators";
 import {
   instanceCachingFactory,
@@ -558,7 +556,11 @@ test("dependencies of an @singleton can be resolved", () => {
 test("passes through the given params", () => {
   @injectable()
   class MyViewModel {
-    constructor(public a: any, public b: any, public c: any) {}
+    constructor(
+      public a: any,
+      public b: any,
+      public c: any
+    ) {}
   }
 
   const a = {};
@@ -936,7 +938,7 @@ describe("dispose", () => {
   class Baz implements Disposable {
     disposed = false;
     async dispose(): Promise<void> {
-      return new Promise(resolve => {
+      return new Promise((resolve) => {
         process.nextTick(() => {
           this.disposed = true;
           resolve();

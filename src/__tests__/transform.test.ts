@@ -137,7 +137,7 @@ test("Injecting all with transform should allow the transformer to act over an a
 
   class FooTransform implements Transform<FooInterface[], string> {
     public transform(foos: FooInterface[]): string {
-      return foos.map(f => f.bar).reduce((acc, f) => acc + f);
+      return foos.map((f) => f.bar).reduce((acc, f) => acc + f);
     }
   }
 
@@ -172,7 +172,7 @@ test("Injecting all with transform should work with a decorator parameter", () =
 
   class FooTransform implements Transform<FooInterface[], string> {
     public transform(foos: FooInterface[], suffix: string): string {
-      return foos.map(f => f.bar + suffix).reduce((acc, f) => acc + f);
+      return foos.map((f) => f.bar + suffix).reduce((acc, f) => acc + f);
     }
   }
 
@@ -212,7 +212,7 @@ test("Injecting all with transform should allow multiple decorator params", () =
       suffix: string
     ): string {
       return (
-        foos.map(f => f.bar + delimiter).reduce((acc, f) => acc + f) + suffix
+        foos.map((f) => f.bar + delimiter).reduce((acc, f) => acc + f) + suffix
       );
     }
   }
@@ -253,7 +253,7 @@ test("@autoInjectable should work with transforms", () => {
       suffix: string
     ): string {
       return (
-        foos.map(f => f.bar + delimiter).reduce((acc, f) => acc + f) + suffix
+        foos.map((f) => f.bar + delimiter).reduce((acc, f) => acc + f) + suffix
       );
     }
   }

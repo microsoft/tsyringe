@@ -36,7 +36,10 @@ test("@autoInjectable injects parameters beyond those specified manually", () =>
   class FooBar {}
   @autoInjectable()
   class Foo {
-    constructor(public myFooBar: FooBar, public myBar?: Bar) {}
+    constructor(
+      public myFooBar: FooBar,
+      public myBar?: Bar
+    ) {}
   }
 
   const myFooBar = new FooBar();
