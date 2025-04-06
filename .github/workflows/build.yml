@@ -29,6 +29,7 @@ jobs:
           npm -g i yarn
           yarn
           yarn build
+          yarn lint
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4

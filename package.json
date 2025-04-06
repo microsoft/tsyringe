@@ -15,8 +15,8 @@
     "build:esnext": "tsc -p ./typescript/tsconfig.esmnext.json",
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
-    "test": "yarn lint && jest --config test/jest.config.js",
-    "test:inspect": "yarn lint && node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js",
+    "test": "jest --config test/jest.config.js",
+    "test:inspect": "node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js",
     "test:coverage": "jest --config test/jest.config.js --coverage",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
