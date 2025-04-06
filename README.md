@@ -223,6 +223,35 @@ class Foo {
 }
 ```
 
+#### Default Provider
+By default, if a dependency is not marked as optional (see above), a provider must exist for this dependency. However, you can use `{ defaultProvider: Provider<any> }` to specify a default provider for this dependency. This provider will be used if no other provider is registered for this dependency.
+
+If you pass both a `defaultProvider` and `isOptional:true`, the `defaultProvider` will be used, making `isOptional: true` useless. 
+
+```typescript
+import {injectable, inject} from "tsyringe";
+
+class Database {}
+
+@injectable()
+class Foo {
+  constructor(@inject("Database", { defaultProvider: { useValue: new Database() } }) private database: Database) {}
+}
+```
+
+All types of providers are supported. Here's an example using a factory:
+
+```typescript
+import {injectable, inject} from "tsyringe";
+import dependencyContainer from "./dependency-container";
+
+@injectable()
+class Foo {
+  constructor(@inject("Database", {defaultProvider: {useFactory: (dependencyContainer: DependencyContainer) => { return dependencyContainer.resolve("Database")}}}) private database: Database) {
+  }
+}
+```
+
 ### injectAll()
 
 Parameter decorator for array parameters where the array contents will come from the container.
