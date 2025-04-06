@@ -10,6 +10,7 @@ describe("Disposable", () => {
 
     it("returns false when dispose method takes too many args", () => {
       const specialDisposable = {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         dispose(_: any) {}
       };
 
