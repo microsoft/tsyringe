@@ -19,19 +19,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+
+      - name: Install yarn, yarn install, and build
+        run: |
+          npm -g i yarn
+          yarn
+          yarn build
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install yarn
+      - name: test on Node.js ${{ matrix.node-version }}
         run: |
-          npm -g i yarn
-
-      - name: npm install, build, and test
-        run: |
-          yarn
-          yarn build
           yarn test
         env:
           CI: true
+
+
