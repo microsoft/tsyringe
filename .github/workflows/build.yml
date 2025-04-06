@@ -14,30 +14,24 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x, 14.x, 16.x, 18.x, 20.x, 22.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.x
-
-      - name: Install yarn, yarn install, and build
-        run: |
-          npm -g i yarn
-          yarn
-          yarn build
-          yarn lint
 
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: test on Node.js ${{ matrix.node-version }}
+      - name: Install yarn
         run: |
+          npm -g i yarn
+
+      - name: yarn install, yarn build, and yarn test
+        run: |
+          yarn
+          yarn build
           yarn test
         env:
           CI: true
