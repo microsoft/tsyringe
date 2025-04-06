@@ -56,7 +56,7 @@ function autoInjectable(): (target: constructor<any>) => any {
                 return globalContainer.resolve(type);
               } catch (e) {
                 const argIndex = index + args.length;
-                throw new Error(formatErrorCtor(target, argIndex, e));
+                throw new Error(formatErrorCtor(target, argIndex, e as Error));
               }
             })
           )

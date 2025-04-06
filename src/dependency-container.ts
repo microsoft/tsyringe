@@ -222,13 +222,17 @@ class InternalDependencyContainer implements DependencyContainer {
 
   public resolve<T>(
     token: InjectionToken<T>,
-    context: ResolutionContext = new ResolutionContext()
+    context: ResolutionContext = new ResolutionContext(),
+    isOptional = false
   ): T {
     this.ensureNotDisposed();
 
     const registration = this.getRegistration(token);
 
     if (!registration && isNormalToken(token)) {
+      if (isOptional) {
+        return (undefined as unknown) as T;
+      }
       throw new Error(
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
@@ -347,13 +351,17 @@ class InternalDependencyContainer implements DependencyContainer {
 
   public resolveAll<T>(
     token: InjectionToken<T>,
-    context: ResolutionContext = new ResolutionContext()
+    context: ResolutionContext = new ResolutionContext(),
+    isOptional = false
   ): T[] {
     this.ensureNotDisposed();
 
     const registrations = this.getAllRegistrations(token);
 
     if (!registrations && isNormalToken(token)) {
+      if (isOptional) {
+        return [];
+      }
       throw new Error(
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
       );
@@ -547,17 +555,25 @@ class InternalDependencyContainer implements DependencyContainer {
           if (isTransformDescriptor(param)) {
             return param.multiple
               ? this.resolve(param.transform).transform(
-                  this.resolveAll(param.token),
+                  this.resolveAll(
+                    param.token,
+                    new ResolutionContext(),
+                    param.isOptional
+                  ),
                   ...param.transformArgs
                 )
               : this.resolve(param.transform).transform(
-                  this.resolve(param.token, context),
+                  this.resolve(param.token, context, param.isOptional),
                   ...param.transformArgs
                 );
           } else {
             return param.multiple
-              ? this.resolveAll(param.token)
-              : this.resolve(param.token, context);
+              ? this.resolveAll(
+                  param.token,
+                  new ResolutionContext(),
+                  param.isOptional
+                )
+              : this.resolve(param.token, context, param.isOptional);
           }
         } else if (isTransformDescriptor(param)) {
           return this.resolve(param.transform, context).transform(
@@ -567,7 +583,7 @@ class InternalDependencyContainer implements DependencyContainer {
         }
         return this.resolve(param, context);
       } catch (e) {
-        throw new Error(formatErrorCtor(ctor, idx, e));
+        throw new Error(formatErrorCtor(ctor, idx, e as Error));
       }
     };
   }

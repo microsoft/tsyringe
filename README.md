@@ -27,6 +27,7 @@ constructor injection.
     - [Register](#register)
     - [Registry](#registry)
     - [Resolution](#resolution)
+    - [IsRegistered](#isregistered)
     - [Interception](#interception)
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
@@ -210,6 +211,18 @@ class Foo {
 }
 ```
 
+#### Optional
+By default, `@inject()` throws an exception if no registration is found. If you want to have `undefined` injected when the registration isn't found, you can pass this options `{ isOptional: true }` as the second parameter:
+
+```typescript
+import {injectable, injectAll} from "tsyringe";
+
+@injectable()
+class Foo {
+  constructor(@inject("Database", { isOptional: true }) private database?: Database) {}
+}
+```
+
 ### injectAll()
 
 Parameter decorator for array parameters where the array contents will come from the container.
@@ -226,6 +239,20 @@ class Foo {}
 @injectable()
 class Bar {
   constructor(@injectAll(Foo) fooArray: Foo[]) {
+    // ...
+  }
+}
+```
+
+#### Optional
+By default, `@injectAll()` throws an exception if no registrations were found. If you want to return an empty array, you can pass this options `{ isOptional: true }` as the second parameter:
+
+```typescript
+import {injectable, injectAll} from "tsyringe";
+
+@injectable()
+class Bar {
+  constructor(@injectAll(Foo, { isOptional: true }) fooArray: Foo[]) {
     // ...
   }
 }
@@ -506,6 +533,41 @@ class Baz implements Bar {}
 class MyRegistry {}
 
 const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[]
+```
+
+You can also add one or more `InjectionToken` to the registration of your class directly in the `@injectable()` decorator:
+
+```typescript
+interface Bar {}
+
+@injectable({token: "Bar"})
+class Foo implements Bar {}
+@injectable({token: ["Bar", "Bar2"]})
+class Baz implements Bar {}
+
+class MyRegistry {}
+
+const myBars = container.resolveAll<Bar>("Bar"); // myBars type is Bar[], contains 2 instances
+const myBars2 = container.resolveAll<Bar>("Bar2"); // myBars2 type is Bar[], contains 1 instance
+```
+
+### IsRegistered
+You can check if a token is registered in the container using `isRegistered()`.
+
+```typescript
+const isRegistered = container.isRegistered("Bar"); // true
+```
+
+If you have a childContainer and want to recursively check if a token is registered in the parent container, you can pass `true` as a second parameter of `isRegistered()`.
+
+```typescript
+class Bar {}
+
+container.register(Bar, {useClass: Bar});
+
+const childContainer = container.createChildContainer();
+childContainer.isRegistered(Bar); // false
+childContainer.isRegistered(Bar, true); // true
 ```
 
 ### Interception
@@ -806,6 +868,12 @@ const instance = container.resolve(Foo);
 The following is a list of features we explicitly plan on not adding:
 
 - Property Injection
+
+# How to release
+The library uses the step action `EndBug/version-check` which requires these two conditions to be met to execute:
+
+1. Have a commit named: `Release X.Y.Z`
+2. In the commit, have a version change in the `package.json` file.
 
 # Contributing
 
