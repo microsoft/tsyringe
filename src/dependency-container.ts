@@ -231,7 +231,7 @@ class InternalDependencyContainer implements DependencyContainer {
 
     if (!registration && isNormalToken(token)) {
       if (isOptional) {
-        return (undefined as unknown) as T;
+        return undefined as unknown as T;
       }
       throw new Error(
         `Attempted to resolve unregistered dependency token: "${token.toString()}"`
@@ -370,7 +370,7 @@ class InternalDependencyContainer implements DependencyContainer {
     this.executePreResolutionInterceptor(token, "All");
 
     if (registrations) {
-      const result = registrations.map(item =>
+      const result = registrations.map((item) =>
         this.resolveRegistration<T>(item, context)
       );
 
@@ -410,9 +410,9 @@ class InternalDependencyContainer implements DependencyContainer {
         token,
         registrations
           // Clear ValueProvider registrations
-          .filter(registration => !isValueProvider(registration.provider))
+          .filter((registration) => !isValueProvider(registration.provider))
           // Clear instances
-          .map(registration => {
+          .map((registration) => {
             registration.instance = undefined;
             return registration;
           })
@@ -436,7 +436,7 @@ class InternalDependencyContainer implements DependencyContainer {
       ) {
         childContainer._registry.setAll(
           token,
-          registrations.map<Registration>(registration => {
+          registrations.map<Registration>((registration) => {
             if (registration.options.lifecycle === Lifecycle.ContainerScoped) {
               return {
                 provider: registration.provider,
@@ -479,7 +479,7 @@ class InternalDependencyContainer implements DependencyContainer {
     this.disposed = true;
 
     const promises: Promise<unknown>[] = [];
-    this.disposables.forEach(disposable => {
+    this.disposables.forEach((disposable) => {
       const maybePromise = disposable.dispose();
 
       if (maybePromise) {

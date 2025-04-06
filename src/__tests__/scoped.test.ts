@@ -24,7 +24,10 @@ describe("Scoped registrations", () => {
 
       @injectable()
       class A {
-        constructor(public b: B, public c: C) {}
+        constructor(
+          public b: B,
+          public c: C
+        ) {}
       }
 
       globalContainer.register(

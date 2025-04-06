@@ -1,23 +1,25 @@
 {
   "name": "tsyringe",
-  "version": "4.9.1",
+  "version": "5.0.0-alpha.1",
   "description": "Lightweight dependency injection container for JavaScript/TypeScript",
   "main": "dist/cjs/index.js",
   "module": "./dist/esm5/index.js",
   "es2015": "./dist/esm2015/index.js",
   "typings": "./dist/typings/index.d.ts",
   "scripts": {
-    "build": "yarn clean && yarn build:cjs && yarn build:es5 && yarn build:es2015 && yarn build:types",
+    "build": "yarn clean && yarn build:cjs && yarn build:es5 && yarn build:es2015 && yarn build:es2020 && yarn build:esnext && yarn build:types",
     "build:cjs": "tsc",
     "build:es5": "tsc -p ./typescript/tsconfig.esm5.json",
     "build:es2015": "tsc -p ./typescript/tsconfig.esm2015.json",
+    "build:es2020": "tsc -p ./typescript/tsconfig.esm2020.json",
+    "build:esnext": "tsc -p ./typescript/tsconfig.esmnext.json",
     "build:types": "tsc -p ./typescript/tsconfig.types.json",
     "clean": "rimraf ./dist",
     "test": "yarn lint && jest --config test/jest.config.js",
     "test:inspect": "yarn lint && node --inspect-brk ./node_modules/jest/bin/jest.js --runInBand --config test/jest.config.js",
     "test:coverage": "jest --config test/jest.config.js --coverage",
-    "lint": "eslint --ext \".js,.jsx,.ts,.tsx\" \"./src\"",
-    "lint:fix": "eslint --fix --ext \".js,.jsx,.ts,.tsx\" \"./src\""
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "repository": {
     "type": "git",
@@ -33,7 +35,7 @@
     "typescript"
   ],
   "engines": {
-    "node": ">= 6.0.0"
+    "node": ">= 18.0.0"
   },
   "author": "Steven Hobson-Campbell",
   "license": "MIT",
@@ -42,22 +44,23 @@
   },
   "homepage": "https://github.com/Microsoft/tsyringe#readme",
   "dependencies": {
-    "tslib": "^1.9.3"
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.21",
-    "@types/node": "^8.10.16",
-    "@typescript-eslint/eslint-plugin": "^2.6.0",
-    "@typescript-eslint/parser": "^2.6.0",
-    "eslint": "^6.6.0",
-    "eslint-config-prettier": "^6.5.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "husky": "^3.0.0",
-    "jest": "^24.7.1",
-    "prettier": "1.18.2",
-    "reflect-metadata": "^0.1.12",
-    "rimraf": "^3.0.0",
-    "ts-jest": "^24.0.2",
-    "typescript": "^3.1.6"
+    "@types/istanbul-lib-report": "^3.0.3",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.0",
+    "@typescript-eslint/parser": "^8.29.0",
+    "eslint": "^9.24.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.6",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "reflect-metadata": "^0.2.2",
+    "rimraf": "^5.0.10",
+    "ts-jest": "^29.3.1",
+    "typescript": "^5.8.3"
   }
 }

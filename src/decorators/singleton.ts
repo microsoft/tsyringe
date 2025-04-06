@@ -9,7 +9,7 @@ import {instance as globalContainer} from "../dependency-container";
  * @return {Function} The class decorator
  */
 function singleton<T>(): (target: constructor<T>) => void {
-  return function(target: constructor<T>): void {
+  return function (target: constructor<T>): void {
     injectable()(target);
     globalContainer.registerSingleton(target);
   };
