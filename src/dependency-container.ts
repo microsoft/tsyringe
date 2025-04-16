@@ -402,6 +402,26 @@ class InternalDependencyContainer implements DependencyContainer {
     this.interceptors.postResolution.clear();
   }
 
+  public unregisterAll(): void {
+    this._registry.clear();
+    this.interceptors.preResolution.clear();
+    this.interceptors.postResolution.clear();
+  }
+
+  public unregister<T>(token: InjectionToken<T>): void {
+    const registration = this.getRegistration(token);
+
+    if (!registration) {
+      throw new Error(
+        `Attempted to delete unregistered dependency token: "${token.toString()}"`
+      );
+    }
+
+    this._registry.delete(token);
+    this.interceptors.preResolution.delete(token);
+    this.interceptors.postResolution.delete(token);
+  }
+
   public clearInstances(): void {
     this.ensureNotDisposed();
 

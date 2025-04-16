@@ -95,6 +95,9 @@ export default interface DependencyContainer extends Disposable {
    */
   reset(): void;
 
+  unregisterAll(): void;
+  unregister<T>(token: InjectionToken<T>): void;
+
   clearInstances(): void;
   createChildContainer(): DependencyContainer;
 
