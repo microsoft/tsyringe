@@ -215,7 +215,7 @@ class Foo {
 By default, `@inject()` throws an exception if no registration is found. If you want to have `undefined` injected when the registration isn't found, you can pass this options `{ isOptional: true }` as the second parameter:
 
 ```typescript
-import {injectable, injectAll} from "tsyringe";
+import {injectable, inject} from "tsyringe";
 
 @injectable()
 class Foo {
