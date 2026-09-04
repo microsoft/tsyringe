@@ -241,7 +241,17 @@ class InternalDependencyContainer implements DependencyContainer {
     this.executePreResolutionInterceptor<T>(token, "Single");
 
     if (registration) {
-      const result = this.resolveRegistration(registration, context) as T;
+      // A singleton belongs to whichever container's registry actually holds
+      // it, not to whichever child container happened to trigger its first
+      // construction. Route resolution through that owner so any Disposable
+      // instance gets tracked there too, and a later dispose() on that owner
+      // (rather than on the child that incidentally resolved it first) still
+      // cleans it up.
+      const owner =
+        registration.options.lifecycle === Lifecycle.Singleton
+          ? this.getOwnerContainer(token)
+          : this;
+      const result = owner.resolveRegistration(registration, context) as T;
       this.executePostResolutionInterceptor(token, result, "Single");
       return result;
     }
@@ -488,6 +498,20 @@ class InternalDependencyContainer implements DependencyContainer {
     });
 
     await Promise.all(promises);
+  }
+
+  private getOwnerContainer<T>(
+    token: InjectionToken<T>
+  ): InternalDependencyContainer {
+    if (this.isRegistered(token)) {
+      return this;
+    }
+
+    if (this.parent) {
+      return this.parent.getOwnerContainer(token);
+    }
+
+    return this;
   }
 
   private getRegistration<T>(token: InjectionToken<T>): Registration | null {

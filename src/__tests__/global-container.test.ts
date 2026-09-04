@@ -1002,4 +1002,41 @@ describe("dispose", () => {
 
     expect(foo.disposed).toBeFalsy();
   });
+
+  it("disposes a singleton on the container that owns its registration, even when a child container resolves it first", async () => {
+    const container = globalContainer.createChildContainer();
+    container.registerSingleton(Foo);
+
+    const childA = container.createChildContainer();
+    const childB = container.createChildContainer();
+
+    // Resolving from a child first used to leave the owning container
+    // unaware it needed to dispose this instance later.
+    const fromChildA = childA.resolve(Foo);
+    const fromChildB = childB.resolve(Foo);
+    const fromOwner = container.resolve(Foo);
+
+    expect(fromChildA).toBe(fromChildB);
+    expect(fromChildA).toBe(fromOwner);
+
+    await container.dispose();
+
+    expect(fromChildA.disposed).toBeTruthy();
+  });
+
+  it("does not dispose a singleton owned by a parent when only the child that resolved it is disposed", async () => {
+    const container = globalContainer.createChildContainer();
+    container.registerSingleton(Foo);
+
+    const child = container.createChildContainer();
+    const foo = child.resolve(Foo);
+
+    await child.dispose();
+
+    expect(foo.disposed).toBeFalsy();
+
+    await container.dispose();
+
+    expect(foo.disposed).toBeTruthy();
+  });
 });
