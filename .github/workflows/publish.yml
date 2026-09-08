@@ -10,15 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22.x"
           registry-url: "https://registry.npmjs.org"
 
       - name: Check if version bump
         id: check
-        uses: EndBug/version-check@v1.1.1
+        uses: EndBug/version-check@4bd0231ddad45617279b02f5a2241bc00d48ea7f # v1.1.1
 
       - name: Log when unchanged
         if: steps.check.outputs.changed != 'true'
@@ -38,7 +38,7 @@ jobs:
 
       - name: Set NPM Token
         if: steps.check.outputs.changed == 'true'
-        uses: filipstefansson/set-npm-token-action@v1
+        uses: filipstefansson/set-npm-token-action@8c885037600dcbc26b36df817527ec85ab4f58ac # v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
 
