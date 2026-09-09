@@ -1,4 +1,4 @@
-[![Travis](https://img.shields.io/travis/Microsoft/tsyringe.svg)](https://travis-ci.org/Microsoft/tsyringe/)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/microsoft/tsyringe/build.yml)
 [![npm](https://img.shields.io/npm/v/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
 [![npm](https://img.shields.io/npm/dt/tsyringe.svg)](https://www.npmjs.com/package/tsyringe)
 
