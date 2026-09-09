@@ -959,13 +959,29 @@ describe("dispose", () => {
   it("disposes all child disposables", () => {
     const container = globalContainer.createChildContainer();
 
+    container.registerInstance(Bar, new Bar());
+    container.register("ValueBar", {useValue: new Bar()});
+    container.register("FactoryBar", {
+      useFactory: () => new Bar()
+    });
+    container.register("ClassBar", Bar);
+    container.register("TokenBar", {useToken: "ValueBar"});
+
     const foo = container.resolve(Foo);
     const bar = container.resolve(Bar);
+    const valueBar = container.resolve<Bar>("ValueBar");
+    const factoryBar = container.resolve<Bar>("FactoryBar");
+    const classBar = container.resolve<Bar>("ClassBar");
+    const tokenBar = container.resolve<Bar>("TokenBar");
 
     container.dispose();
 
     expect(foo.disposed).toBeTruthy();
-    expect(bar.disposed).toBeTruthy();
+    expect(bar.dispose).toBeTruthy();
+    expect(valueBar.disposed).toBeTruthy();
+    expect(factoryBar.disposed).toBeTruthy();
+    expect(classBar.disposed).toBeTruthy();
+    expect(tokenBar.disposed).toBeTruthy();
   });
 
   it("disposes asynchronous disposables", async () => {
@@ -992,14 +1008,17 @@ describe("dispose", () => {
     expect(foo2.disposed).toBeTruthy();
   });
 
-  it("doesn't dispose of instances created external to the container", () => {
-    const foo = new Foo();
+  it("disposes all instances that were resolved together", () => {
     const container = globalContainer.createChildContainer();
 
-    container.registerInstance(Foo, foo);
-    container.resolve(Foo);
+    container.register("FooList", {useValue: new Foo()});
+    container.register("FooList", {useValue: new Bar()});
+
+    const fooList = container.resolveAll<Foo | Bar>("FooList");
+
     container.dispose();
 
-    expect(foo.disposed).toBeFalsy();
+    expect(fooList[0].disposed).toBeTruthy();
+    expect(fooList[1].disposed).toBeTruthy();
   });
 });
