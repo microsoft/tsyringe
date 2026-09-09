@@ -1,0 +1,8 @@
+{
+  "extends": "./tsconfig.typescript5.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "outDir": "../dist/esnext"
+  }
+}
