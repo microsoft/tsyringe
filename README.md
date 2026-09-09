@@ -31,6 +31,7 @@ constructor injection.
     - [Interception](#interception)
     - [Child Containers](#child-containers)
     - [Clearing Instances](#clearing-instances)
+    - [Unregister](#unregister)
 - [Circular dependencies](#circular-dependencies)
   - [The `delay` helper function](#the-delay-helper-function)
   - [Interfaces and circular dependencies](#interfaces-and-circular-dependencies)
@@ -657,6 +658,29 @@ test("something", () => {
   container.resolve(Foo); // will be a new singleton instance in every test
 });
 ```
+
+Unlike with `container.reset()`, the registrations themselves are not cleared.
+
+### Unregister
+Unregister allows you to clear a previously created and registered instance.
+
+```typescript
+class Foo {}
+class Bar {}
+
+const myFoo = new Foo();
+container.registerInstance("MY_FOO", myFoo);
+
+const myBar = new Bar();
+container.registerInstance("MY_BAR", myBar);
+
+container.unregister("MY_BAR");
+
+const myFoo2 = container.resolve("MY_FOO"); // resolved instance
+const myBar2 = container.resolve("MY_BAR"); // throws error
+```
+
+Unlike `container.reset()`, unregister allows the removal of a specific token without affecting the others.
 
 # Circular dependencies
 

@@ -36,6 +36,10 @@ export default abstract class RegistryBase<T> {
     this._registryMap.clear();
   }
 
+  public delete(key: InjectionToken<any>): void {
+    this._registryMap.delete(key);
+  }
+
   private ensure(key: InjectionToken<any>): void {
     if (!this._registryMap.has(key)) {
       this._registryMap.set(key, []);
