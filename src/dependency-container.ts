@@ -240,6 +240,13 @@ class InternalDependencyContainer implements DependencyContainer {
 
     this.executePreResolutionInterceptor<T>(token, "Single");
 
+    // Using a container scoped registration within a singleton is not allowed
+    if(registration && registration.options.lifecycle === Lifecycle.ContainerScoped && context.isSingleton) {
+      throw new Error(
+        `Attempted to use a container scoped registration "${token.toString()}" within a singleton`
+      );
+    }
+
     if (registration) {
       const result = this.resolveRegistration(registration, context) as T;
       this.executePostResolutionInterceptor(token, result, "Single");
@@ -313,6 +320,7 @@ class InternalDependencyContainer implements DependencyContainer {
     const isContainerScoped =
       registration.options.lifecycle === Lifecycle.ContainerScoped;
 
+    context.isSingleton = isSingleton;
     const returnInstance = isSingleton || isContainerScoped;
 
     let resolved: T;
