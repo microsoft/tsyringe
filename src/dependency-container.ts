@@ -46,7 +46,7 @@ export const typeInfo = new Map<constructor<any>, ParamInfo[]>();
 class InternalDependencyContainer implements DependencyContainer {
   private _registry = new Registry();
   private interceptors = new Interceptors();
-  private disposed = false;
+  private disposal?: "starting" | Promise<void>;
   private disposables = new Set<Disposable>();
 
   public constructor(private parent?: InternalDependencyContainer) {}
@@ -475,18 +475,24 @@ class InternalDependencyContainer implements DependencyContainer {
     });
   }
 
-  public async dispose(): Promise<void> {
-    this.disposed = true;
+  public dispose(): Promise<void> {
+    if (this.disposal === "starting") {
+      // A callback reentering during startup cannot wait on its own teardown.
+      return Promise.resolve();
+    }
 
-    const promises: Promise<unknown>[] = [];
-    this.disposables.forEach(disposable => {
-      const maybePromise = disposable.dispose();
+    if (!this.disposal) {
+      this.disposal = "starting";
+      this.disposal = this.disposeInstances();
+    }
+    return this.disposal;
+  }
 
-      if (maybePromise) {
-        promises.push(maybePromise);
-      }
-    });
-
+  private async disposeInstances(): Promise<void> {
+    const promises = Array.from(this.disposables, async disposable =>
+      disposable.dispose()
+    );
+    this.disposables.clear();
     await Promise.all(promises);
   }
 
@@ -589,7 +595,7 @@ class InternalDependencyContainer implements DependencyContainer {
   }
 
   private ensureNotDisposed(): void {
-    if (this.disposed) {
+    if (this.disposal) {
       throw new Error(
         "This container has been disposed, you cannot interact with a disposed container"
       );
