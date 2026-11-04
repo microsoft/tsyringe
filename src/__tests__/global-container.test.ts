@@ -980,6 +980,83 @@ describe("dispose", () => {
     expect(baz.disposed).toBeTruthy();
   });
 
+  it("shares pending and completed disposal across calls", async () => {
+    const container = globalContainer.createChildContainer();
+    let finish!: () => void;
+    const pending = new Promise<void>(resolve => {
+      finish = resolve;
+    });
+    const dispose = jest.fn(() => pending);
+    class Resource implements Disposable {
+      dispose(): Promise<void> {
+        return dispose();
+      }
+    }
+    container.resolve(Resource);
+
+    const first = container.dispose();
+    const second = container.dispose();
+    expect(second).toBe(first);
+    expect(dispose).toHaveBeenCalledTimes(1);
+
+    finish();
+    await Promise.all([first, second]);
+    await container.dispose();
+    expect(dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])(
+    "shares a disposal failure without repeating teardown (async: %s)",
+    async isAsync => {
+      const container = globalContainer.createChildContainer();
+      const error = new Error("teardown failed");
+      const dispose = jest.fn(() => {
+        if (isAsync) {
+          return Promise.reject(error);
+        }
+        throw error;
+      });
+      class FailingResource implements Disposable {
+        dispose(): Promise<void> {
+          return dispose();
+        }
+      }
+      container.resolve(FailingResource);
+      const other = container.resolve(Foo);
+
+      await Promise.all([
+        expect(container.dispose()).rejects.toBe(error),
+        expect(container.dispose()).rejects.toBe(error)
+      ]);
+      await expect(container.dispose()).rejects.toBe(error);
+      expect(dispose).toHaveBeenCalledTimes(1);
+      expect(other.disposed).toBeTruthy();
+    }
+  );
+
+  it.each([false, true])(
+    "does not wait on itself when teardown calls dispose again (async: %s)",
+    async isAsync => {
+      const container = globalContainer.createChildContainer();
+      const dispose = jest.fn(
+        isAsync
+          ? async () => {
+              await container.dispose();
+            }
+          : () => container.dispose()
+      );
+      class Resource implements Disposable {
+        dispose(): Promise<void> | void {
+          return dispose();
+        }
+      }
+      container.resolve(Resource);
+
+      await container.dispose();
+      expect(dispose).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it("disposes all instances of the same type", () => {
     const container = globalContainer.createChildContainer();
 
