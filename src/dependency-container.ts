@@ -555,11 +555,7 @@ class InternalDependencyContainer implements DependencyContainer {
           if (isTransformDescriptor(param)) {
             return param.multiple
               ? this.resolve(param.transform).transform(
-                  this.resolveAll(
-                    param.token,
-                    new ResolutionContext(),
-                    param.isOptional
-                  ),
+                  this.resolveAll(param.token, context, param.isOptional),
                   ...param.transformArgs
                 )
               : this.resolve(param.transform).transform(
@@ -568,11 +564,7 @@ class InternalDependencyContainer implements DependencyContainer {
                 );
           } else {
             return param.multiple
-              ? this.resolveAll(
-                  param.token,
-                  new ResolutionContext(),
-                  param.isOptional
-                )
+              ? this.resolveAll(param.token, context, param.isOptional)
               : this.resolve(param.token, context, param.isOptional);
           }
         } else if (isTransformDescriptor(param)) {
