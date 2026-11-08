@@ -1,4 +1,6 @@
 import injectable from "../decorators/injectable";
+import injectAll from "../decorators/inject-all";
+import injectAllWithTransform from "../decorators/inject-all-with-transform";
 import {instance as globalContainer} from "../dependency-container";
 import Lifecycle from "../types/lifecycle";
 import scoped from "../decorators/scoped";
@@ -59,6 +61,73 @@ describe("Scoped registrations", () => {
       const b = globalContainer.resolve(A);
 
       expect(a.b.x).not.toBe(b.b.x);
+    });
+
+    describe("collection injection", () => {
+      class RequestContext {}
+
+      @injectable()
+      class Plugin {
+        constructor(public context: RequestContext) {}
+      }
+
+      beforeEach(() => {
+        globalContainer.register(
+          RequestContext,
+          {useClass: RequestContext},
+          {lifecycle: Lifecycle.ResolutionScoped}
+        );
+        globalContainer.register("Plugin", {useClass: Plugin});
+        globalContainer.register("Plugin", {useClass: Plugin});
+      });
+
+      it("shares the resolution scope with all injected plugins", () => {
+        @injectable()
+        class Handler {
+          constructor(
+            public context: RequestContext,
+            @injectAll("Plugin") public plugins: Plugin[]
+          ) {}
+        }
+
+        const handler = globalContainer.resolve(Handler);
+        expect(handler.plugins).toHaveLength(2);
+        expect(handler.plugins[0].context).toBe(handler.context);
+        expect(handler.plugins[1].context).toBe(handler.context);
+      });
+
+      it("shares the resolution scope with plugins passed to a transform", () => {
+        class PluginContexts {
+          transform(plugins: Plugin[]): RequestContext[] {
+            return plugins.map(plugin => plugin.context);
+          }
+        }
+
+        @injectable()
+        class Handler {
+          constructor(
+            @injectAllWithTransform("Plugin", PluginContexts)
+            public pluginContexts: RequestContext[],
+            public context: RequestContext
+          ) {}
+        }
+
+        const handler = globalContainer.resolve(Handler);
+        expect(handler.pluginContexts).toHaveLength(2);
+        expect(handler.pluginContexts[0]).toBe(handler.context);
+        expect(handler.pluginContexts[1]).toBe(handler.context);
+      });
+
+      it("keeps separate top-level resolutions isolated", () => {
+        @injectable()
+        class Handler {
+          constructor(@injectAll("Plugin") public plugins: Plugin[]) {}
+        }
+
+        const first = globalContainer.resolve(Handler);
+        const second = globalContainer.resolve(Handler);
+        expect(first.plugins[0].context).not.toBe(second.plugins[0].context);
+      });
     });
   });
 
